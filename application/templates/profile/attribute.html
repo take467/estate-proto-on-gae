@@ -1,0 +1,201 @@
+{% extends "../base.html" %}
+
+
+{% block stylesheets %}
+<link rel="stylesheet" href="/css/flexigrid/flexigrid.css" type="text/css" media="all">
+<style>
+        .flexigrid div.fbutton .add
+            {
+                background: url(/img/add.png) no-repeat center left;
+            }	
+    
+        .flexigrid div.fbutton .delete
+            {
+                background: url(/img/close.png) no-repeat center left;
+            }	
+    
+</style>
+{% endblock %}
+{% block js %}
+<script src="/js/jquery-1.2.6.pack.js" type="text/javascript"></script>
+<script src="/js/jquery.form.js" type="text/javascript"></script>
+<script src="/js/flexigrid.pack.js" type="text/javascript"></script>
+<script src="/js/jquery.blockUI.js" type="text/javascript"></script>
+<script type="text/javascript" src="/js/swfobject.js"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+	$("#flex1").flexigrid({
+			url: '/profile/attr_json/' + $('#profile_key').val(),
+			dataType: 'json',
+			procmsg: '読み込み中',
+			colModel : [
+				{display: 'ID',       name : 'id', width : 40, sortable : true, align: 'center'},
+				{display: '会社/団体名',       name : 'organization', width : 180, sortable : true, align: 'left'},
+				{display: '所属/部署',     name : 'section', width : 100, sortable : true, align: 'left'},
+				{display: '担当者',     name : 'person', width : 100, sortable : true, align: 'left'},
+				{display: 'code',     name : 'code', width : 100, sortable : true, align: 'left',hide:true},
+				{display: 'label',     name : 'label', width : 100, sortable : true, align: 'left',hide:true},
+				{display: '購入パッケージ', name : 'val', width : 190, sortable : true, align: 'left'},
+				],
+			buttons : [
+				{name: '追加', bclass: 'add', onpress : addFormData},
+				{name: '削除', bclass: 'delete', onpress : deleteFormData},
+				],
+			searchitems : [
+				{display: 'ID', name : 'id',is_default: true},
+				],
+			sortname: "id",
+			sortorder: "asc",
+			usepager: true,
+			title: '購入パッケージ一覧',
+			useRp: true,
+			rp: 15,
+			showTableToggleBtn: true,
+			width: 800,
+			height: 100
+	});
+	$(".close_form").click(function(){
+		$.unblockUI();
+	});
+	$("#form_submit").click(function(){
+		$.blockUI({ message: "<b>少々お待ちください...</b>" }); 
+		$.ajax({
+		   type: "POST",
+		   dataType: "json",
+		   url: $('#action_url').val(),
+		   data: 'profile_key=' + $('#profile_key').val() + '&selected_package=' + $('#selected_package').val() ,
+		   success: function(data){
+			$.unblockUI();
+			$("#flex1").flexReload();
+		   },
+		   error: function(){
+			alert('システムエラー');
+		  }
+		 });
+	 });
+});
+function deleteFormData(com,grid){ if($('.trSelected',grid).length>0){
+	var items = $('.trSelected',grid);  
+	var itemlist = [];  
+	for(i=0 ; i< items.length ; i++) {  
+		itemlist.push(items[i].id.substr(3)); 
+	}  
+        itemlist_s = itemlist.join(',')
+	if(confirm('本当に削除しますか？')){
+		$.ajax({
+			   type: "POST",
+			   dataType: "json",
+			   url: "/profile/cancell_package",
+			   data: "items="+itemlist_s,
+			   success: function(data){
+         			if( data.status == 'success' ){
+					items.fadeOut('slow')
+					$("#flex1").flexReload();
+				}else{
+					alert('削除に失敗しました:' + data.msg);
+				}
+			   },
+			   error: function(){
+				alert('システムエラー');
+			  }
+		 });
+
+	}
+}else{
+	alert('削除する項目を選択してください')
+}
+}
+function uploadThumbNail(id) {
+	$('#thumbnail_product_id').val(id)
+	$.blockUI({ message: $('#upload_thumbnail'),css: { top: '20%' } })
+}
+function addFormData() {
+	$('#action_url').val('/profile/buy_package')
+	$.blockUI({ message: $('#new_entry'),css: { top: '20%',width: '400px' } })
+}
+function play_movie(filename){
+	$.blockUI({ message: $('#movie_area'),css: { top: '20%' ,width:'400px'} })
+	var s1 = new SWFObject("/player/player.swf","ply","328","250","9","#FFFFFF");
+	s1.addParam("allowfullscreen","true");
+	s1.addParam("allowscriptaccess","always");
+	s1.addParam("flashvars","file=/player/" + filename );
+	s1.write("mediaplayer");
+}
+function disp_img(path){
+        $('#disp_thumbnail_img').html('<img src="/product/thumbnail/' + path + '" style="margin-top:10px">')
+	$.blockUI({ message: $('#disp_thumbnail'),css: { top: '20%' } })
+}
+function editFormData(com,grid) {
+	var items = $('.trSelected',grid);  
+	if(items.length != 1){
+		alert('一つだけ選択してください')
+		return false;
+	}
+	var id = items[0].id.substr(3); 
+	$('#action_url').val('/profile/update')
+	$.ajax({
+		   type: "GET",
+		   dataType: "json",
+		   url: "/profile/json",
+		   data: "id="+id,
+		   success: function(data){
+			// 要素に値をぶち込む
+			$('#profile_id').val(data.id)
+			$('#organization').val(data.organization)
+			$('#section').val(data.section)
+			$('#last_name').val(data.last_name)
+			$('#first_name').val(data.first_name)
+			$('#title').val(data.title)
+			$('#tel_no').val(data.tel_no)
+			$('#email').val(data.email)
+		   },
+		   error: function(){
+			alert('システムエラー');
+		  }
+	});
+        $('#create_entry_button').attr('style',"display:none");
+        $('#edit_entry_button').attr('style',"display:block");
+	$.blockUI({ message: $('#new_entry'),css: { top: '20%',width: '400px' } })
+        //setTimeout($.unblockUI, 12000); 
+}
+	
+//This function adds paramaters to the post of flexigrid. You can add a verification as well by return to false if you don't want flexigrid to submit			
+function submitFormData() {
+	//passing a form object to serializeArray will get the valid data from all the objects, 
+	//but, if the you pass a non-form object, you have to specify the input elements that the data will come from
+	var dt = $('#new_entry_form').serializeArray();
+	$("flex1").flexOptions({params: dt});
+	return true;
+}
+	
+$('#sform').submit (
+	function ()
+		{
+			$('#flex1').flexOptions({newp: 1}).flexReload();
+			return false;
+		}
+);						
+
+	
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>{{ profile.organization}} {{ profile.section }} 担当者：{{ profile.last_name }} {{ profile.fisrt_name }}</h2>
+<input type="hidden" id="profile_key" value="{{ profile.key }}">
+
+<table id="flex1" style="display:none"></table>
+<p>
+<a href="/site/profile">戻る</a>
+</p>
+
+<div id="new_entry" style="display:none; cursor: default">
+<form id="new_entry_form">
+{% include "_attribute_form.html" %}
+<p>
+	<input type="button" id="form_submit" value="保存"> - <input type="button" class="close_form" value="閉じる"> 
+</p>
+</form>
+</div>
+
+{% endblock %}

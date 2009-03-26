@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>{% block title %}{% endblock %}</title>
+	<style type="text/css">
+	img {
+		border: medium none;
+	}
+	</style>
+        {% block stylesheets %}
+	{% endblock %}
+        {% block js %}
+	<script type="text/javascript" src="/fckeditor/fckeditor.js"></script>
+	<script type="text/javascript">
+	      window.onload = function()
+	      {
+		var oFCKeditor = new FCKeditor( 'content' ) ;
+		oFCKeditor.BasePath = "/fckeditor/" ;
+		oFCKeditor.Height = 800;
+		oFCKeditor.Width =  700;
+		oFCKeditor.ReplaceTextarea() ;
+	      }
+	</script>
+	{% endblock %}
+    </head>
+    <body>
+	<h1>Verona - 管理</h1>
+	<div style="text-align: right">
+	  <a href="/site">トップ</a> | <a href="/site/global_navi">グローバルナビ</a> | <a href="/site/bottom_navi">ボトムナビ</a> |  <a href="/site/category">カテゴリ</a> | <a href="/site/document">ドキュメント</a> | <a href="/files">ファイルマネージャー</a> |<a href="/inquiry">お問い合わせ</a>
+	</div>
+	<div style="margin-top:0.5em;text-align: right">
+	商品情報[<a href="/site/package">パッケージ</a> | <a href="/site/genre">ジャンル</a> | <a href="/site/product">商品一覧</a>]
+	ユーザ情報[<a href="/site/profile">ユーザ情報</a>]
+	</div>
+        {% block content %}{% endblock %}
+    </body>
+</html>

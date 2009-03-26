@@ -1,0 +1,56 @@
+{% extends "../base.html" %}
+{% block content %}
+<form action="/site/update" method="post">
+  <input type="hidden" name="key" value="{{ rec.key }}">
+  <fieldset>
+  <legend>設定</legend>
+    <p><input type="submit" value="Submit">&nbsp;&nbsp;&nbsp;<input type="reset" value="Reset">&nbsp;&nbsp;&nbsp;<input type="button" value="Cancel" onClick="javascript: history.go(-1)"></p>
+    <table border=1>
+    <tr>
+	<th>ロゴタイトル</th><td><input type="text" name="logo_label" value="{{ rec.logo_label|escape }}" size="20"></th>
+    </tr>
+    <tr>
+	<th>ロゴサブテキスト</th><td><input type="text" name="logo_subtext" value="{{ rec.logo_subtext|escape }}" size="40"></th>
+    </tr>
+    <tr>
+	<th>サイトの説明</th><td><input type="text" name="description" value="{{ rec.description|escape }}" size="80"></th>
+    </tr>
+    <tr>
+	<th>キーワード</th><td><input type="text" name="keywords" value="{{ rec.keywords|escape }}" size="80"></th>
+    </tr>
+    </table>
+    <table>
+    <tr>
+	<td valign="top">
+	    <fieldset>
+		    <legend>トップページ本文</legend>
+		    <textarea id="content" name="content" >{{ rec.content }}</textarea>
+            </fieldset>
+        </td>
+	<td valign="top">
+	    <fieldset>
+		    <legend>サイドバー</legend>
+		<fieldset>
+			<legend>サイト内検索</legend>
+			<p style="font-size:8pt">googleカスタムサーチを使用しています。カスタマイズするときはテンプレート(puzzled.html)を修正してください</p>
+		</fieldset>
+		<fieldset>
+			<legend>インデックス</legend>
+			<p style="font-size:8pt">同一のカテゴリに属するドキュメント、または同一のドキュメントに属するページへのリンクが表示されます。</p>
+		</fieldset>
+		<fieldset>
+			<legend>フリーエリア</legend>
+			<p style="font-size:8pt">
+			見出し<br />
+			<input type="text" name="sidebar_label" value="{{ rec.sidebar_label }}" ><br/>
+ 			記述したHTMLがそのまま表示されます。<br/>
+			<textarea name='sidebar_content' cols="30" rows="20">{{rec.sidebar_content}}</textarea>
+			</p>
+		</fieldset>
+            </fieldset>
+	</td>
+    </tr>
+    </table>
+  </fieldset>
+</form>
+{% endblock %}

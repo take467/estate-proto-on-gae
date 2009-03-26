@@ -1,0 +1,30 @@
+{% extends "../base.html" %}
+{% block  js %}
+{% endblock %}
+
+{% block content %}
+<form action="/site/global_navi" method="post">
+  <fieldset>
+  <legend>グローバルメニュー</legend>
+    <p>グローバルメニューに表示するカテゴリを設定してください。(最大５つ)</p>
+    <table>
+	<tr>
+		<th>順番</th><th>名前</th>
+	</tr>
+	{%  for num in item_order %}
+        <tr>
+		<td>{{num}}</td>
+		<td><select name="global_menu{{num}}">
+			<option value="" selected>なし</option>
+		{% for c in categories %}
+			<option value="{{c.key}}">{{ c.name }}</option>
+		{% endfor %}
+		</td>
+		
+	</tr>
+	{% endfor %}
+    </table>
+    <p><input type="submit" value="保存"> 
+  </fieldset>
+</form>
+{% endblock %}

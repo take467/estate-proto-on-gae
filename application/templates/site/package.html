@@ -1,0 +1,56 @@
+{% extends "../base.html" %}
+{% block  js %}
+<script src="/js/jquery-1.2.6.pack.js" type="text/javascript"></script>
+<script type="text/javascript">
+ function del_package( key,code ){
+        yes = confirm("本当に削除しますか？");
+        if( yes ) {
+                $.ajax({
+                        type: "POST",
+			dataType:"json",
+                        url: "/package/delete",
+                        data: "key="+key+"&code="+code,
+                        success: function(data){
+                          if( data.status == 'success' ){
+                                location = location
+             		  }else{
+				alert(data.msg);
+			  }
+                        },
+                        error: function(data){
+                          alert(data.msg)
+                        }
+                })
+        }
+ }
+</script>
+{% endblock %}
+
+{% block content %}
+<form action="/package/create" method="post">
+  <fieldset>
+  <legend>パッケージ</legend>
+    <p>パッケージを設定してください。ジャンルは商品のグループ化に利用されます。</p>
+    <table>
+	<tr>
+		<th>名前</th><th>コード(英数)</th><th></th>
+	</tr>
+    {% for rec in result %}
+      <tr>
+	 <td><input type="text" name="name_{{ rec.code }}" size="20" value="{{rec.name }}"></td>
+         <td><input type="text" name="package_{{rec.code}}" size="20" value="{{rec.code}}"></td>
+	 <td>
+		 - <a href="javascript:void(0);" onclick="del_package('{{rec.key}}','{{ rec.code }}');return false;">削除</a>
+	</td>
+      </tr>
+    {% endfor %}
+      <tr>
+	 <td><input type="text" name="new_package" size="20" value=""></td>
+	 <td><input type="text" name="new_package_code" size="20" ></td>
+	 <td></td>
+      </tr>
+    </table>
+    <p><input type="submit" value="更新">
+  </fieldset>
+</form>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "../precision.html" %}
+{% block js %}
+{% endblock %}
+{% block menu %}
+                <ul>
+                        <li><a href="/showcase">商品一覧</a></li>
+                        <li><a href="/document/show/help">ヘルプ</a></li>
+                        <li><a href="/contact">お問い合わせ</a></li>
+                        <li class="last"><a href="{{ url }} ">{{ url_text }}</a></li>
+                </ul>
+	<p style="float:right">
+	こんにちはhogehogeさん
+	</p>
+{% endblock %}
+
+{% block page %}
+	<!-- start content -->
+	<div id="content" style="width:650px">
+		<div class="post">
+			<h1 class="title">{{product.title}}</h1>
+			<div class="entry">
+			<div id="mediaplayer" style="margin: 1em"></div>
+	<script type="text/javascript" src="/js/swfobject.js"></script>
+	<script type="text/javascript">
+		var s1 = new SWFObject("/player/player.swf","ply","328","250","9","#FFFFFF");
+		s1.addParam("allowfullscreen","true");
+		s1.addParam("allowscriptaccess","always");
+		s1.addParam("flashvars","file=http://localhost/~fujisawatakeshi/{{product.filename}}");
+		s1.write("mediaplayer");
+	</script>
+			</div>
+		</div>
+	</div>
+	<!-- end content -->
+	<!-- start sidebar2 -->
+	<div id="sidebar2" class="sidebar">
+		<ul>
+			<li id="recent-posts">
+				<h2>フリーエリア？</h2>
+				<ul>
+					<li>
+						<h3>お任せリンク</h3>
+						<p>
+<script type="text/javascript"><!--
+amazon_ad_tag = "aap-22"; amazon_ad_width = "180"; amazon_ad_height = "150";//--></script>
+<script type="text/javascript" src="http://www.assoc-amazon.jp/s/ads.js"></script>
+						</p>
+					</li>
+					<li>
+						<h3>本-教育•大学受験</h3>
+						<p>
+<iframe src="http://rcm-jp.amazon.co.jp/e/cm?t=aap-22&o=9&p=20&l=ur1&category=educationbooks&banner=0T8PDR413ED2NXJBT3R2&f=ifr" width="120" height="90" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>
+						</p>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+{% endblock %}

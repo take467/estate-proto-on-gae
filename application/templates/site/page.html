@@ -1,0 +1,17 @@
+{% extends "../base.html" %}
+{% block js %}{% endblock %}
+
+{% block content %}
+<a href="/page/new">New</a>
+
+<table>
+<tr>
+	<th>作成日</th><th>カテゴリ</th><th>ドキュメント名</th><th>ページ名</th>
+</tr>
+{% for rec in result %}
+<tr>
+    <td>{{ rec.post_at|date}}</td><td>{{rec.document.category.name}}</td><td><a href="/document/show/{{ rec.document.key }}">{{ rec.document.name }}</a></td><td><a href="/page/show/{{ rec.key }}">{{rec.header_label}}</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

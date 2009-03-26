@@ -1,0 +1,41 @@
+{% extends "../application/templates/moview.html" %}
+{% block js %}
+{% endblock %}
+{% block menu %}
+<a href="/welcome/help">【ヘルプ】</a>　　<a href="/contact">【お問い合わせ】</a>　
+{% endblock %}
+{% block bread_crumbs %}
+ログイン
+{% endblock %}
+
+{% block page %}
+  
+<div id="main_02">
+    <div class="box_title_4">ログイン</div>	
+    <div class="textbox_1">OpenID URLを確認して「次」をクリックしてください</a></div>
+
+<form method="post" action="/login">
+	<div class="listbox_0">
+	  <div class="listbox_a1">OpenID URL</div>
+	  <div class="listbox_b1"> 
+	    <input name="openid" type="text" id="openid" size="40" value="{{claimed_id}}"/>
+	  </div>
+	</div>
+	<div class="textbox_1">
+	  <input type="submit" name="Submit"  value="　　次　　" >
+	  <input type="reset" name="reset" value="　 リセット 　" >
+	</div>
+</form>
+
+<div class="textbox_1">
+  <p class="bold_01">※ご注意</p>
+  <ul>
+
+    <li>Moviewではユーザ認証にOpenIDを使用しています。</li>
+    <li>OpenID URLが分からない場合は<a href="/contact">こちら</a>からお問い合わせください。</li>
+	<!-- li>株式会社Mobiew　tel：012-345-6789</li -->
+    <li>[藤沢注] 本番公開ではOpenID URLは固定とし、ユーザは意識しないでも利用できるようにします！</li>
+  </ul>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "../inquiry.html" %}
+
+{% block content %}
+<table id="inquiryTable">
+<tr>
+	<th>担当者</th><td colspan="3">{{ inquiry.to}}</td>
+</tr>
+<tr>
+	<th>問合せ番号</th><td>{{ inquiry.key.id}}</td>
+	<th>問合せ者</th><td>{{ inquiry.from_email}}</td>
+</tr>
+<tr>
+	<th>ステータス</th><td>{{ inquiry.status}}</td>
+	<th>問合せ日</th><td>{{ inquiry.post_at|date:"Y/m/d H:s"}}</td>
+</tr>
+<tr>
+	<th>件名</th><td>{{ inquiry.category.name|escape}}</td>
+	<th>参照元</th><td>お問い合わせ番号:<a href="/inquiry/show_by_id/{{ inquiry.reference_id}}" target="_ref">{{inquiry.reference_id}}</a></td>
+</tr>
+{% for f in form_fields %}
+<tr>
+	<th>{{f.label}}</th><td colspan="3">{{ f.val|escape }}</td>
+</tr>
+{% endfor %}
+<tr>
+	<th>お問い合わせ内容</th><td colspan="3">{{ content }}</td>
+</tr>
+<tr>
+	<th>回答</th>
+	<td colspan="3">
+	{% ifequal inquiry.status 'draft' %}
+	  {{ inquiry.reply_content }}
+	{% else %}
+	  {% ifequal inquiry.status 'sent' %}
+	    {{ inquiry.reply_content }}
+	  {% else %}
+		<form action="/inquiry/update/{{inquiry.key}}" method="post">
+		<textarea name="reply_content" cols="60" rows="15">{{inquiry.reply_content}}</textarea>
+		<p>
+		<input type="submit" value="保存">
+		</p>
+		</form>
+	  {% endifequal %}
+	{% endifequal %}
+	</td>
+</tr>
+{% if not inquiry.is_replied %}
+{%   ifequal inquiry.status "draft" %}
+<tr>	
+	<th></th>
+	<td colspan="3">
+	<form action="/inquiry/show" method="post">
+		<input type="hidden" name="key" value="{{ inquiry.key}}">
+		<select name="mode" >
+			<option value="edit">回答を編集</option>
+			<option value="send">送信</option>
+		</select>
+		<input type="submit" value="実行">
+	</form>
+	</td>
+</tr>
+{% endifequal %}
+{% else %}
+<tr>
+	<th>回答の送信</th><td>送信済み</td>
+	<th>送信日</th><td>{{inquiry.reply_at|date:"Y/m/d H:s"}}
+</tr>
+{% endif %}
+</table>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends "../standardized.html" %}
+{% block stylesheets %}
+<link rel="stylesheet" href="/css/flexigrid/flexigrid.css" type="text/css" media="all">
+<link type="text/css"  href="/css/smoothness/jquery-ui-1.7.1.custom.css" rel="stylesheet" />
+<style>
+        .flexigrid div.fbutton .add
+            {
+                background: url(/img/add.png) no-repeat center left;
+            }	
+    
+        .flexigrid div.fbutton .delete
+            {
+                background: url(/img/close.png) no-repeat center left;
+            }	
+    
+</style>
+{% endblock %}
+{% block js %}
+<script src="/js/jquery-1.2.6.pack.js" type="text/javascript"></script>
+<script src="/js/jquery.form.js" type="text/javascript"></script>
+<script src="/js/flexigrid.pack.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/jquery-ui-1.7.1.custom.min.js"></script>
+
+<script src="/js/jqDnR.js" type="text/javascript"></script>
+<script type="text/javascript"><!--
+$(document).ready(function(){
+	$("#search").flexigrid();
+	$("#search_block").resizable();
+	$("#flexigrid01").flexigrid({
+			url: '/profile',
+			dataType: 'json',
+			procmsg: '読み込んでいます。しばらくお待ちください..',
+			pagestat: '全 {total} 件のうち、{from} - {to} 件目を表示中',
+			colModel : [
+				{display: 'ID',       name : 'id', width : 40, sortable : true, align: 'center'},
+				{display: '会社/団体名', name : 'organization', width : 180, sortable : true, align: 'left'},
+				{display: '所属/部署', name : 'section', width : 100, sortable : true, align: 'left'},
+				{display: '担当者', name : 'last_name', width : 90, sortable : true, align: 'left'},
+				{display: '役職',   name : 'title', width : 80, sortable : true, align: 'left'},
+				{display: '電話番号',   name : 'tel_no', width : 120, sortable : true, align: 'left'},
+				{display: '電子メール',   name : 'email', width : 180, sortable : true, align: 'left'},
+				{display: '購入パッケージ',   name : 'packages', width : 180, sortable : true, align: 'left'},
+				],
+			buttons : [
+				{name: '追加', bclass: 'add', onpress : dummy},
+				{name: '削除', bclass: 'delete', onpress : dummy},
+				{separator: true},
+				{name: '編集', bclass: 'edit', onpress : dummy}
+				],
+			searchitems : [
+				{display: 'ID', name : 'id',is_default: true},
+				],
+			sortname: "id",
+			sortorder: "asc",
+			usepager: true,
+			title: '顧客一覧',
+			useRp: true,
+			rp: 15,
+			showTableToggleBtn: true,
+			width: 'auto',
+			height:'auto' 
+	});
+
+});
+function dummy(){}
+// --></script>
+{% endblock %}
+
+{% block search_refinement %}
+<div >
+<div style="margin:0;width:32%;height:150px;float:left;border:solid ;overflow:auto">
+			<a href="#">aaaaa</a><br/>
+			11111111111111<br/>
+			22222222222222<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+</div>
+<div style="margin:0;width:32%;height:150px;float:left;border:solid ;overflow:auto">
+			11111111111111<br/>
+			22222222222222<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+</div>
+<div style="margin:0;width:32%;height:150px;float:left;border:solid ;overflow:auto">
+			11111111111111<br/>
+			22222222222222<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+</div>
+</div>
+<br clear="all">
+{% endblock %}
+{% block _search_refinement %}
+<table width="100%" id="search" border="1">
+	<thead>
+	<tr><th width="33%">項目1</th><th width="33%">項目2</th><th width="33%">項目3</th></tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>
+<div style="margin:0;height:100;overflow:auto">
+			11111111111111<br/>
+			22222222222222<br/>
+			22222222222223<br/>
+			<a href="#">aaaaa</a><br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+			22222222222223<br/>
+</div>
+		</td>
+		<td>値
+		</td>
+		<td>値
+		</td>
+	</tr>
+	</tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "../inquiry.html" %}
+{% block  js %}
+<script src="/js/jquery-1.2.6.pack.js" type="text/javascript"></script>
+<script type="text/javascript">
+ function del_contact_category( idx ){
+        yes = confirm("本当に削除しますか？");
+        if( yes ) {
+                $.ajax({
+                        type: "POST",
+			dataType:"json",
+                        url: "/inquiry/delete_category",
+                        data: "idx="+idx,
+                        success: function(data){
+                          if( data.status == 'success' ){
+                                location = location
+             		  }else{
+				alert(data.msg);
+			  }
+                        },
+                        error: function(data){
+                          alert(data.msg)
+                        }
+                })
+        }
+ }
+</script>
+{% endblock %}
+{% block content %}
+<fieldset>
+<legend>問い合わせフォームの設定</legend>
+<form action="/inquiry/setting" method="post">
+<p><input type="submit" value="更新"> - <a href="/category/order">並び替え</a></p>
+  <fieldset>
+     <legend>前置き</legend>
+	<textarea name="lead" id="lead" cols="60" rows="5">{{config.lead}}</textarea>
+  </fieldset>
+  <fieldset>
+   <legend>問い合わせカテゴリ</legend>
+    <p>ページの右上のメインメニューに表示するカテゴリを設定してください。(最大10)</p>
+    <p>カテゴリごとに問い合わせの通知先のメールアドレスを指定できます。メールアドレスを省略した場合は、デフォルトのメールアドレスに問い合わせの通知が送信されます。</p>
+    <b>デフォルトの通知メールアドレス:</b> <input type="text" name="default_to" value="{{config.default_to}}" size="30">
+    <table>
+	<tr>
+         <th></th><th>名前</th><th>担当者メールアドレス</th>
+	 <td><td>
+	</tr>
+      <input type="hidden" name="category_count" value="{{category_num}}">
+    {% for rec in categories %}
+      <tr>
+         <th>順番{{ rec.order }}</th>
+	 <td><input type="text" name="name{{ rec.order }}" size="30" value="{{rec.name }}"></td>
+         <td><input type="text" name="person_email{{rec.order}}" size="30" value="{{rec.person_email}}"></td>
+	 <td>
+		 - <a href="javascript:void(0);" onclick="del_contact_category('{{ rec.order }}');return false;">削除</a>
+	</td>
+      </tr>
+    {% endfor %}
+      <tr>
+         <th>新規</th>
+	 <td><input type="text" name="new_category" size="30" value=""></td>
+	 <td><input type="text" name="new_category_email" size="30" ></td>
+	 <td></td>
+      </tr>
+    </table>
+  </fieldset>
+
+  <fieldset>
+	<legend>追加項目(オプション)</legend>
+        <p>入力してもらう項目を一行ずつ記入してください。注：メールアドレスは必須項目として表示されます<br/>
+	<textarea name="fields" cols="40" rows="10">{{ fields }}</textarea>
+	</p>
+  </fieldset>
+  <fieldset>
+     <legend>後書き</legend>
+	<textarea name="after_word" id="after_word" cols="60" rows="5">{{config.after_word}}</textarea>
+  </fieldset>
+</form>
+</fieldset>
+{% endblock %}

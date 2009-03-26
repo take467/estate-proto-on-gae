@@ -1,0 +1,25 @@
+{% extends "../base.html" %}
+{% block js %}
+{% endblock %}
+
+
+{% block content %}
+<a href="/site/edit">編集</a> - <a href="/" target="_site">サイトの確認</a>
+  <fieldset>
+  <legend>設定</legend>
+    <table border=1>
+    <tr>
+	<th>ロゴタイトル</th><td>{{ rec.logo_label|escape }}</th>
+    </tr>
+    <tr>
+	<th>ロゴサブテキスト</th><td>{{ rec.logo_subtext|escape }}</th>
+    </tr>
+    <tr>
+	<th>サイトの説明</th><td>{{ rec.description|escape }}</th>
+    </tr>
+    <tr>
+	<th>キーワード</th><td>{{ rec.keywords|escape }}</th>
+    </tr>
+    </table>
+  </fieldset>
+{% endblock %}

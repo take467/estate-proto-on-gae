@@ -1,0 +1,94 @@
+{% extends "../precision.html" %}
+{% block menu %}
+                <ul>
+                        <li><a href="/showcase">商品一覧</a></li>
+                        <li><a href="/welcome/help">ヘルプ</a></li>
+                        <li><a href="/contact">お問い合わせ</a></li>
+                        <li class="last"><a href="{{ url }} ">{{ url_text }}</a></li>
+                </ul>
+	<p style="float:right">
+	こんにちはhogehogeさん
+	</p>
+{% endblock %}
+{% block page %}
+	<!-- start sidebar1 -->
+	<div id="sidebar1" class="sidebar">
+		<ul>
+			<li id="categories-1">
+				<h2>購入パッケージ一覧</h2>
+				<ul>
+				{% for p in packages %}
+					<li><a href="/showcase/?p={{p.code}}" title="{{p.name}}">{{p.name}}</a></li>
+				{% endfor %}
+				</ul>
+			</li>
+			<li id="categories-1">
+				<h2>カテゴリ</h2>
+				<ul>
+				{% for genre in genres %}
+					<li><a href="/showcase/?g={{genre.genre_code}}" title="{{genre.name}}">{{genre.name}}</a></li>
+				{% endfor %}
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<!-- end sidebar1 -->
+	<!-- start content -->
+	<div id="content">
+		<div class="post">
+			<h1 class="title">ビデオ一覧</h1>
+			<div class="entry">
+			<div style="margin-top: 1em">
+			<ul>
+			{% for p in products %}
+				<li><a href="/product/show/{{ p.key.id }}"><img src="/product/thumbnail/{{p.key.id}}/{{p.thumbnail_filename}}" alt="{{p.title}}" ><br />{{p.title}}</a></li>
+			{% endfor %}
+			</ul>
+			</div>
+			</div>
+<div id="pagination" class="pagination">
+{% if has_previous %}
+<div style="float:left">
+ <a class="section_links" rel="prev" href="?page={{ previous }}">
+           &lt;&lt; 前へ </a>
+</div>
+{% endif %}
+{% if has_next %}
+<div style="float:right">
+           <a class="section_links" rel="next" href="?page={{ next }}"> 後へ &gt;&gt;</a>
+</div>
+{% endif %}
+</div>
+		</div>
+	</div>
+	<!-- end content -->
+	<!-- start sidebar2 -->
+	<div id="sidebar2" class="sidebar">
+		<ul>
+			<li id="recent-posts">
+				<h2>フリーエリア？</h2>
+				<ul>
+					<li>
+						<h3>お任せリンク</h3>
+						<p>
+<script type="text/javascript"><!--
+amazon_ad_tag = "aap-22"; amazon_ad_width = "180"; amazon_ad_height = "150";//--></script>
+<script type="text/javascript" src="http://www.assoc-amazon.jp/s/ads.js"></script>
+						</p>
+					</li>
+					<li>
+						<h3>本-教育•大学受験</h3>
+						<p>
+<iframe src="http://rcm-jp.amazon.co.jp/e/cm?t=aap-22&o=9&p=20&l=ur1&category=educationbooks&banner=0T8PDR413ED2NXJBT3R2&f=ifr" width="120" height="90" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>
+						</p>
+					</li>
+					<li>
+						<h3>カテゴリリンク</h3>
+						<p>
+<iframe src="http://rcm-jp.amazon.co.jp/e/cm?t=aap-22&o=9&p=9&l=st1&mode=books-jp&search=%E6%95%99%E8%82%B2&fc1=000000&lt1=&lc1=3366FF&bg1=FFFFFF&f=ifr" marginwidth="0" marginheight="0" width="180" height="150" border="0" frameborder="0" style="border:none;" scrolling="no"></iframe>
+						</p>				
+				</ul>
+			</li>
+		</ul>
+	</div>
+{% endblock %}

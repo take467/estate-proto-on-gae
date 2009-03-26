@@ -1,0 +1,17 @@
+<input type="hidden" id="profile_key" name="profile_key" value="{{profile.key}}">
+<input type="hidden" id="action_url" name="action_url" value="">
+<input type="hidden" id="attribute_group" name="attribute_group" value="purchased_package">
+<input type="hidden" id="attribute_name" name="attribute_name" value="purchased_package">
+<b>パッケージを選択してください</b>
+<table>
+<tr>
+	<th align="right">パッケージ名</th>
+	<td align="left">
+		<select id="selected_package" name="selected_package">
+		{% for p in packages %}
+			<option value="{{p.code}}">{{p.name}}</option>
+		{% endfor %}
+		</select>
+	</td>
+</tr>
+</table>

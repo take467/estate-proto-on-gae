@@ -1,0 +1,26 @@
+{% extends "../application/templates/precision.html" %}
+{% block js %}
+{% endblock %}
+{% block menu %}
+{% endblock %}
+
+
+{% block page %}
+<div class="entry">
+<div style="margin:1em">
+
+	<form method="post" action="/login">
+
+        視聴するにはログインが必要です。
+	OpenID URLを確認して「次」をクリックしてください
+
+	<p>
+	<input type="text" name="openid" id="openid" value="{{ claimed_id }}" />
+	<input type="submit" value="次" /></p>
+	</p>
+
+	</form>
+</div>
+</div>
+
+{% endblock %}

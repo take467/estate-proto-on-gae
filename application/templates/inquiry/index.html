@@ -1,0 +1,26 @@
+{% extends "../inquiry.html" %}
+
+{% block content %}
+<span style="margin-bottom:1em;font-size:0.8em">
+<a href="/inquiry/">全件</a> |
+<a href="/inquiry/?is_replied=false">未処理のみ</a>
+</span>
+<table id="inquiryTable">
+<tr>
+	<th>問合せ番号</th>
+        <th>送信済み</th>
+	<th>ステータス</th>
+	<th>件名</th>
+	<th>日時</th>
+</tr>
+{% for inquiry in inquiries %}
+<tr>
+	<td><a href="/inquiry/show/{{ inquiry.key }}">{{ inquiry.key.id }}</a></td>
+	<td>{{inquiry.is_replied}}</td>
+	<td>{{inquiry.status}}</td>
+	<td>{{inquiry.category.name }}</td>
+	<td>{{inquiry.post_at|date:"Y/m/d H:s" }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
