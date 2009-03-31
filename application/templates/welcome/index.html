@@ -27,8 +27,8 @@
 $(document).ready(function(){
 	$("#treeview").treeview({});
 	$("#treeviewList span").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
-	$("#c_0").disableContextMenu()
-	$("#v_0").disableContextMenu()
+	$("#category_root").disableContextMenu()
+	$("#category_root_file").disableContextMenu()
 	$("#flexigrid01").flexigrid({
 			url: '/profile',
 			dataType: 'json',
@@ -223,8 +223,11 @@ function initContextMenu(action,el,pos){
 	</ul>
 	<div id="treeviewList">
 	<ul id="treeview" class="filetree treeview">
+        <li> <span id="category_root" class="folder">カテゴリ</span>
+		<ul>
+			 <li><span id="category_root_file" class="file">全データ</span></li>
 	{% for g in groups %}
-		<li id="i_{{g.id}}"><span id="c_{{g.id}}" class="folder">{{ g.name }}</span> 
+			<li id="i_{{g.id}}"><span id="c_{{g.id}}" class="folder">{{ g.name }}</span> 
 		{% if g.views %}
 			<ul>
 			{% for v in g.views %}
@@ -234,6 +237,7 @@ function initContextMenu(action,el,pos){
 		{% endif %}
 		</li>
 	{% endfor %}
+		</ul>
 	</ul>
 	</div>
 	<div id="edit_category" style="margin:1em;display:none; cursor: default">
