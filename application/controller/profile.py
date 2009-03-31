@@ -3,9 +3,8 @@ from gaeo.controller import BaseController
 from google.appengine.ext import db
 
 from google.appengine.api import users
-from model.profile import Profile
+from model.profile import ProfileCore
 from model.package import Package
-from model.attribute import Attribute
 import json
 from google.appengine.api import images
 from getimageinfo import getImageInfo
@@ -26,19 +25,19 @@ class ProfileController(BaseController):
       id = self.params.get('id')
       data = {}
       if id:
-        p = Profile().get_by_id(int(id))
+        p = ProfileCore().get_by_id(int(id))
         if p:
           data = {'id':id,'organization':p.organization,'section':p.section,'last_name':p.last_name,'first_name':p.first_name,'title':p.title,'tel_no':p.tel_no,'email':p.email}
       self.render(json=self.to_json(data))
         
     def attribute(self):
       key = self.params.get('id')
-      self.profile  = Profile.get(key)
+      self.profile  = ProfileCore.get(key)
       self.packages = Package.all()
       pass
 
     def attr_json(self):
-      profile = Profile().get(self.params.get('id'))
+      profile = ProfileCore().get(self.params.get('id'))
       page = 1
       total = 0
       rows = []
@@ -76,7 +75,7 @@ class ProfileController(BaseController):
       id = self.params.get('id')
       if id:
         p = self.params
-        rec = Profile().get_by_id(int(id))
+        rec = ProfileCore().get_by_id(int(id))
         rec.organization=p.get('organization')
         rec.section=p.get('section')
         rec.last_name=p.get("last_name")
@@ -107,7 +106,7 @@ class ProfileController(BaseController):
 
     def buy_package(self):
       key = self.params.get('profile_key')
-      profile  = Profile.get(key)
+      profile  = ProfileCore.get(key)
       p_code = self.params.get('selected_package')
 
       wk = u"購入パッケージ"
@@ -121,7 +120,7 @@ class ProfileController(BaseController):
 
     def create(self):
       p = self.params
-      profile = Profile(organization=p.get('organization'),section=p.get('section'),title=p.get("title"),last_name=p.get("last_name"),first_name=p.get('first_name'),tel_no=p.get('tel_no'),email=p.get("email"),claimed_id=p.get('claimed_id'))
+      profile = ProfileCore(organization=p.get('organization'),section=p.get('section'),title=p.get("title"),last_name=p.get("last_name"),first_name=p.get('first_name'),tel_no=p.get('tel_no'),email=p.get("email"),claimed_id=p.get('claimed_id'))
       profile.put()
 
       msg = {'status':'success'}
@@ -134,7 +133,7 @@ class ProfileController(BaseController):
       #try:
       for id in items.split(','):
           if id != None and id != '':
-            data = Profile().get_by_id(int(id))
+            data = ProfileCore().get_by_id(int(id))
             if data:
               data.delete()
       #except Exception,e:
@@ -149,33 +148,33 @@ class ProfileController(BaseController):
 
       sortname = self.params.get("sortname")
       sortorder = self.params.get("sortorder")
-      if sortorder.upper() == "DESC":
+      if sortorder != None and sortorder.upper() == "DESC":
         sortname = "-" + sortname
 
       lines = int(self.params.get("rp"))
       page = int(self.params.get("page"))
       offset = (page - 1) * lines
      
-      total = Profile.all().count()
+      total = ProfileCore.all().count()
       if (query != None and query != '' ) and ( qtype != None and qtype != ''):
         if qtype == 'id':
-          p = Profile().get_by_id(int(query))
+          p = ProfileCore().get_by_id(int(query))
           results = []
           results.append(p)
         else:
-          sql = "SELECT * FROM Profile WHERE " + qtype + "= :1 "
+          sql = "SELECT * FROM ProfileCore WHERE " + qtype + "= :1 "
           if offset > 0:
             sql = sql + " OFFSET=" + str(offset) 
           sql = sal +  " limit = " + str(lines)
           results = db.GqlQuery(sql,query)
       else:
         if sortname == "id" :
-          results = Profile.all().fetch(offset=offset,limit=lines)
+          results = ProfileCore.all().fetch(offset=offset,limit=lines)
         elif sortname == "-id":
-          results = Profile.all().fetch(offset=offset,limit=lines)
+          results = ProfileCore.all().fetch(offset=offset,limit=lines)
           results.reverse()
         else:
-          results = Profile.all().order(sortname).fetch(offset=offset,limit=lines)
+          results = ProfileCore.all().order(sortname).fetch(offset=offset,limit=lines)
 
       rows = []
       for rec in results:

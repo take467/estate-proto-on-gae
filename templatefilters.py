@@ -3,12 +3,13 @@
 # import the webapp module
 from google.appengine.ext import webapp
 import datetime
+import re
 
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
 
-def truncate(value,maxsize,stopper = '...'):
+def truncate(value,maxsize=50,stopper = '...'):
   """ truncates a string to a given maximum size and appends the stopper if needed """
   stoplen = len(stopper)
   if len(value) > maxsize and maxsize > stoplen:
@@ -21,5 +22,11 @@ def timeJST (value):
   return value + datetime.timedelta(hours=9)
   # SDK102 にしたら動作がかわった？??
 
+def pre2markup(value):
+  description = re.sub("\n","<br/>",value)
+  description = re.sub("\s","&nbsp;",description)
+  return description
+
 register.filter(truncate)
 register.filter(timeJST)
+register.filter(pre2markup)

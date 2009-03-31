@@ -108,9 +108,15 @@ a:hover
 	width: 100%;
 }
 
+#menu {
+	margin-left: 1em;
+	margin-top: 1em;
+}
+
+/*
 #header ul
 {
-	padding: 1em 4.5em 1em 4.5em;
+	//padding: 1em 4.5em 1em 4.5em;
 	list-style: none;
 }
 
@@ -118,9 +124,9 @@ a:hover
 {
 	display: inline;
 	padding-right: 2.5em;
-	font-size: 0.8em;
+	//font-size: 0.8em;
+	font-size: 9pt;
 }
-
 #header li a
 {
 	color: #fff;
@@ -131,6 +137,7 @@ a:hover
 {
 	border-bottom: solid 1px #558800;
 }
+*/
 
 /* Content */
 
@@ -149,7 +156,7 @@ a:hover
 {
 	margin-top: 0.5em;
 	padding: 1.25em 1em 0.25em 1em;
-	background: #ffffff url('images/a1.gif') top left repeat-x;
+	background: #ffffff url('/img/standardized/a1.gif') top left repeat-x;
 }
 
 /** boxA **/
@@ -327,7 +334,7 @@ a:hover
 
 #primaryContent
 {
-	//margin: 0em 0em 0em 15em;
+	margin: 0em 0em 0em 15em;
 	padding: 2.5em 2.5em 1.5em 2.5em;
 }
 

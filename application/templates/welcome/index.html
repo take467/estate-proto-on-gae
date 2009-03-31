@@ -1,7 +1,8 @@
 {% extends "../standardized.html" %}
 {% block stylesheets %}
 <link rel="stylesheet" href="/css/flexigrid/flexigrid.css" type="text/css" media="all">
-<link type="text/css"  href="/css/smoothness/jquery-ui-1.7.1.custom.css" rel="stylesheet" />
+<link type="text/css"  href="/css/jquery.treeview.css" rel="stylesheet" />
+<link type="text/css"  href="/css/jquery.contextMenu.css" rel="stylesheet" />
 <style>
         .flexigrid div.fbutton .add
             {
@@ -19,13 +20,15 @@
 <script src="/js/jquery-1.2.6.pack.js" type="text/javascript"></script>
 <script src="/js/jquery.form.js" type="text/javascript"></script>
 <script src="/js/flexigrid.pack.js" type="text/javascript"></script>
-<script type="text/javascript" src="js/jquery-ui-1.7.1.custom.min.js"></script>
-
-<script src="/js/jqDnR.js" type="text/javascript"></script>
+<script src="/js/jquery.treeview.js" type="text/javascript"></script>
+<script src="/js/jquery.treeview.async.js" type="text/javascript"></script>
+<script src="/js/jquery.contextMenu.js" type="text/javascript"></script>
 <script type="text/javascript"><!--
 $(document).ready(function(){
-	$("#search").flexigrid();
-	$("#search_block").resizable();
+	$("#treeview").treeview({});
+	$("#treeviewList span").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+	$("#c_0").disableContextMenu()
+	$("#v_0").disableContextMenu()
 	$("#flexigrid01").flexigrid({
 			url: '/profile',
 			dataType: 'json',
@@ -61,8 +64,67 @@ $(document).ready(function(){
 			height:'auto' 
 	});
 
+
+        $("#edit_category_anchor").click(function(){
+		$('#edit_category_id').val('2')
+		$.blockUI({ message: $('#edit_category'),css: { top: '40%',width: '400px' } })
+	});
+        $("#edit_category_submit").click(function(){
+                $.blockUI({ message: "<b>少々お待ちください...</b>" });
+                $.ajax({
+                   type: "POST",
+                   dataType: "json",
+                   url: '/groups/update',
+                   data: 'id='+$('#edit_category_id').val() +  '&name=' + $('#edit_category_name').val(),
+                   success: function(data){
+                        $.unblockUI();
+			location.reload()
+                   },
+                   error: function(){
+                        alert('update システムエラー');
+                  }
+                 });
+         });
 });
 function dummy(){}
+function initContextMenu(action,el,pos){
+                var id = $(el).attr('id').slice(2)
+                if (id == 0 ){
+                        alert('このカテゴリは削除できません')
+                        return
+                }
+                if( action == 'edit' ){
+                        $('#edit_category_name').val($(el).text())
+                        $('#edit_category_id').val(id)
+                        $.blockUI({ message: $('#edit_category'),css: { top: '40%',width: '400px' } })
+                }else if( action=="delete" ) {
+                        var url = '/group/delete'
+                        if( confirm($(el).text() +'(ID:' + $(el).attr('id')+ ')を本当に削除しますか？') != true ){
+                                return;
+                        }else{  
+                                $.ajax({
+                                   type: "POST",
+                                   dataType: "json",
+                                   url: url,
+                                   data: 'id=' + id,
+                                   success: function(data){
+					loation.reload()
+                                   },
+                                   error: function(){
+                                        alert('delete システムエラー');
+                                   }
+                                 });
+                        }
+                }else{  
+                        alert(  
+                                'Action: ' + action + '\n\n' +
+                                'Element ID: ' + $(el).attr('id') + '\n\n' +
+                                'X: ' + pos.x + '  Y: ' + pos.y + ' (relative to element)\n\n' +
+                                'X: ' + pos.docX + '  Y: ' + pos.docY+ ' (relative to document)'
+                        );
+                }
+        
+}
 // --></script>
 {% endblock %}
 
@@ -153,4 +215,34 @@ function dummy(){}
 	</tr>
 	</tbody>
 </table>
+{% endblock %}
+{% block treeview %}
+	<ul id="myMenu" class="contextMenu">
+		<li class="edit"><a href="#edit">編集</a></li>
+		<li class="delete separator"><a href="#delete">削除</a></li>
+	</ul>
+	<div id="treeviewList">
+	<ul id="treeview" class="filetree treeview">
+	{% for g in groups %}
+		<li id="i_{{g.id}}"><span id="c_{{g.id}}" class="folder">{{ g.name }}</span> 
+		{% if g.views %}
+			<ul>
+			{% for v in g.views %}
+				<li id="iv_{{v.id}}"><span id="v_{{v.id}}" class="file"><a href="/?g={{g.id}}&v={{v.id}}">{{v.name}}</a></span></li>
+			{% endfor %}
+			</ul>
+		{% endif %}
+		</li>
+	{% endfor %}
+	</ul>
+	</div>
+	<div id="edit_category" style="margin:1em;display:none; cursor: default">
+		<form id="edit_category_form">
+			<input type="hidden" id="edit_category_id" name="edit_category_id" value="">
+			<label>カテゴリ名</label><input type="text" name="edit_category_name" id="edit_category_name" value="" size="30">
+		<p>
+			<input type="button" id="edit_category_submit" value="保存"> - <input type="button" class="close_form" value="閉じる">
+		</p>
+		</form>
+	</div>
 {% endblock %}
