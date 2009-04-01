@@ -1,0 +1,9 @@
+<form>
+<table>
+{% for col in columns %}
+<tr>
+	<td><input type="text" name="{{col.name}}" value="{{col.label}}" size="20"></td><td><input type="checkbox" name="check_{{col.name}}" value="c_{{col.name}}"></td>
+</tr>
+{% endfor %}
+</table>
+</form>
