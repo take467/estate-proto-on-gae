@@ -54,6 +54,7 @@
 	classes to the respective LI element(s)
 */
 
+.contextMenu LI.add A { background-image: url(/img/contextMenu/page_white_add.png); }
 .contextMenu LI.edit A { background-image: url(/img/contextMenu/page_white_edit.png); }
 .contextMenu LI.cut A { background-image: url(/img/contextMenu/cut.png); }
 .contextMenu LI.copy A { background-image: url(/img/contextMenu/page_white_copy.png); }

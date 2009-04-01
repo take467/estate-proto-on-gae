@@ -3,7 +3,7 @@ from google.appengine.ext import db
 from gaeo.controller import BaseController
 
 from model.site import Site
-from model.profile_group import ProfileGroup
+from model.user_db import UserDb
 from google.appengine.api import users
 
 class GroupsController(BaseController):
@@ -12,7 +12,7 @@ class GroupsController(BaseController):
       pass
 
 #    def index(self):
-#      results = db.GqlQuery("SELECT * FROM ProfileGroup WHERE user = :1",self.user)
+#      results = db.GqlQuery("SELECT * FROM UserDb WHERE user = :1",self.user)
 #
 #      list = []
 #      list.append({'id':'0','text':'<a href="#">全カテゴリ</a>','children':[{'classes':'file','text':'<a href="#">全データ</a>'}],'classes':'folder','expand':True})
@@ -26,7 +26,7 @@ class GroupsController(BaseController):
         return 
 
       id = self.params.get('id')
-      g = ProfileGroup.get_by_id(int(id))
+      g = UserDb.get_by_id(int(id))
       if g:
         g.name = self.params.get('name')
 	g.put()
@@ -39,7 +39,7 @@ class GroupsController(BaseController):
         return 
 
       id = self.params.get('id')
-      g = ProfileGroup.get_by_id(int(id))
+      g = UserDb.get_by_id(int(id))
       if g:
         g.delete()
 
@@ -49,9 +49,7 @@ class GroupsController(BaseController):
     def create(self):
       if self.request.method.upper() != "POST":
         return 
-
-      name = self.params.get('name')
-      category = ProfileGroup(user=self.user,name=name)
+      category = UserDb(user=self.user)
       category.put()
 
       data = {'status':'success','id':category.key().id(),'name':category.name}

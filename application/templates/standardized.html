@@ -24,17 +24,14 @@ $(document).ready(function() {
                 $.unblockUI();
         });
 	$("#new_category_anchor").click(function() {
-		$.blockUI({ message: $('#new_category'),css: { top: '40%',width: '400px' } })
-	});
-        $("#new_category_submit").click(function(){
                 $.blockUI({ message: "<b>少々お待ちください...</b>" });
                 $.ajax({
                    type: "POST",
                    dataType: "json",
                    url: '/groups/create',
-                   data: 'name=' + $('#new_category_name').val(),
                    success: function(data){
                         $.unblockUI();
+			location.reload()
                    },
                    error: function(){
                         alert('システムエラー');
@@ -55,9 +52,14 @@ $(document).ready(function() {
 -->
 		<div id="menu">
 		<ul class="dropdown">
-			<li><a href="#" accesskey="1" title="">ファイル</a>
+			<li><a href="#">Estate</a>
 				<ul>
-				<li><a id="new_category_anchor" href="javascript:void(0);"  title="新規カテゴリ">新規カテゴリ</a>
+				<li><a id="estate_config" href="javascript:void(0);"  title="初期設定">初期設定</a>
+				</ul>
+				
+			<li><a href="#" title="ファイル">ファイル</a>
+				<ul>
+				<li><a id="new_category_anchor" href="javascript:void(0);">新規データベース</a>
 				</ul>
 			</li>
 			<li><a href="#" accesskey="2" title="">About Us</a></li>
@@ -92,14 +94,6 @@ $(document).ready(function() {
 	<div id="footer">
 		<p>Copyright &copy; 2009 健康deねっと IT事業部 Designed by <a href="http://www.freecsstemplates.org">Free CSS Templates</a></p>
 	</div>
-</div>
-<div id="new_category" style="margin:1em;display:none; cursor: default">
-	<form id="new_category_form">
-	<label>カテゴリ名</label><input type="text" name="new_category_name" id="new_category_name" value="" size="30">
-	<p>
-		<input type="button" id="new_category_submit" value="保存"> - <input type="button" class="close_form" value="閉じる">
-	</p>
-	</form>
 </div>
 <div id="edit_category" style="margin:1em;display:none; cursor: default">
 	<form id="edit_category_form">

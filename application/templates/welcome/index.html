@@ -26,9 +26,10 @@
 <script type="text/javascript"><!--
 $(document).ready(function(){
 	$("#treeview").treeview({});
-	$("#treeviewList span").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
-	$("#category_root").disableContextMenu()
-	$("#category_root_file").disableContextMenu()
+	//$("#treeviewList span").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+	$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+	$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+	//$("#category_root").disableContextMenu()
 	$("#flexigrid01").flexigrid({
 			url: '/profile',
 			dataType: 'json',
@@ -87,28 +88,74 @@ $(document).ready(function(){
          });
 });
 function dummy(){}
+function initFileContextMenu(action,el,pos){
+	var id = $(el).attr('id').slice(2)
+	if( action=="delete" ) {
+		var url = '/view/delete'
+		if( confirm($(el).text() +'を本当に削除しますか？') != true ){
+			return;
+		}else{  
+			$.blockUI({ message: "<b>少々お待ちください...</b>" });
+			$.ajax({
+			   type: "POST",
+			   dataType: "json",
+			   url: url,
+			   data: 'id=' + id,
+			   success: function(data){
+                        	$.unblockUI();
+				location.reload()
+			   },
+			   error: function(){
+				alert('delete システムエラー');
+			   }
+			 });
+		}
+	}else if( action =="edit"){
+		$('#form_called_by_treeview').load('/view/edit')
+		$.blockUI({ message: $('#form_called_by_treeview'),css: { top: '10%',width: '400px' } })
+	}
+}
 function initContextMenu(action,el,pos){
                 var id = $(el).attr('id').slice(2)
-                if (id == 0 ){
-                        alert('このカテゴリは削除できません')
-                        return
-                }
-                if( action == 'edit' ){
+                if( action == 'addview' ){
+			$.blockUI({ message: "<b>少々お待ちください...</b>" });
+			$.ajax({
+			   type: "POST",
+			   dataType: "json",
+			   url: '/view/create',
+			   data: 'db_id='+ $(el).attr('id'),
+			   success: function(data){
+				if( data.status == 'error' ){
+					alert(data.msg);
+				}
+				$.unblockUI();
+				if( data.status == 'success' ){
+					location.reload()
+				}
+			   },
+			   error: function(data){
+				alert('system error');
+				$.unblockUI();
+			  }
+			 });
+                }else if( action == 'edit' ){
                         $('#edit_category_name').val($(el).text())
                         $('#edit_category_id').val(id)
                         $.blockUI({ message: $('#edit_category'),css: { top: '40%',width: '400px' } })
                 }else if( action=="delete" ) {
-                        var url = '/group/delete'
+                        var url = '/groups/delete'
                         if( confirm($(el).text() +'(ID:' + $(el).attr('id')+ ')を本当に削除しますか？') != true ){
                                 return;
                         }else{  
+				$.blockUI({ message: "<b>少々お待ちください...</b>" });
                                 $.ajax({
                                    type: "POST",
                                    dataType: "json",
                                    url: url,
                                    data: 'id=' + id,
                                    success: function(data){
-					loation.reload()
+					$.unblockUI();
+					location.reload()
                                    },
                                    error: function(){
                                         alert('delete システムエラー');
@@ -217,27 +264,28 @@ function initContextMenu(action,el,pos){
 </table>
 {% endblock %}
 {% block treeview %}
+	<ul id="myFileMenu" class="contextMenu">
+		<li class="edit separator"><a href="#edit">編集</a></li>
+		<li class="delete"><a href="#delete">削除</a></li>
+	</ul>
 	<ul id="myMenu" class="contextMenu">
-		<li class="edit"><a href="#edit">編集</a></li>
-		<li class="delete separator"><a href="#delete">削除</a></li>
+		<li class="add"><a href="#addview">ビューの追加</a></li>
+		<li class="edit separator"><a href="#edit">編集</a></li>
+		<li class="delete"><a href="#delete">削除</a></li>
 	</ul>
 	<div id="treeviewList">
 	<ul id="treeview" class="filetree treeview">
-        <li> <span id="category_root" class="folder">カテゴリ</span>
-		<ul>
-			 <li><span id="category_root_file" class="file">全データ</span></li>
-	{% for g in groups %}
-			<li id="i_{{g.id}}"><span id="c_{{g.id}}" class="folder">{{ g.name }}</span> 
-		{% if g.views %}
+	{% for udb in user_dbs %}
+		<li id="udb_{{udb.db.key.id}}"><span id="d_{{udb.db.key.id}}" class="folder">{{ udb.db.name }}</span> 
+		{% if udb.views %}
 			<ul>
-			{% for v in g.views %}
-				<li id="iv_{{v.id}}"><span id="v_{{v.id}}" class="file"><a href="/?g={{g.id}}&v={{v.id}}">{{v.name}}</a></span></li>
+			{% for v in udb.views %}
+				<li id="v_{{v.key.id}}"><span id="f_{{v.key.id}}" class="file"><a href="/?g={{udb.db.key.id}}&v={{v.key.id}}">{{v.name}}</a></span></li>
 			{% endfor %}
 			</ul>
 		{% endif %}
 		</li>
 	{% endfor %}
-		</ul>
 	</ul>
 	</div>
 	<div id="edit_category" style="margin:1em;display:none; cursor: default">
@@ -249,4 +297,5 @@ function initContextMenu(action,el,pos){
 		</p>
 		</form>
 	</div>
+	<div id="form_called_by_treeview" style="display:none"></div>
 {% endblock %}

@@ -4,7 +4,6 @@ from google.appengine.ext import db
 
 from google.appengine.api import users
 from model.profile import ProfileCore
-from model.package import Package
 import json
 from google.appengine.api import images
 from getimageinfo import getImageInfo
@@ -30,11 +29,6 @@ class ProfileController(BaseController):
           data = {'id':id,'organization':p.organization,'section':p.section,'last_name':p.last_name,'first_name':p.first_name,'title':p.title,'tel_no':p.tel_no,'email':p.email}
       self.render(json=self.to_json(data))
         
-    def attribute(self):
-      key = self.params.get('id')
-      self.profile  = ProfileCore.get(key)
-      self.packages = Package.all()
-      pass
 
     def attr_json(self):
       profile = ProfileCore().get(self.params.get('id'))
@@ -63,7 +57,6 @@ class ProfileController(BaseController):
             wk = {'id':p.key().id(),"cell":[p.key().id(),profile.organization,profile.section,person,p.group,p.label,val]}
             rows.append(wk)
 
-        #wk = {'id':1,'cell':['1','purchased_package','購入パッケージ','パッケージA']}
 
 	data = {'page':page, 'total': total, 'rows': rows }
       self.render(json=self.to_json(data))
@@ -88,35 +81,6 @@ class ProfileController(BaseController):
 
       msg = {'status':'success'}
       self.render(json=self.to_json(msg))
-
-    def cancell_package(self):
-      items = self.params.get('items')
-      # split by ','
-      msg = {'status':'success'}
-      #try:
-      for id in items.split(','):
-          if id != None and id != '':
-            data = Attribute().get_by_id(int(id))
-            if data:
-              data.delete()
-      #except Exception,e:
-      #  msg = {'status':'error','msg':'例外が発生しました'}
- 
-      self.render(json=self.to_json(msg))
-
-    def buy_package(self):
-      key = self.params.get('profile_key')
-      profile  = ProfileCore.get(key)
-      p_code = self.params.get('selected_package')
-
-      wk = u"購入パッケージ"
-      attr = Attribute(profile = profile,label=wk,name='purchased_package',val=p_code,config=json.write({'model_name':'Package'}))
-      attr.put()
-
-      msg = {'status':'success'}
-      self.render(json=self.to_json(msg))
-
-      pass
 
     def create(self):
       p = self.params

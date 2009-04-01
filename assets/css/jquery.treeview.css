@@ -42,7 +42,7 @@
 .treeview .expandable-hitarea { background-position: -80px -3px; }
 
 .treeview li.last { background-position: 0 -1766px }
-.treeview li.lastCollapsable, .treeview li.lastExpandable { background-image: url(images/treeview-default.gif); }  
+.treeview li.lastCollapsable, .treeview li.lastExpandable { background-image: url(/img/treeview/treeview-default.gif); }  
 .treeview li.lastCollapsable { background-position: 0 -111px }
 .treeview li.lastExpandable { background-position: -32px -67px }
 
@@ -62,7 +62,7 @@
 
 
 .filetree li { padding: 3px 0 2px 16px; }
-.filetree span.folder, .filetree span.file { padding: 1px 0 1px 16px; display: block; }
+.filetree span.folder, .filetree span.file {line-height:1.0em; padding: 1px 0 1px 16px; display: block; }
 .filetree span.folder { background: url(/img/treeview/folder.gif) 0 0 no-repeat; }
 .filetree li.expandable span.folder { background: url(/img/treeview/folder-closed.gif) 0 0 no-repeat; }
-.filetree span.file { background: url(/img/treeview/file.gif) 0 0 no-repeat; }
+.filetree span.file { line-height:1.0em;background: url(/img/treeview/file.gif) 0 0 no-repeat; }

@@ -1,7 +1,6 @@
 #!-*- coding:utf-8 -*-
 from google.appengine.ext import db
 from gaeo.model import BaseModel, SearchableBaseModel
-from model.category import Category
 
 class Site(BaseModel):
   logo_label = db.StringProperty(required=True)
