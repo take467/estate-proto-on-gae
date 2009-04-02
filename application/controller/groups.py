@@ -4,6 +4,7 @@ from gaeo.controller import BaseController
 
 from model.site import Site
 from model.user_db import UserDb
+from model.view import UserView
 from google.appengine.api import users
 
 class GroupsController(BaseController):
@@ -11,15 +12,25 @@ class GroupsController(BaseController):
       self.user = users.get_current_user()
       pass
 
-#    def index(self):
-#      results = db.GqlQuery("SELECT * FROM UserDb WHERE user = :1",self.user)
-#
-#      list = []
-#      list.append({'id':'0','text':'<a href="#">全カテゴリ</a>','children':[{'classes':'file','text':'<a href="#">全データ</a>'}],'classes':'folder','expand':True})
-#      for rec in results:
-#        list.append({'id':rec.key().id(),'text':rec.name,'children':[],'classes':'folder','expand':True})
-#
-#      self.render(json=self.to_json(list))
+    def treeview(self):
+      user = users.get_current_user()
+      self.user_dbs = []
+      for u in db.GqlQuery("SELECT * FROM UserDb WHERE user = :1",user):
+        list = db.GqlQuery("SELECT * FROM UserView WHERE user_db_id = :1",u)
+        self.user_dbs.append({'db':u,'views':list})
+
+      #list  = []
+      #views = []
+      #for u in db.GqlQuery("SELECT * FROM UserDb WHERE user = :1",self.user):
+      #  for v in db.GqlQuery("SELECT * FROM UserView WHERE user_db_id = :1",u):
+      #    views.append({'id':v.key().id(),"text":v.name})
+      #  list.append({'id':u.key().id(),'text':u.name,'children':views,'classes':'folder','expand':True})
+      #self.render(json=self.to_json(list))
+
+    def edit(self):
+      id = self.params.get('id')
+      self.user_db = UserDb.get_by_id(int(id))
+      pass
 
     def update(self):
       if self.request.method.upper() != "POST":

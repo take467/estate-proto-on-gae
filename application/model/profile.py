@@ -32,22 +32,22 @@ class ProfileCore(BaseModel):
   data            = db.TextProperty(default='')
 
   disp_columns = [
-	{'name':'name','label':'氏名'}
-	,{'name':'name_yomi','label':'氏名(かな)'}
-	,{'name':'organization','label':'企業/団体'}
-	,{'name':'section','label':'所属/部署'}
-	,{'name':'title','label':'役職'}
-	,{'name':'birthday','label':'生年月日'}
-	,{'name':'sex','label':'性別'}
-	,{'name':'zip_code','label':'郵便番号'}
-	,{'name':'prefecture_code','label':'都道府県'}
-	,{'name':'city','label':'市町村区'}
-	,{'name':'address','label':'それ以降の住所'}
-	,{'name':'email','label':'電子メール'}
-	,{'name':'mobile_email','label':'電子メール(携帯)'}
-	,{'name':'tel_no','label':'電話番号'}
-	,{'name':'cellphone_no','label':'電話番号(携帯)'}
-	,{'name':'fax_no','label':'FAX番号'}
+	{'name':'name','label':'氏名','checked':'checked'}
+	,{'name':'name_yomi','label':'氏名(かな)','checked':'checked'}
+	,{'name':'organization','label':'企業/団体','checked':'checked'}
+	,{'name':'section','label':'所属/部署','checked':'checked'}
+	,{'name':'title','label':'役職','checked':'checked'}
+	,{'name':'birthday','label':'生年月日','checked':'checked'}
+	,{'name':'sex','label':'性別','checked':'checked'}
+	,{'name':'zip_code','label':'郵便番号','checked':'checked'}
+	,{'name':'prefecture_code','label':'都道府県','checked':'checked'}
+	,{'name':'city','label':'市町村区','checked':'checked'}
+	,{'name':'address','label':'それ以降の住所','checked':'checked'}
+	,{'name':'email','label':'電子メール','checked':'checked'}
+	,{'name':'mobile_email','label':'電子メール(携帯)','checked':'checked'}
+	,{'name':'tel_no','label':'電話番号','checked':'checked'}
+	,{'name':'cellphone_no','label':'電話番号(携帯)','checked':'checked'}
+	,{'name':'fax_no','label':'FAX番号','checked':'checked'}
   ]
 
 class ProfileEx(BaseModel):

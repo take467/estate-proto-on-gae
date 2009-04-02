@@ -17,6 +17,7 @@ h1,h2,h3,h4,h5,h6
 	color: #444;
 }
 
+/*
 body,input
 {
 	font-family: tahoma, sans-serif;
@@ -46,6 +47,7 @@ input.text
 	margin-top: 0.25em;
 	margin-bottom: 0.5em;
 }
+*/
 
 a
 {
@@ -103,14 +105,13 @@ a:hover
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	background-color: #558800;
-	border-bottom: solid 1px #336600;
+	//background-color: #558800;
+	//border-bottom: solid 1px #336600;
 	width: 100%;
 }
 
 #menu {
-	margin-left: 1em;
-	margin-top: 1em;
+	margin: 1em;
 }
 
 /*

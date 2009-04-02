@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="/css/flexigrid/flexigrid.css" type="text/css" media="all">
 <link type="text/css"  href="/css/jquery.treeview.css" rel="stylesheet" />
 <link type="text/css"  href="/css/jquery.contextMenu.css" rel="stylesheet" />
+<link type="text/css" href="/css/niceforms/niceforms-default.css" rel="stylesheet" media="screen"/>
 <style>
         .flexigrid div.fbutton .add
             {
@@ -23,13 +24,21 @@
 <script src="/js/jquery.treeview.js" type="text/javascript"></script>
 <script src="/js/jquery.treeview.async.js" type="text/javascript"></script>
 <script src="/js/jquery.contextMenu.js" type="text/javascript"></script>
+<script type="text/javascript" src="/js/nicejforms.js"></script>
+
 <script type="text/javascript"><!--
 $(document).ready(function(){
-	$("#treeview").treeview({});
-	//$("#treeviewList span").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
-	$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
-	$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
-	//$("#category_root").disableContextMenu()
+	//$.NiceJForms.build({
+	//	imagesPath:"/css/niceforms/images/default/"
+	//});
+        //$(".close_form").click(function(){
+        //        $.unblockUI();
+        //});
+	$("#treeview").load('/groups/treeview',function(){
+		$(this).treeview({});
+		$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+		$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+	});
 	$("#flexigrid01").flexigrid({
 			url: '/profile',
 			dataType: 'json',
@@ -64,28 +73,6 @@ $(document).ready(function(){
 			width: 'auto',
 			height:'auto' 
 	});
-
-
-        $("#edit_category_anchor").click(function(){
-		$('#edit_category_id').val('2')
-		$.blockUI({ message: $('#edit_category'),css: { top: '40%',width: '400px' } })
-	});
-        $("#edit_category_submit").click(function(){
-                $.blockUI({ message: "<b>少々お待ちください...</b>" });
-                $.ajax({
-                   type: "POST",
-                   dataType: "json",
-                   url: '/groups/update',
-                   data: 'id='+$('#edit_category_id').val() +  '&name=' + $('#edit_category_name').val(),
-                   success: function(data){
-                        $.unblockUI();
-			location.reload()
-                   },
-                   error: function(){
-                        alert('update システムエラー');
-                  }
-                 });
-         });
 });
 function dummy(){}
 function initFileContextMenu(action,el,pos){
@@ -103,7 +90,11 @@ function initFileContextMenu(action,el,pos){
 			   data: 'id=' + id,
 			   success: function(data){
                         	$.unblockUI();
-				location.reload()
+				$("#treeview").load('/groups/treeview',function(){
+					$(this).treeview({});
+					$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+					$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+				});
 			   },
 			   error: function(){
 				alert('delete システムエラー');
@@ -111,9 +102,62 @@ function initFileContextMenu(action,el,pos){
 			 });
 		}
 	}else if( action =="edit"){
-		$('#form_called_by_treeview').load('/view/edit')
-		$.blockUI({ message: $('#form_called_by_treeview'),css: { top: '10%',width: '400px' } })
+   		url = '/view/edit?id=' + id
+		$("#called_by_treeview").html('');
+		$('#called_by_treeview').load(url,function(text,status){
+			$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
+			$(".close_form").click(function(){ $.unblockUI(); });
+			//var max = 0;
+			//$("#called_by_treeview label").each(function(){
+			//	if ($(this).width() > max)
+			//	max = $(this).width();
+			//});
+			//$("#called_by_treeview label").width(max + 10);
+			$.blockUI({ message: $('#called_by_treeview'),css: { top: '10%',width: '400px' } })
+		});
 	}
+}
+function init_treeview(){
+	$("#treeview").load('/groups/treeview',function(){
+		$(this).treeview({});
+		$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+		$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+	});
+}
+function update_view(){
+	$.blockUI({ message: "<b>少々お待ちください...</b>" });
+	$.ajax({
+	   async:false,
+	   type: "POST",
+	   url: '/view/update',
+	   data: $('#called_by_treeview form').serialize(),
+	   success: function(data){
+		$('#called_by_treeview').html(data)
+		$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
+		$.blockUI({ message: $('#called_by_treeview'),css: { top: '10%',width: '400px' } })
+		$(".close_form").click(function(){ $.unblockUI(); });
+		init_treeview()
+	   },
+	   error: function(){
+		alert('update システムエラー');
+	   }
+	});
+}
+function update_user_db(){
+	$.blockUI({ message: "<b>少々お待ちください...</b>" });
+	$.ajax({
+	   type: "POST",
+	   dataType: "json",
+	   url: '/groups/update',
+	   data: 'id='+$('#edit_category_id').val() +  '&name=' + $('#edit_category_name').val(),
+	   success: function(data){
+		$.unblockUI();
+		init_treeview()
+	   },
+	   error: function(){
+		alert('update システムエラー');
+	   }
+	});
 }
 function initContextMenu(action,el,pos){
                 var id = $(el).attr('id').slice(2)
@@ -123,14 +167,14 @@ function initContextMenu(action,el,pos){
 			   type: "POST",
 			   dataType: "json",
 			   url: '/view/create',
-			   data: 'db_id='+ $(el).attr('id'),
+			   data: 'db_id='+ id,
 			   success: function(data){
 				if( data.status == 'error' ){
 					alert(data.msg);
 				}
 				$.unblockUI();
 				if( data.status == 'success' ){
-					location.reload()
+					init_treeview();
 				}
 			   },
 			   error: function(data){
@@ -139,9 +183,12 @@ function initContextMenu(action,el,pos){
 			  }
 			 });
                 }else if( action == 'edit' ){
-                        $('#edit_category_name').val($(el).text())
-                        $('#edit_category_id').val(id)
-                        $.blockUI({ message: $('#edit_category'),css: { top: '40%',width: '400px' } })
+                        var url = '/groups/edit?id='+id
+			$('#called_by_treeview').load(url,function(text,status){
+				$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
+				$(".close_form").click(function(){ $.unblockUI(); });
+			});
+			$.blockUI({ message: $('#called_by_treeview'),css: { top: '10%',width: '400px' } })
                 }else if( action=="delete" ) {
                         var url = '/groups/delete'
                         if( confirm($(el).text() +'(ID:' + $(el).attr('id')+ ')を本当に削除しますか？') != true ){
@@ -155,7 +202,11 @@ function initContextMenu(action,el,pos){
                                    data: 'id=' + id,
                                    success: function(data){
 					$.unblockUI();
-					location.reload()
+					$("#treeview").load('/groups/treeview',function(){
+						$(this).treeview({});
+						$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+						$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+					});
                                    },
                                    error: function(){
                                         alert('delete システムエラー');
@@ -273,29 +324,7 @@ function initContextMenu(action,el,pos){
 		<li class="edit separator"><a href="#edit">編集</a></li>
 		<li class="delete"><a href="#delete">削除</a></li>
 	</ul>
-	<div id="treeviewList">
-	<ul id="treeview" class="filetree treeview">
-	{% for udb in user_dbs %}
-		<li id="udb_{{udb.db.key.id}}"><span id="d_{{udb.db.key.id}}" class="folder">{{ udb.db.name }}</span> 
-		{% if udb.views %}
-			<ul>
-			{% for v in udb.views %}
-				<li id="v_{{v.key.id}}"><span id="f_{{v.key.id}}" class="file"><a href="/?g={{udb.db.key.id}}&v={{v.key.id}}">{{v.name}}</a></span></li>
-			{% endfor %}
-			</ul>
-		{% endif %}
-		</li>
-	{% endfor %}
-	</ul>
+	<ul id="treeview" class="filetree treeview"></ul>
+	<div id="called_by_treeview" style="margin:1em;display:none; cursor: default">
 	</div>
-	<div id="edit_category" style="margin:1em;display:none; cursor: default">
-		<form id="edit_category_form">
-			<input type="hidden" id="edit_category_id" name="edit_category_id" value="">
-			<label>カテゴリ名</label><input type="text" name="edit_category_name" id="edit_category_name" value="" size="30">
-		<p>
-			<input type="button" id="edit_category_submit" value="保存"> - <input type="button" class="close_form" value="閉じる">
-		</p>
-		</form>
-	</div>
-	<div id="form_called_by_treeview" style="display:none"></div>
 {% endblock %}

@@ -6,9 +6,36 @@ from model.user_db import UserDb
 from model.view    import UserView
 from model.profile import ProfileCore
 
+import yaml
+import copy
+
 class ViewController(BaseController):
     def edit(self):
-      self.columns = ProfileCore.disp_columns
+      self.view = UserView.get_by_id(int(self.params.get('id')))
+      self.config = yaml.load(self.view.config)
+      pass
+
+    def update(self):
+      id = self.params.get('edit_view_id')
+      name = self.params.get('view_name')
+
+      # build yaml for config
+      self.view = UserView.get_by_id(int(self.params.get('edit_view_id')))
+      config = yaml.load(self.view.config)
+      for col in config:
+        key = "disp_%s" % col['name']
+        val = self.params.get(key)
+        if val == 'yes':
+          col['checked']= 'checked'
+        else:
+          col['checked']= ''
+
+      self.view.name = name
+      self.view.config = yaml.dump(config)
+      self.view.put()
+      self.config = config
+          
+
       pass
 
     def create(self):
@@ -16,7 +43,9 @@ class ViewController(BaseController):
      #try:
        udb = UserDb.get_by_id(int(self.params.get('db_id')))
        if udb:
-         v = UserView(user_db_id=udb)
+         cols = copy.deepcopy(ProfileCore.disp_columns)
+         config = yaml.dump(cols)
+         v = UserView(user_db_id=udb,config=config)
          v.put()
        else:
          res= {"status":"error","msg":"missing user db"}
@@ -37,9 +66,6 @@ class ViewController(BaseController):
     def show(self):
       self.site = Site.all().get()
       self.category = db.GqlQuery("SELECT * FROM Category WHERE category_id = :1",self.params.get('id')).get()
-
-    def edit(self):
-      self.rec = Category.get(self.params.get('id'))
 
     def update(self):
       self.rec = Category.get(self.params.get('key'))
