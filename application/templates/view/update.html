@@ -1,0 +1,24 @@
+<p>設定を保存しました</p>
+<form class="niceform">
+<table>
+	<tr>
+		<td align="left"><label for="text">ビュー名</label></td>
+		<td align="left"><div style="margin-left:1em">{{view.name}}</div></td>
+	</tr>
+	<tr>
+		<td valign="top" align="left"><label for="text">項目</label></td>
+		<td align="left">
+		{% for col in config %}
+			<div style="margin-top:0.2em;margin-left:1em">
+			{% ifequal col.checked 'checked' %}
+				<img src="/img/check_icon.jpg" style="margin-right:0.2em">{{col.label}}
+			{% else %}
+				<img src="/img/cross_icon.jpg" style="margin-right:0.2em">{{col.label}}
+			{% endifequal %}
+			</div>
+		{% endfor %}
+		</td>
+	</tr>
+</table>
+<input type="button" class="close_form" value="閉じる">
+</form>

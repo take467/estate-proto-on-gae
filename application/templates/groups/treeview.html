@@ -1,0 +1,11 @@
+        {% for udb in user_dbs %}
+                <li id="udb_{{udb.db.key.id}}"><span id="d_{{udb.db.key.id}}" class="folder">{{ udb.db.name }}</span>
+                {% if udb.views %}
+                        <ul>
+                        {% for v in udb.views %}
+                                <li id="v_{{v.key.id}}"><span id="f_{{v.key.id}}" class="file"><a href="/?g={{udb.db.key.id}}&v={{v.key.id}}">{{v.name}}</a></span></li>
+                        {% endfor %}
+                        </ul>
+                {% endif %}
+                </li>
+        {% endfor %}

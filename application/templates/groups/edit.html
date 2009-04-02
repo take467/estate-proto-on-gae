@@ -1,0 +1,10 @@
+<form id="form_called_by_treeview" class="niceform" >
+	<div style="text-align:left">
+	<input type="hidden" id="edit_category_id" name="edit_category_id" value="{{user_db.key.id}}">
+	<label for="text">データベース名</label><br />
+	<input type="text" name="edit_category_name" id="edit_category_name" value="{{user_db.name}}" size="35">
+	</div>
+	<br />
+	<input type="button" id="edit_category_submit" value="保存" onclick="update_user_db();return false"> -
+	<input type="button" class="close_form" value="閉じる">
+</form>
