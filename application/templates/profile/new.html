@@ -1,0 +1,44 @@
+<form id="blockui_form" class="niceform" >
+	<input type="hidden" name="action_url"   id="action_url"  value="{{action_url}}">
+	<input type="hidden" name="user_view_id" id="user_view_id" value="{{view.key.id}}">
+	<input type="hidden" name="profile_id" id="user_view_id" value="{{profile_id}}">
+	<table>
+	{% for f in fields %}
+		<tr>
+			<td align="left"><label>{{ f.label }}</label></td>
+			<td align="left">
+			{% ifequal f.type 'text' %}
+				<input type="text" name="{{f.name}}" id="{{f.name}}" value="{{f.val}}" size="25">
+			{% endifequal %}
+			{% ifequal f.type 'radio' %}
+				{% for item in f.items %}
+					<input type="radio" id="{{f.name}}_{{item.code}}" name="{{ f.name }}" value="{{item.code}}" {{item.checked}}>
+					<label for="{{f.name}}_{{item.code}}">{{item.name}}</label><br/>
+				{% endfor %}
+			{% endifequal %}
+			{% ifequal f.type 'select' %}
+				<select name="{{f.name}}" size="1" id="{{f.name}}" name="{{f.name}}" class="" style="border:solid 1px #bbbbbb">
+				<option value="" class="" style="width:100px"></option>
+				{% for item in f.items %}
+					<option value="{{item.code}}" style="padding-left:0.3em" {{item.selected}}><font color="#999999">{{item.name}}</font></option>
+				{% endfor %}
+				</select>
+			{% endifequal %}
+			</td>
+		</tr>
+	{% endfor %}
+	</table>
+	<div style="margin-top:1em">
+	<input type="button" id="block_ui_form_submit" value="保存" onclick="submitData();return false"> -
+	<input type="button" class="close_form" value="閉じる">
+	</div>
+</form>
+
+<!--
+<pre>
+{{ config }}
+</pre>
+<pre>
+{{ dump }}
+</pre>
+-->
