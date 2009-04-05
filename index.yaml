@@ -77,6 +77,13 @@ indexes:
     direction: desc
 
 # Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: sex
+
+# Unused in query history -- copied from input.
 - kind: UsedNonce
   properties:
   - name: salt

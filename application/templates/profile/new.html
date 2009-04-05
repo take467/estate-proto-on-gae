@@ -10,6 +10,9 @@
 			{% ifequal f.type 'text' %}
 				<input type="text" name="{{f.name}}" id="{{f.name}}" value="{{f.val}}" size="25">
 			{% endifequal %}
+			{% ifequal f.type 'date' %}
+				<input type="text" name="{{f.name}}" id="{{f.name}}" value="{{f.val}}" size="15">
+			{% endifequal %}
 			{% ifequal f.type 'radio' %}
 				{% for item in f.items %}
 					<input type="radio" id="{{f.name}}_{{item.code}}" name="{{ f.name }}" value="{{item.code}}" {{item.checked}}>

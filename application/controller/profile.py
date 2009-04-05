@@ -4,147 +4,190 @@ from google.appengine.ext import db
 
 from google.appengine.api import users
 from model.profile import ProfileCore
+from model.view    import UserView
+from model.user_db import *
+
 import json
 from google.appengine.api import images
 from getimageinfo import getImageInfo
 import yaml
+from google.appengine.api import users
+from types import *
 
 # /product/show/:id 
 class ProfileController(BaseController):
+
     def before_action(self):
-      user = users.get_current_user()
-      if user:
-        self.url = users.create_logout_url("/")
-        self.url_text = 'ログアウト'
-      else:
-        self.url = users.create_login_url(self.request.url)
-        self.url_text = 'ログイン'
-
-    def json(self):
-      id = self.params.get('id')
-      data = {}
-      if id:
-        p = ProfileCore().get_by_id(int(id))
-        if p:
-          data = {'id':id,'organization':p.organization,'section':p.section,'last_name':p.last_name,'first_name':p.first_name,'title':p.title,'tel_no':p.tel_no,'email':p.email}
-      self.render(json=self.to_json(data))
-        
-
-    def attr_json(self):
-      profile = ProfileCore().get(self.params.get('id'))
-      page = 1
-      total = 0
-      rows = []
-      data = {'page':page, 'total': total, 'rows': rows }
-      if profile:
-        results = db.GqlQuery("SELECT * FROM Attribute WHERE profile = :1",profile)
-        total = results.count()
-        if total > 0:
-          for p in results:
-            wk = {}
-            val = p.val
-            if p.config:
-              #config=json.read(p.config)
-              config=yaml.load(p.config)
-              if config:
-                query = "SELECT * FROM " + config['model_name'] + " WHERE code = :1 "
-                results = db.GqlQuery(query,p.val)
-                if results.count() > 0:
-                  rec = results.get()
-                  val = rec.name
-              
-            person = "%s %s" % (profile.last_name,profile.first_name)
-            wk = {'id':p.key().id(),"cell":[p.key().id(),profile.organization,profile.section,person,p.group,p.label,val]}
-            rows.append(wk)
-
-
-	data = {'page':page, 'total': total, 'rows': rows }
-      self.render(json=self.to_json(data))
-        
-    def show(self):
-      pass
-
-    def update(self):
-      id = self.params.get('id')
-      if id:
-        p = self.params
-        rec = ProfileCore().get_by_id(int(id))
-        rec.organization=p.get('organization')
-        rec.section=p.get('section')
-        rec.last_name=p.get("last_name")
-        rec.first_nam=p.get("first_nam")
-        rec.title=p.get("title")
-        rec.tel_no=p.get("tel_no")
-        rec.email=p.get("email")
-        rec.claimed_id=p.get("claimed_id")
-        rec.put()
-
-      msg = {'status':'success'}
-      self.render(json=self.to_json(msg))
-
-    def create(self):
-      p = self.params
-      profile = ProfileCore(organization=p.get('organization'),section=p.get('section'),title=p.get("title"),last_name=p.get("last_name"),first_name=p.get('first_name'),tel_no=p.get('tel_no'),email=p.get("email"),claimed_id=p.get('claimed_id'))
-      profile.put()
-
-      msg = {'status':'success'}
-      self.render(json=self.to_json(msg))
+      self.user = user=users.get_current_user()
 
     def delete(self):
+      user = user=users.get_current_user()
       items = self.params.get('items')
       # split by ','
       msg = {'status':'success'}
-      #try:
       for id in items.split(','):
           if id != None and id != '':
-            data = ProfileCore().get_by_id(int(id))
+            #data = ProfileCore().get_by_id(int(id))
+            data = db.GqlQuery("SELECT * FROM ProfileCore WHERE  user = :1 and id = :2",user,int(id)).get()
             if data:
               data.delete()
-      #except Exception,e:
-      #  msg = {'status':'error','msg':'例外が発生しました'}
- 
       self.render(json=self.to_json(msg))
 
-    def index(self):
+    def update(self):
+      id = self.params.get('profile_id')
+      v  = self.params.get('user_view_id')
+      view = UserView.get_by_id(int(v))
+
+      rec = ProfileCore.get_by_id(int(id))
+      if rec.user == self.user:
+        config = yaml.load(view.config)
+        for col in config:
+          if col['checked'] == 'checked':
+            val = self.params.get(col['name'])
+            if val and val != '':
+              setattr(rec,col['name'],val)
+        rec.put()
+      data = {'status':'success'}
+      self.render(json=self.to_json(data))
+
+    def edit(self):
+      self.action_url = "/profile/update"
+      id = self.params.get('id')
+      v  = self.params.get('v')
+      self.fields = []
+      if id:
+        self.profile_id = id
+        self.view = UserView.get_by_id(int(v))
+        data = ProfileCore.get_by_id(int(id))
+        if data.user == self.user:
+          self.config = yaml.load(self.view.config)
+          for col in self.config:
+            if col['checked'] == 'checked':
+              col['val'] = getattr(data,col['name'])
+              if col['type'] == 'radio' or col['type'] == 'select':
+                 result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
+                 if result.count() > 0: 
+                   rec = result.get()
+                   items = yaml.load(rec.yaml_data)
+                   for item in items:
+                     if item['code'] == col['val']:
+                       if col['type'] == 'radio':
+                         item['checked'] = 'checked'
+                       elif col['type'] == 'select':
+                         item['selected'] = 'selected'
+                   col['items'] = items
+           
+              self.fields.append(col)
+        self.dump = yaml.dump(self.fields)
+        self.render(template="new")
+
+    def new(self):
+      self.action_url = "/profile/create"
+      id = self.params.get('id')
+      self.fields = []
+      if id:
+        self.view = UserView.get_by_id(int(id))
+        self.config = yaml.load(self.view.config)
+        for col in self.config:
+          if col['checked'] == 'checked':
+            if col['type'] == 'radio' or col['type'] == 'select':
+               result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
+               if result.count() > 0: 
+                 rec = result.get()
+                 col['items'] = yaml.load(rec.yaml_data)
+                 #col['items'] = str(result.count())
+            self.fields.append(col)
+        #self.dump = yaml.dump(self.fields)
+
+    def create(self):
+      view_id = self.params.get('user_view_id')
+      view = UserView.get_by_id(int(view_id))
+
+      config = yaml.load(view.config)
+      rec = ProfileCore(user_db_id=view.user_db_id,user=users.get_current_user())
+      for col in config:
+        if col['checked'] == 'checked':
+          val = self.params.get(col['name'])
+          if val:
+            setattr(rec,col['name'],val)
+
+      rec.put()
+      data = {'status':'success'}
+      self.render(json=self.to_json(data))
+
+    def json(self):
+      id = self.params.get('id')
+      if id == None:
+        self.render(json=self.to_json([]))
+        return
+
+      self.fields = []
+      self.view = UserView.get_by_id(int(id))
+      if self.view == None:
+        self.render(json=self.to_json([]))
+        return
+
+      self.config = yaml.load(self.view.config)
 
       query = self.params.get("query")
       qtype = self.params.get("qtype")
 
       sortname = self.params.get("sortname")
+      if sortname == None or sortname == '':
+        sortname = 'id'
       sortorder = self.params.get("sortorder")
-      if sortorder != None and sortorder.upper() == "DESC":
-        sortname = "-" + sortname
 
       lines = int(self.params.get("rp"))
       page = int(self.params.get("page"))
       offset = (page - 1) * lines
-     
-      total = ProfileCore.all().count()
+
+      results = []
       if (query != None and query != '' ) and ( qtype != None and qtype != ''):
         if qtype == 'id':
-          p = ProfileCore().get_by_id(int(query))
-          results = []
-          results.append(p)
+          p  = ProfileCore.get_by_id(int(query))
+          total = 0
+          if p != None and (p.user == users.get_current_user()):
+            total = 1
+            results.append(p)
         else:
-          sql = "SELECT * FROM ProfileCore WHERE " + qtype + "= :1 "
-          if offset > 0:
-            sql = sql + " OFFSET=" + str(offset) 
-          sql = sal +  " limit = " + str(lines)
-          results = db.GqlQuery(sql,query)
+          sql = "SELECT * FROM ProfileCore WHERE user_db_id =:1 and user = :2 and " + qtype + "= :3 "
+          #if offset > 0:
+          #  sql = sql + " OFFSET=" + str(offset)
+          #sql = sql +  " LIMIT=10" # + str(lines)
+          wk = db.GqlQuery(sql,self.view.user_db_id,users.get_current_user(),query)
+          results=wk.fetch(lines,offset)
+
+          total = wk.count()
       else:
-        if sortname == "id" :
-          results = ProfileCore.all().fetch(offset=offset,limit=lines)
-        elif sortname == "-id":
-          results = ProfileCore.all().fetch(offset=offset,limit=lines)
-          results.reverse()
+        sql = "SELECT * FROM ProfileCore WHERE user_db_id =:1 and user = :2 "
+        is_id_sort = False
+        if sortname != 'id' and sortname != '-id' :
+          sql = sql + 'order by ' + sortname + ' ' + sortorder
         else:
-          results = ProfileCore.all().order(sortname).fetch(offset=offset,limit=lines)
+          is_id_sort = True
+
+        if offset > 0:
+          sql = sql + " OFFSET=" + str(offset)
+          sql = sal +  " limit = " + str(lines)
+
+        results = db.GqlQuery(sql,self.view.user_db_id,users.get_current_user())
+        total=results.count()
+        if is_id_sort and (sortorder != None and sortorder.upper() == 'DESC'):
+          results.reverse()
 
       rows = []
       for rec in results:
-        name = "%s %s" % (rec.last_name,rec.first_name)
-        link = '<a href="/profile/attribute/' + str(rec.key()) + '">詳細</a>'
-        wk = {'id':rec.key().id(),"cell":[rec.key().id(),rec.organization,rec.section,name,rec.title,rec.tel_no,rec.email,link]}
+        wk = {'id':rec.key().id(),"cell":[rec.key().id()]}
+        for col in self.config:
+          if col['checked'] == 'checked':
+            val = getattr(rec,col['name'])
+            if col['type'] == 'radio' or col['type'] == 'select':
+              udm = db.GqlQuery("SELECT  * FROM UserDbMaster WHERE name = :1",col['name']).get()
+              for item in yaml.load(udm.yaml_data):
+                if item['code'] == val:
+                  val = item['name']
+            wk['cell'].append(val)
+
         rows.append(wk)
 
       data = {'page':page, 'total': total, 'rows': rows }

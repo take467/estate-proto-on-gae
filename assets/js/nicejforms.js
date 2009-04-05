@@ -99,7 +99,7 @@ jQuery.NiceJForms = {
 					jQuery.NiceJForms.getElements(el);
 					jQuery.NiceJForms.replaceRadios();
 					jQuery.NiceJForms.replaceCheckboxes();
-					jQuery.NiceJForms.replaceSelects();
+					//jQuery.NiceJForms.replaceSelects();
 					
 					if (!$.browser.safari) {
 						jQuery.NiceJForms.replaceTexts();

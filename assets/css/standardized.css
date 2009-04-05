@@ -294,22 +294,23 @@ a:hover
 	line-height: 1.5em;
 }
 
+/*
 #content table
 {
-	margin-bottom: 1.5em;
+	//margin-bottom: 1.5em;
 }
 
 #content table th
 {
 	text-align: left;
 	font-weight: bold;
-	padding: 0.5em;
+	//padding: 0.5em;
 	color: #444;
 }
 
 #content table td
 {
-	padding: 0.5em;
+	//padding: 0.5em;
 }
 
 #content table tr.rowA
@@ -323,6 +324,7 @@ a:hover
 	background-color: #fafafa;
 	color: inherit;
 }
+*/
 
 /* Primary Content */
 
