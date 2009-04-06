@@ -141,37 +141,56 @@ class ProfileController(BaseController):
       page = int(self.params.get("page"))
       offset = (page - 1) * lines
 
+      # 絞り込み項目が選択されていれば追加
+      add_filters =[]
+      if self.view:
+        configs =  yaml.load(self.view.config)
+        for col in configs:
+          if col['checked'] == 'checked':
+            if col['type'] == 'radio' or col['type'] == 'select':
+              if isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
+                 val = self.params.get(col['name'])
+                 if val != None and val != '':
+                   add_filters.append({'name':col['name'],'val':val})
+
       results = []
       if (query != None and query != '' ) and ( qtype != None and qtype != ''):
         if qtype == 'id':
-          p  = ProfileCore.get_by_id(int(query))
+          p = None
+          try:
+            p  = ProfileCore.get_by_id(int(query))
+          except:
+            pass
           total = 0
           if p != None and (p.user == users.get_current_user()):
             total = 1
             results.append(p)
         else:
-          sql = "SELECT * FROM ProfileCore WHERE user_db_id =:1 and user = :2 and " + qtype + "= :3 "
-          #if offset > 0:
-          #  sql = sql + " OFFSET=" + str(offset)
-          #sql = sql +  " LIMIT=10" # + str(lines)
-          wk = db.GqlQuery(sql,self.view.user_db_id,users.get_current_user(),query)
-          results=wk.fetch(lines,offset)
+          p = ProfileCore.all()
+          p.filter(" user_db_id = ",self.view.user_db_id)
+          p.filter(" user = ",users.get_current_user())
+          p.filter(qtype + " = ",query)
+          for f in add_filters:
+            p.filter(f['name'] + " = ",f['val'])
 
-          total = wk.count()
+          results=p.fetch(lines,offset)
+          total = p.count()
       else:
-        sql = "SELECT * FROM ProfileCore WHERE user_db_id =:1 and user = :2 "
+        p = ProfileCore.all()
+        p.filter(" user_db_id = ",self.view.user_db_id)
+        p.filter(" user = ",users.get_current_user())
+        for f in add_filters:
+          p.filter(f['name'] + " = ",f['val'])
         is_id_sort = False
         if sortname != 'id' and sortname != '-id' :
-          sql = sql + 'order by ' + sortname + ' ' + sortorder
+          if sortorder.upper() == 'DESC':
+            sortname = '-' + sortname
+          p.order(sortname)
         else:
           is_id_sort = True
 
-        if offset > 0:
-          sql = sql + " OFFSET=" + str(offset)
-          sql = sal +  " limit = " + str(lines)
-
-        results = db.GqlQuery(sql,self.view.user_db_id,users.get_current_user())
-        total=results.count()
+        results = p.fetch(lines,offset)
+        total=p.count()
         if is_id_sort and (sortorder != None and sortorder.upper() == 'DESC'):
           results.reverse()
 

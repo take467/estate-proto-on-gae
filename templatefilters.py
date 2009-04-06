@@ -27,6 +27,10 @@ def pre2markup(value):
   description = re.sub("\s","&nbsp;",description)
   return description
 
+def join(value,d):
+  return d.join(value)
+
 register.filter(truncate)
 register.filter(timeJST)
 register.filter(pre2markup)
+register.filter(join)

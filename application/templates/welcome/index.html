@@ -30,6 +30,12 @@
 
 <script type="text/javascript"><!--
 $(document).ready(function(){
+	$('{% for f in fields %}#sr_{{f.name}},{% endfor %}').change(function(){
+		var _selectedObj = $(this).children("option[@selected]");
+		var dt=$('#search_refinement').serializeArray();
+		$('#flexigrid01').flexOptions({params:dt});
+		$("#flexigrid01").flexReload();
+	});
 	$("#treeview").load('/groups/treeview',function(){
 		$(this).treeview({});
 		$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
@@ -305,89 +311,32 @@ function initContextMenu(action,el,pos){
 {% block search_refinement %}
 {% if view %}
 <h3>{{view.user_db_id.name}} &gt; {{view.name}}</h3>
-<form>
-<div style="float:left;width:33%">
-	<label>項目１</label><br/>
-	<select style="width:100%">
-			<option>11111111111111</option>
-			<option>22222222222222</option>
-			<option>2222222222222</option>
-			<option>22222222222223</option>
-			<option>22222222222223</option>
-	</select>
-</div>
-<div style="float:left;width:33%">
-	<label>項目１</label><br/>
-	<select style="width:100%">
-			<option>11111111111111</option>
-			<option>22222222222222</option>
-			<option>2222222222222</option>
-			<option>22222222222223</option>
-			<option>22222222222223</option>
-	</select>
-</div>
-<div style="float:left;width:33%">
-	<label>項目１</label><br/>
-	<select style="width:100%">
-			<option>11111111111111</option>
-			<option>22222222222222</option>
-			<option>2222222222222</option>
-			<option>22222222222223</option>
-			<option>22222222222223</option>
-	</select>
-</div>
+<form id="search_refinement">
+{% for f in fields %}
+	{% ifequal f.type 'radio' %}
+	<div style="float:left;width:{{width}}%">
+		<!-- label>{{f.label}}</label><br/ -->
+		<select name="{{f.name}}" size="1" id="sr_{{f.name}}" name="{{f.name}}" style="width:100%">
+		<option value=''>全{{f.label}}</option>
+		{% for item in f.items %}
+			<option id="sr_{{f.name}}_{{item.code}}" value="{{item.code}}">{{item.name}}</option>
+		{% endfor %}
+		</select>
+	</div>
+	{% endifequal %}
+	{% ifequal f.type 'select' %}
+	<div style="float:left;width:{{width}}%">
+		<!-- label>{{f.label}}</label><br/ -->
+		<select name="{{f.name}}" size="1" id="sr_{{f.name}}" name="{{f.name}}" style="width:100%">
+		<option value=''>全{{f.label}}</option>
+		{% for item in f.items %}
+			<option id="sr_{{f.name}}_{{item.code}}" value="{{item.code}}">{{item.name}}</option>
+		{% endfor %}
+		</select>
+	</div>
+	{% endifequal %}
+{% endfor %}
 </form>
-<!--
-<div>
-<div style="margin:0;width:32%;height:150px;float:left;border:solid ;overflow:auto">
-			<a href="#">aaaaa</a><br/>
-			11111111111111<br/>
-			22222222222222<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-</div>
-<div style="margin:0;width:32%;height:150px;float:left;border:solid ;overflow:auto">
-			11111111111111<br/>
-			22222222222222<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-</div>
-<div style="margin:0;width:32%;height:150px;float:left;border:solid ;overflow:auto">
-			11111111111111<br/>
-			22222222222222<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-			22222222222223<br/>
-</div>
-</div>
--->
 <br clear="all">
 {% else %}
 	{% include "greeting.html"  %}

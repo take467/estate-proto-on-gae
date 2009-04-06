@@ -22,14 +22,29 @@ class WelcomeController(BaseController):
         self.colModels = []
         self.searchitems = []
         self.view = UserView.get_by_id(int(v_id))
+        self.fields = []
+
+        self.width = 33
+        i = 1
         if self.view: 
+          configs =  yaml.load(self.view.config)
           self.colModels.append({'name':'id','label':'ID','width':'20','align':'center'})
-          for col in yaml.load(self.view.config):
+          for col in configs:
             if col['checked'] == 'checked':
               self.colModels.append(col)
               if col['type'] != 'radio' and col['type'] != 'select':
-                if  isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
+                if isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
                   self.searchitems.append({'display':col['label'],'name':col['name']})
+              else:
+                result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
+                if result.count() > 0:
+                  rec = result.get()
+                  i = i+1
+                  col['items'] = yaml.load(rec.yaml_data)
+                  self.fields.append(col)
 
+        m = 100 / i
+        if m < self.width:
+          self.width = m
       else:
         pass
