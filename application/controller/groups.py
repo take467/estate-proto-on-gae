@@ -58,10 +58,15 @@ class GroupsController(BaseController):
       self.render(json=self.to_json(data))
 
     def create(self):
-      if self.request.method.upper() != "POST":
-        return 
-      category = UserDb(user=self.user)
-      category.put()
-
-      data = {'status':'success','id':category.key().id(),'name':category.name}
+      data = {'status':'error'}
+      try:
+        if self.request.method.upper() != "POST":
+          data = {'status':'error','msg':'forbidden method '}
+        else:
+          category = UserDb(user=self.user)
+          category.put()
+          data = {'status':'success','id':category.key().id(),'name':category.name}
+      except ex:
+        data = {'status':'error','msg':ex}
+        
       self.render(json=self.to_json(data))

@@ -11,35 +11,341 @@
 <link href="/css/standardized.css" rel="stylesheet" type="text/css" />
 <link href="/css/dropdowns.css" rel="stylesheet" type="text/css" />
 <link type="text/css"  href="/css/smoothness/jquery-ui-1.7.1.custom.css" rel="stylesheet" />
-{% block stylesheets %}
-{% endblock %}
-<script src="/js/jquery-1.2.6.pack.js" type="text/javascript"></script>
-{% block js %}
-{% endblock %}
-<script type="text/javascript" language="javascript" src="js/jquery.dropdownPlain.js"></script>
-<script src="/js/jquery.blockUI.js" type="text/javascript"></script>
+<link rel="stylesheet" href="/css/flexigrid/flexigrid.css" type="text/css" media="all">
+<link type="text/css"  href="/css/jquery.treeview.css" rel="stylesheet" />
+<link type="text/css"  href="/css/jquery.contextMenu.css" rel="stylesheet" />
+<link type="text/css"  href="/css/niceforms/niceforms-default.css" rel="stylesheet" media="screen"/>
+<style>
+        .flexigrid div.fbutton .add
+            {
+                background: url(/img/table_add.png) no-repeat center left;
+            }	
+    
+        .flexigrid div.fbutton .delete
+            {
+                background: url(/img/table_delete.png) no-repeat center left;
+            }	
+        .flexigrid div.fbutton .edit
+            {
+                background: url(/img/table_edit.png) no-repeat center left;
+            }	
+</style>
+<script src="/js/jquery-1.2.6.pack.js"   	type="text/javascript"></script>
+<script src="/js/jquery.dropdownPlain.js" 	type="text/javascript"></script>
+<script src="/js/jquery.blockUI.js" 		type="text/javascript"></script>
+<script src="/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/js/ui.datepicker-ja.js" 		type="text/javascript"></script>
+<script src="/js/jquery.form.js" 		type="text/javascript"></script>
+<script src="/js/flexigrid.pack.js" 		type="text/javascript"></script>
+<script src="/js/jquery.treeview.js" 		type="text/javascript"></script>
+<script src="/js/jquery.treeview.async.js" 	type="text/javascript"></script>
+<script src="/js/jquery.contextMenu.js" 	type="text/javascript"></script>
+<script src="/js/nicejforms.js"></script>
 <script type="text/javascript" language="javascript">
-$(document).ready(function() {
-	$(".close_form").click(function(){
-                $.unblockUI();
-        });
-	$("#new_category_anchor").click(function() {
-                $.blockUI({ message: "<b>少々お待ちください...</b>" });
-                $.ajax({
-                   type: "POST",
-                   dataType: "json",
-                   url: '/groups/create',
-                   success: function(data){
-                        $.unblockUI();
-			location.reload()
-                   },
-                   error: function(){
-                        alert('システムエラー');
-                  }
-                 });
-         });
+$(document).ready(function(){
+        {% if fields %}
+	$('{% for f in fields %}#sr_{{f.name}},{% endfor %}').change(function(){
+		var _selectedObj = $(this).children("option[@selected]");
+		var dt=$('#search_refinement').serializeArray();
+		$('#flexigrid01').flexOptions({params:dt});
+		$("#flexigrid01").flexReload();
+	});
+	{% endif %}
+	$("#treeview").load('/groups/treeview',function(){
+		$(this).treeview({});
+		$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+		$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+	});
+	{% if view %}
+	$("#flexigrid01").flexigrid({
+			url: '/profile/json/' + {{ view.key.id}},
+			dataType: 'json',
+			procmsg: '読み込んでいます。しばらくお待ちください..',
+			pagestat: '全 {total} 件のうち、{from} - {to} 件目を表示中',
+			colModel : [
+			{% for col in colModels %}
+				{display: '{{col.label}}', name : '{{col.name}}', width : {{col.width}}, sortable : true, align: '{{col.align}}'},
+			{% endfor %}
+				],
+			buttons : [
+				{name: '追加', bclass: 'add', onpress : newData},
+				{name: '編集', bclass: 'edit', onpress : editData},
+				{separator: true},
+				{name: '削除', bclass: 'delete', onpress : deleteData}
+				],
+			searchitems : [
+				{display: 'ID', name : 'id',is_default: true}{% for item in searchitems %}
+					,{display:'{{item.display}}' , name:'{{item.name}}'}{% endfor %}
+				],
+			sortname: "id",
+			sortorder: "asc",
+			usepager: true,
+			useRp: true,
+			rp: 15,
+			showTableToggleBtn: true,
+			width: 'auto',
+			height:'auto' 
+	});
+	{% endif %}
 });
+function createDatabase(){
+	$.blockUI({ message: "<b>少々お待ちください...</b>" });
+	$.ajax({
+	   type: "POST",
+	   dataType: "json",
+	   data: 'data=dummy',
+	   url: '/groups/create',
+	   success: function(data){
+	     if( data.status == 'success' ){
+		$.unblockUI();
+		$("#treeview").load('/groups/treeview?createDatabase',function(){
+			$(this).treeview({});
+			$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+			$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+		});
+	     }else{
+		alert('エラー:',data.msg);
+	     }
+	   },
+	   error: function(msg){
+		alert('システムエラー',msg);
+	  }
+	 });
+}
+function newData() {
+	$('#blockui_area').html('');
+        {% if view %}
+          var url = '/profile/new/' + {{view.key.id}};
+	{% else %}
+          var url = '/profile/new/';
+	{% endif %}
+        $('#blockui_area').load(url ,function(text,status){
+		$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
+		$(".close_form").click(function(){ $.unblockUI(); });
+		$('#birthday').datepicker({
+			yearRange:'-50:0',
+			changeMonth: true,
+			changeYear: true
+		});
+                $('#ui-datepicker-div').css('z-index','2000')
+        	$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
+	});
+}
+function deleteData(com,grid){if($('.trSelected',grid).length>0){
+        var items = $('.trSelected',grid);
+        var itemlist = [];
+        for(i=0 ; i< items.length ; i++) {
+                itemlist.push(items[i].id.substr(3));
+        }
+	itemlist_s = itemlist.join(',')
+	if(confirm('本当に削除しますか？')){
+		$.ajax({
+		   type: "POST",
+		   dataType: "json",
+		   url: '/profile/delete/',
+		   data: "items="+itemlist_s,
+		   success: function(data){
+			if( data.status == 'success' ){
+				items.fadeOut('slow')
+				$("#flexgrid01").flexReload();
+			}else{
+				alert('削除に失敗しました:' + data.msg);
+			}
+		   },
+		   error: function(){
+			alert('システムエラー');
+		   }
+		 });
+
+	}else{
+		alert('削除する項目を選択してください(複数選択可)');
+	}
+}
+}
+function editData(com,grid) {
+	$('#blockui_area').html('');
+        var items = $('.trSelected',grid);
+        if(items.length != 1){ 
+                alert('一つだけ選択してください')
+                return false;
+        }
+        var id = items[0].id.substr(3);
+        var url = '/profile/edit/' + id + '?v={{view.key.id}}';
+	$('#blockui_area').load(url,function(text,status){
+		$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
+		$(".close_form").click(function(){ $.unblockUI(); });
+		$('#birthday').datepicker({
+			yearRange:'-50:0',
+			changeMonth: true,
+			changeYear: true
+		});
+                $('#ui-datepicker-div').css('z-index','2000')
+	});
+	$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
+}
+function initFileContextMenu(action,el,pos){
+	var id = $(el).attr('id').slice(2)
+	if( action=="delete" ) {
+		var url = '/view/delete'
+		if( confirm($(el).text() +'を本当に削除しますか？') != true ){
+			return;
+		}else{  
+			$.blockUI({ message: "<b>少々お待ちください...</b>" });
+			$.ajax({
+			   type: "POST",
+			   dataType: "json",
+			   url: url,
+			   data: 'id=' + id,
+			   success: function(data){
+                        	$.unblockUI();
+				$("#treeview").load('/groups/treeview',function(){
+					$(this).treeview({});
+					$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+					$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+				});
+			   },
+			   error: function(){
+				alert('delete システムエラー');
+			   }
+			 });
+		}
+	}else if( action =="edit"){
+   		url = '/view/edit?id=' + id
+		$('#blockui_area').html('');
+		$('#blockui_area').load(url,function(text,status){
+			$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
+			$(".close_form").click(function(){ $.unblockUI(); });
+			$('#birthday').datepicker();
+			$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
+		});
+	}
+}
+function init_treeview(){
+	$("#treeview").load('/groups/treeview',function(){
+		$(this).treeview({});
+		$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+		$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+	});
+}
+function submitData(){
+	$.blockUI({ message: "<b>少々お待ちください...</b>"});
+	$.ajax({
+	   type: "POST",
+	   dataType: "json",
+	   url: $('#action_url').val(),
+	   data: $('#blockui_form').serialize(),
+	   success: function(data){
+		$.unblockUI();
+		$("#flexigrid01").flexReload();
+	   },
+	   error: function(){
+		$.unblockUI();
+		alert('システムエラー');
+	   }
+	 });
+}
+function update_view(){
+	$.blockUI({ message: "<b>少々お待ちください...</b>" });
+	$.ajax({
+	   async:false,
+	   type: "POST",
+	   url: '/view/update',
+	   data: $('#blockui_form').serialize(),
+	   success: function(data){
+		$('#blockui_area').html('');
+		$('#blockui_area').html(data)
+		$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
+		$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
+		$(".close_form").click(function(){ location.reload();$.unblockUI();});
+		//init_treeview()
+	   },
+	   error: function(){
+		alert('update システムエラー');
+	   }
+	});
+}
+function update_user_db(){
+	$.blockUI({ message: "<b>少々お待ちください...</b>" });
+	$.ajax({
+	   type: "POST",
+	   dataType: "json",
+	   url: '/groups/update',
+	   data: 'id='+$('#edit_category_id').val() +  '&name=' + $('#edit_category_name').val(),
+	   success: function(data){
+		$.unblockUI();
+		init_treeview()
+	   },
+	   error: function(){
+		alert('update システムエラー');
+	   }
+	});
+}
+function initContextMenu(action,el,pos){
+                var id = $(el).attr('id').slice(2)
+                if( action == 'addview' ){
+			$.blockUI({ message: "<b>少々お待ちください...</b>" });
+			$.ajax({
+			   type: "POST",
+			   dataType: "json",
+			   url: '/view/create',
+			   data: 'db_id='+ id,
+			   success: function(data){
+				if( data.status == 'error' ){
+					alert(data.msg);
+				}
+				$.unblockUI();
+				if( data.status == 'success' ){
+					init_treeview();
+				}
+			   },
+			   error: function(data){
+				alert('system error');
+				$.unblockUI();
+			  }
+			 });
+                }else if( action == 'edit' ){
+                        var url = '/groups/edit?id='+id
+			$('#blockui_area').load(url,function(text,status){
+				$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
+				$(".close_form").click(function(){ $.unblockUI(); });
+			});
+			$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
+                }else if( action=="delete" ) {
+                        var url = '/groups/delete'
+                        if( confirm($(el).text() +'(ID:' + $(el).attr('id')+ ')を本当に削除しますか？') != true ){
+                                return;
+                        }else{  
+				$.blockUI({ message: "<b>少々お待ちください...</b>" });
+                                $.ajax({
+                                   type: "POST",
+                                   dataType: "json",
+                                   url: url,
+                                   data: 'id=' + id,
+                                   success: function(data){
+					$.unblockUI();
+					$("#treeview").load('/groups/treeview',function(){
+						$(this).treeview({});
+						$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+						$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+					});
+                                   },
+                                   error: function(){
+                                        alert('delete システムエラー');
+                                   }
+                                 });
+                        }
+                }else{  
+                        alert(  
+                                'Action: ' + action + '\n\n' +
+                                'Element ID: ' + $(el).attr('id') + '\n\n' +
+                                'X: ' + pos.x + '  Y: ' + pos.y + ' (relative to element)\n\n' +
+                                'X: ' + pos.docX + '  Y: ' + pos.docY+ ' (relative to document)'
+                        );
+                }
+        
+}
 </script>
+
 </head>
 <body>
 <div id="outer">
@@ -52,20 +358,17 @@ $(document).ready(function() {
 -->
 		<div id="menu">
 		<ul class="dropdown jd_menu ">
-			<li><a href="#">Estate</a>
-				<ul>
-				<li><a id="estate_config" href="javascript:void(0);" >初期設定</a>
-				</ul>
-				
 			<li><a href="#" title="ファイル">ファイル</a>
 				<ul>
-				<li><a id="new_category_anchor" href="javascript:void(0);">新規データベース</a>
+				<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase()">新規データベース</a>
 				</ul>
 			</li>
+<!--
 			<li><a href="#" accesskey="2" title="">About Us</a></li>
 			<li><a href="#" accesskey="3" title="">Products</a></li>
 			<li><a href="#" accesskey="4" title="">日本語</a></li>
-			<li><a href="#" accesskey="5" title="">Contact Us</a></li>
+-->
+			<li style="float:right"><a href="{{logout_url}}">ログアウト</a></li>
 		</ul>
 		</div>
 	</div>
@@ -74,6 +377,38 @@ $(document).ready(function() {
 			<div id="primaryContent">
 				<div class="box">
 					{% block search_refinement %}
+					{% if view %}
+					<h3>{{view.user_db_id.name}} &gt; {{view.name}}</h3>
+					<form id="search_refinement">
+					{% for f in fields %}
+						{% ifequal f.type 'radio' %}
+						<div style="float:left;width:{{width}}%">
+							<!-- label>{{f.label}}</label><br/ -->
+							<select name="{{f.name}}" size="1" id="sr_{{f.name}}" name="{{f.name}}" style="width:100%">
+							<option value=''>全{{f.label}}</option>
+							{% for item in f.items %}
+								<option id="sr_{{f.name}}_{{item.code}}" value="{{item.code}}">{{item.name}}</option>
+							{% endfor %}
+							</select>
+						</div>
+						{% endifequal %}
+						{% ifequal f.type 'select' %}
+						<div style="float:left;width:{{width}}%">
+							<!-- label>{{f.label}}</label><br/ -->
+							<select name="{{f.name}}" size="1" id="sr_{{f.name}}" name="{{f.name}}" style="width:100%">
+							<option value=''>全{{f.label}}</option>
+							{% for item in f.items %}
+								<option id="sr_{{f.name}}_{{item.code}}" value="{{item.code}}">{{item.name}}</option>
+							{% endfor %}
+							</select>
+						</div>
+						{% endifequal %}
+					{% endfor %}
+					</form>
+					<br clear="all">
+					{% else %}
+						{% include "greeting.html"  %}
+					{% endif %}
 					{% endblock %}
 				</div>
 				<div class="box" style="margin:0">
@@ -85,8 +420,17 @@ $(document).ready(function() {
 			<div class="box">
 				<h3>データベース一覧</h3>
 				<div class="boxContent" id="sheet_list">
- 				{% block treeview %}
- 				{% endblock %}
+					<ul id="myFileMenu" class="contextMenu">
+						<li class="edit separator"><a href="#edit">編集</a></li>
+						<li class="delete"><a href="#delete">削除</a></li>
+					</ul>
+					<ul id="myMenu" class="contextMenu">
+						<li class="add"><a href="#addview">ビューの追加</a></li>
+						<li class="edit separator"><a href="#edit">編集</a></li>
+						<li class="delete"><a href="#delete">削除</a></li>
+					</ul>
+					<ul id="treeview" class="filetree treeview"></ul>
+					<div id="blockui_area" style="margin:1em;display:none; cursor: default"></div>
 				</div>
 			</div>
 		</div>

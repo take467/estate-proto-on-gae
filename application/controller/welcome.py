@@ -10,15 +10,16 @@ import yaml
 
 class WelcomeController(BaseController):
 
-    #def before_action(self):
-    #  user = users.get_current_user()
+    def before_action(self):
+      self.user = users.get_current_user()
+      self.logout_url =  users.create_logout_url('/')
     #  self.user_dbs = []
     #  for u in db.GqlQuery("SELECT * FROM UserDb WHERE user = :1",user):
     #    list = db.GqlQuery("SELECT * FROM UserView WHERE user_db_id = :1",u)
     #    self.user_dbs.append({'db':u,'views':list})
     def index(self):
       v_id = self.params.get('v')
-      if v_id:
+      if v_id and v_id != '':
         self.colModels = []
         self.searchitems = []
         self.view = UserView.get_by_id(int(v_id))
@@ -26,7 +27,8 @@ class WelcomeController(BaseController):
 
         self.width = 33
         i = 1
-        if self.view: 
+        if self.view and self.view.user_db_id.user == self.user: 
+
           configs =  yaml.load(self.view.config)
           self.colModels.append({'name':'id','label':'ID','width':'20','align':'center'})
           for col in configs:
@@ -42,9 +44,9 @@ class WelcomeController(BaseController):
                   i = i+1
                   col['items'] = yaml.load(rec.yaml_data)
                   self.fields.append(col)
-
-        m = 100 / i
-        if m < self.width:
-          self.width = m
-      else:
-        pass
+          m = 100 / i
+          if m < self.width:
+            self.width = m
+      
+        else:
+          self.view = None
