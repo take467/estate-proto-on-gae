@@ -13,12 +13,27 @@ from getimageinfo import getImageInfo
 import yaml
 from google.appengine.api import users
 from types import *
+import datetime
 
 # /product/show/:id 
 class ProfileController(BaseController):
 
     def before_action(self):
       self.user = user=users.get_current_user()
+      if 'cv_id' in self.cookies:
+        self.v_id = self.cookies['cv_id']
+
+    def reset_post_at(self):
+      for p in ProfileCore.all():
+        if p.post_at == None:
+          p.post_at = datetime.datetime.now()
+          p.put()
+        else:
+          if isinstance(p.post_at,db.DateTimeProperty) != True:
+            p.post_at = datetime.datetime.now()
+            p.put()
+
+      self.render(text="done")
 
     def delete(self):
       user = user=users.get_current_user()
@@ -83,21 +98,28 @@ class ProfileController(BaseController):
 
     def new(self):
       self.action_url = "/profile/create"
-      id = self.params.get('id')
+      #id = self.params.get('id')
+      id = self.v_id
       self.fields = []
       if id:
         self.view = UserView.get_by_id(int(id))
         self.config = yaml.load(self.view.config)
+        data = ProfileCore(user_db_id=self.view.user_db_id,user=self.user,status="active",sex="0")
         for col in self.config:
           if col['checked'] == 'checked':
+            col['val'] = getattr(data,col['name'])
             if col['type'] == 'radio' or col['type'] == 'select':
                result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
                if result.count() > 0: 
                  rec = result.get()
+                 items = yaml.load(rec.yaml_data)
+                 for item in items:
+                   if col['type'] == 'radio' and item['code'] == col['val']:
+                     item['checked'] = 'checked'
+
                  col['items'] = yaml.load(rec.yaml_data)
-                 #col['items'] = str(result.count())
             self.fields.append(col)
-        #self.dump = yaml.dump(self.fields)
+        self.dump = yaml.dump(self.fields)
 
     def create(self):
       view_id = self.params.get('user_view_id')
@@ -115,8 +137,44 @@ class ProfileController(BaseController):
       data = {'status':'success'}
       self.render(json=self.to_json(data))
 
+    def search_refinement(self):
+        
+        self.view = None
+        if self.v_id:
+          self.view = UserView.get_by_id(int(self.v_id))
+
+        self.fields = []
+        self.width = 33
+
+        i = 1 
+        if self.view and self.view.user_db_id.user == self.user:
+
+          configs =  yaml.load(self.view.config)
+          for col in configs:
+            if col['checked'] == 'checked':
+              if 'hidden' not in col:
+                col['hidden'] = 'false'
+              elif col['hidden'] == '':
+                col['hidden'] = 'false'
+
+              if col['type'] == 'radio' or col['type'] == 'select':
+                result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
+                if result.count() > 0:
+                  rec = result.get()
+                  i = i+1
+                  col['items'] = yaml.load(rec.yaml_data)
+                  self.fields.append(col)
+          m = 100 / i
+          if m < self.width:
+            self.width = m
+        else:
+          self.view = None
+
     def json(self):
-      id = self.params.get('id')
+      #id = self.params.get('id')
+      #retrive from cookie
+      id = self.cookies['cv_id']
+
       if id == None:
         self.render(json=self.to_json([]))
         return
@@ -205,9 +263,17 @@ class ProfileController(BaseController):
               for item in yaml.load(udm.yaml_data):
                 if item['code'] == val:
                   val = item['name']
+            if isinstance(getattr(ProfileCore,col['name']),db.DateTimeProperty):
+              wk2 = val + datetime.timedelta(hours=9)
+              if 'format' in col:
+                val = wk2.strftime(col['format'])
+              else:
+                val = wk2.strftime('%Y/%m/%d %H:%M:%S')
+                 
             wk['cell'].append(val)
 
         rows.append(wk)
 
       data = {'page':page, 'total': total, 'rows': rows }
       self.render(json=self.to_json(data))
+

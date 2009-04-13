@@ -4,6 +4,10 @@ import yaml
 
 w = UserDbMaster.all()
 if w.count() == 0:
+ status = [
+	{'code':'active','name':u'有効'},
+	{'code':'expired','name':u'無効'}
+ ]
  sex = [
 	{'code':'male','name':u'男性'},
 	{'code':'female','name':u'女性'}
@@ -61,3 +65,4 @@ if w.count() == 0:
 
  UserDbMaster(name='sex',yaml_data=yaml.dump(sex)).put()
  UserDbMaster(name='prefecture',yaml_data=yaml.dump(prefecture)).put()
+ UserDbMaster(name='status',yaml_data=yaml.dump(status)).put()

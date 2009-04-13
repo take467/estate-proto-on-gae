@@ -79,9 +79,271 @@ indexes:
 # Unused in query history -- copied from input.
 - kind: ProfileCore
   properties:
+  - name: prefecture
+  - name: sex
+  - name: user
+  - name: user_db_id
+  - name: post_at
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: prefecture
+  - name: user
+  - name: user_db_id
+  - name: post_at
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: sex
+  - name: user
+  - name: user_db_id
+  - name: post_at
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: address
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: address
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: birthday
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: birthday
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: cellphone_no
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: cellphone_no
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: city
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: city
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: email
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: email
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: fax_no
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: fax_no
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: mobile_email
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: mobile_email
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: name
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: name
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: name_yomi
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: organization
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: organization
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: post_at
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: prefecture
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: prefecture
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: section
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: section
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
   - name: user
   - name: user_db_id
   - name: sex
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: sex
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: tel_no
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: tel_no
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: title
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: title
+    direction: desc
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: zipcode
+
+# Unused in query history -- copied from input.
+- kind: ProfileCore
+  properties:
+  - name: user
+  - name: user_db_id
+  - name: zipcode
+    direction: desc
 
 # Unused in query history -- copied from input.
 - kind: UsedNonce

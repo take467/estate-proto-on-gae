@@ -5,11 +5,16 @@ from gaeo.controller import BaseController
 from model.site import Site
 from model.user_db import UserDb
 from model.view import UserView
+from model.profile import ProfileCore
 from google.appengine.api import users
+import yaml
+import copy
 
 class GroupsController(BaseController):
     def before_action(self):
       self.user = users.get_current_user()
+      if 'cv_id' in self.cookies:
+        self.v_id = self.cookies['cv_id']
       pass
 
     def treeview(self):
@@ -51,22 +56,49 @@ class GroupsController(BaseController):
 
       id = self.params.get('id')
       g = UserDb.get_by_id(int(id))
-      if g:
-        g.delete()
+
+      if g.user != self.user:
+        data = {'status':'error','msg':'権限がありません'}
+        self.render(json=self.to_json(data))
+        return
 
       data = {'status':'success'}
+      if g:
+        # 紐づくProfileデータは、リンク関係を切るー＞ゴミ箱をつくってそこに入れる
+        q = ProfileCore.all()
+        q.filter("user_db_id = ",g)
+        for p in q:
+          p.user_db_id = None
+          p.put()
+
+        # 紐づくViewを全て削除
+        q = UserView.all()
+        q.filter("user_db_id = ",g)
+        for p in q:
+          p.delete()
+
+        g.delete()
+        data = {'status':'success'}
+
+        if id == self.v_id:
+  	  self.response.headers.add_header('Set-Cookie','cv_id=-1 ;expires=Fri, 5-Oct-1979 08:10:00 GMT')
+
       self.render(json=self.to_json(data))
 
     def create(self):
-      data = {'status':'error'}
-      try:
+        data = {'status':'error'}
+      #try:
         if self.request.method.upper() != "POST":
           data = {'status':'error','msg':'forbidden method '}
         else:
           category = UserDb(user=self.user)
           category.put()
+          # ついでにビューもつくってしまう
+          cols = copy.deepcopy(ProfileCore.disp_columns)
+          v = UserView(user_db_id = category,config=yaml.dump(cols))
+          v.put()
           data = {'status':'success','id':category.key().id(),'name':category.name}
-      except ex:
-        data = {'status':'error','msg':ex}
+      #except Exception,ex:
+      #   data = {'status':'error','msg':ex}
         
-      self.render(json=self.to_json(data))
+        self.render(json=self.to_json(data))

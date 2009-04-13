@@ -1,5 +1,6 @@
 #!-*- coding:utf-8 -*-
 from google.appengine.ext import db
+from google.appengine.api import users
 
 from gaeo.controller import BaseController
 from model.user_db import UserDb
@@ -10,10 +11,43 @@ import yaml
 import copy
 
 class ViewController(BaseController):
+    def before_action(self):
+      self.user = users.get_current_user()
+      self.v_id = None
+      if 'cv_id' in self.cookies:
+        self.v_id = self.cookies['cv_id']
+      pass
+
+#    def cols(self):
+#      colModels=[]
+#      if self.v_id:
+#        view = UserView.get_by_id(int(self.v_id))
+#        configs =  yaml.load(view.config)
+#        colModels.append({'name':'id','label':'ID','width':'20','align':'center','hidden':'false'})
+#        for col in configs:
+#          if col['checked'] == 'checked':
+#            if 'hidden' not in col:
+#              col['hidden'] = 'false'
+##            elif col['hidden'] == '':
+#              col['hidden'] = 'false'
+#
+#            colModels.append(col)
+#      self.render(json=self.to_json(colModels))
+
+
+    def share(self):
+      id = self.params.get('id')
+      if id == None:
+        self.render(text='不正なリクエスト')
+        return
+
+      self.view = UserView.get_by_id(int(id))
+ 
     def edit(self):
       self.view = UserView.get_by_id(int(self.params.get('id')))
       self.config = yaml.load(self.view.config)
       pass
+
 
     def update(self):
       id = self.params.get('edit_view_id')
@@ -23,6 +57,8 @@ class ViewController(BaseController):
       self.view = UserView.get_by_id(int(self.params.get('edit_view_id')))
       config = yaml.load(self.view.config)
       for col in config:
+        if col['type'] == 'hidden':
+          continue
         key = "disp_%s" % col['name']
         val = self.params.get(key)
         if val == 'yes':
@@ -37,6 +73,14 @@ class ViewController(BaseController):
           
 
       pass
+
+    #def reset(self):
+    #  cols = copy.deepcopy(ProfileCore.disp_columns)
+    #  config = yaml.dump(cols)
+    #  v = UserView.get_by_id(id)
+    #  if v.user_db_id.user == self.user:
+    #     v.config = config
+    #     v.put()
 
     def create(self):
        res= {"status":"success"}
@@ -61,41 +105,3 @@ class ViewController(BaseController):
       v.delete()
       self.render(json=self.to_json(res))
 
-
-'''
-    def show(self):
-      self.site = Site.all().get()
-      self.category = db.GqlQuery("SELECT * FROM Category WHERE category_id = :1",self.params.get('id')).get()
-
-    def update(self):
-      self.rec = Category.get(self.params.get('key'))
-      self.rec.content = self.params.get('content')
-      self.rec.put()
-      
-      self.redirect('/category/edit/' + self.params.get('key'))
-      pass
-
-
-      key = self.params.get("key");
-
-      # カテゴリに属するドキュメントがあったら削除できない
-      res= {"status":"success","msg":"削除しました"}
-      query = db.GqlQuery("SELECT * FROM Document WHERE category = :1",db.Key(key))
-      if query.count() > 0:
-        res= {"status":"error","msg":"カテゴリに属するドキュメントがあるため削除できません。"}
-      else:
-        category = Category.get(db.Key(key));
-        if category:
-          category.delete()
-          # リナンバー
-          query = Category.all();
-          num = 1;
-          for c in query:
-            c.order = num
-            c.put()
-            num = num +1
-        else:
-          res= {"status":"error","msg":"削除に失敗しました"}
-
-      self.render(json=self.to_json(res))
-'''

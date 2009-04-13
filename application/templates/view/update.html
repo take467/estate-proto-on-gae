@@ -8,7 +8,7 @@
 	<tr>
 		<td valign="top" align="left"><label for="text">項目</label></td>
 		<td align="left">
-		{% for col in config %}
+		{% for col in config %}{% ifnotequal col.type 'hidden' %}
 			<div style="margin-top:0.2em;margin-left:1em">
 			{% ifequal col.checked 'checked' %}
 				<img src="/img/check_icon.jpg" style="margin-right:0.2em">{{col.label}}
@@ -16,7 +16,7 @@
 				<img src="/img/cross_icon.jpg" style="margin-right:0.2em">{{col.label}}
 			{% endifequal %}
 			</div>
-		{% endfor %}
+		{% endifnotequal %}{% endfor %}
 		</td>
 	</tr>
 </table>

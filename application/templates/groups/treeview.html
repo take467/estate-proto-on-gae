@@ -3,7 +3,7 @@
                 {% if udb.views %}
                         <ul>
                         {% for v in udb.views %}
-                                <li id="v_{{v.key.id}}"><span id="f_{{v.key.id}}" class="file"><a href="/?v={{v.key.id}}">{{v.name}}</a></span></li>
+                                <li id="v_{{v.key.id}}"><span id="f_{{v.key.id}}" class="file"><a href="javascript:void(0)" onclick="changeView('{{v.key.id}}')">{{v.name}}</a></span></li>
                         {% endfor %}
                         </ul>
                 {% endif %}

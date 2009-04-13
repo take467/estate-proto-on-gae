@@ -62,7 +62,8 @@
 
 
 .filetree li { padding: 3px 0 2px 16px; }
-.filetree span.folder, .filetree span.file {line-height:1.0em; padding: 1px 0 1px 16px; display: block; }
+.filetree span.folder, .filetree span.file,.filetree span.trash_empty,.filetree span.trash_full {line-height:1.0em; padding: 1px 0 1px 16px; display: block; }
 .filetree span.folder { background: url(/img/treeview/folder.gif) 0 0 no-repeat; }
 .filetree li.expandable span.folder { background: url(/img/treeview/folder-closed.gif) 0 0 no-repeat; }
 .filetree span.file { line-height:1.0em;background: url(/img/treeview/file.gif) 0 0 no-repeat; }
+.filetree span.trash_empty { line-height:1.0em;background: url(/img/trash_empty.png) 0 0 no-repeat; }

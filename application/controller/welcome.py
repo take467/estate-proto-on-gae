@@ -17,12 +17,22 @@ class WelcomeController(BaseController):
     #  for u in db.GqlQuery("SELECT * FROM UserDb WHERE user = :1",user):
     #    list = db.GqlQuery("SELECT * FROM UserView WHERE user_db_id = :1",u)
     #    self.user_dbs.append({'db':u,'views':list})
+    def greeting(self):
+      pass
+    
     def index(self):
-      v_id = self.params.get('v')
-      if v_id and v_id != '':
+      #v_id = self.params.get('v')
+      v_id = None
+      if 'cv_id' in self.cookies:
+        v_id = self.cookies['cv_id'] 
+
+      if v_id:
         self.colModels = []
         self.searchitems = []
         self.view = UserView.get_by_id(int(v_id))
+        if self.view == None:
+          self.response.headers.add_header('Set-Cookie','cv_id=-1 ;expires=Fri, 5-Oct-1979 08:10:00 GMT')
+
         self.fields = []
 
         self.width = 33
@@ -30,9 +40,14 @@ class WelcomeController(BaseController):
         if self.view and self.view.user_db_id.user == self.user: 
 
           configs =  yaml.load(self.view.config)
-          self.colModels.append({'name':'id','label':'ID','width':'20','align':'center'})
+          self.colModels.append({'name':'id','label':'ID','width':'20','align':'center','hidden':'false'})
           for col in configs:
             if col['checked'] == 'checked':
+              if 'hidden' not in col:
+                col['hidden'] = 'false'
+              elif col['hidden'] == '':
+                col['hidden'] = 'false'
+
               self.colModels.append(col)
               if col['type'] != 'radio' and col['type'] != 'select':
                 if isinstance(getattr(ProfileCore,col['name']),db.StringProperty):

@@ -9,11 +9,12 @@
 	<tr>
 		<td valign="top" align="left"><label for="text">項目</label></td>
 		<td align="left"><font size="-3">使用する項目にチェックを付けてください</font><br/>
-		{% for col in config %}
+		{% for col in config %}{% ifnotequal col.type 'hidden' %}
+
 			<div style="margin-top:0.2em">
 			<input type="checkbox" name="disp_{{col.name}}" id="check_{{col.name}}" value="yes" {{col.checked}}><label for="check_{{col.name}}">{{col.label}}</label>
 			</div>
-		{% endfor %}
+		{% endifnotequal %}{% endfor %}
 		</td>
 	</tr>
 	</table>
