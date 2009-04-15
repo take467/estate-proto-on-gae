@@ -60,6 +60,10 @@ $(document).ready(function(){
 	$("#shared_treeview").load('/groups/shared_treeview',function(){
 		$(this).treeview({});
 	});
+	$("#shared_member_list").load('/groups/shared_member_list',function(){
+		$(this).treeview({});
+		$(".file").contextMenu({ menu: 'sharedViewMenu' }, function(action,el,pos){initSharedViewContextMenu(action, el, pos)});
+	});
 	{% if view %}
                 $('#search_refinement_area').load('/profile/search_refinement',function(){initSearchRefinment();$.unblockUI();});
 		initFlexigrid()
@@ -228,6 +232,38 @@ function editData(com,grid) {
                 $('#ui-datepicker-div').css('z-index','2000')
 	});
 	$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
+}
+function initSharedViewContextMenu(action,el,pos){
+	var id = $(el).attr('id').slice(2)
+	if( action=="delete" ) {
+		var url = '/share_user/delete'
+		if( confirm($(el).text() +'の共有を解除しますか？') != true ){
+			return;
+		}else{  
+			$.blockUI({ message: "<b>少々お待ちください...</b>" });
+			$.ajax({
+			   type: "POST",
+			   dataType: "json",
+			   url: url,
+			   data: 'id=' + id,
+			   success: function(data){
+				if( data.status == 'success' ){
+					$("#shared_member_list").load('/groups/shared_member_list',function(){
+						$(this).treeview({});
+						$(".file").contextMenu({ menu: 'sharedViewMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+					});
+					$.unblockUI();
+				}else{
+					alert(data.msg);
+					$.unblockUI();
+				}
+			   },
+			   error: function(){
+				alert('delete システムエラー');
+			   }
+			 });
+		}
+	}
 }
 function initFileContextMenu(action,el,pos){
 	var id = $(el).attr('id').slice(2)
@@ -455,12 +491,11 @@ function initContextMenu(action,el,pos){
 					<ul id="shared_treeview" class="filetree treeview"></ul>
 				</div>
 				<h3>共有　メンバー一覧</h3>
-				<div class="boxContent" id="member_list">
-					<ul id="myMemberMenu" class="contextMenu">
-						<li class="edit separator"><a href="#edit">編集</a></li>
+				<div class="boxContent" id="shared_member">
+					<ul id="sharedViewMenu" class="contextMenu">
 						<li class="delete"><a href="#delete">削除</a></li>
 					</ul>
-					<ul id="members" class=""></ul>
+					<ul id="shared_member_list" class="filetree treeview"></ul>
 				</div>
 	
 			</div>

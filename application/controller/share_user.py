@@ -10,6 +10,18 @@ import yaml
 
 class Share_userController(BaseController):
 
+  def delete(self):
+    id = self.params.get('id')
+
+    res = {'status':'success'}
+    su=ShareUser.get_by_id(int(id))
+    if su:
+      su.delete()
+    else:
+      res={'status':'error','msg':u"対象のビューが見つかりません(ID:%s)" % id}
+
+    self.render(json=self.to_json(res))
+
   def create(self):
 
     id = self.params.get('shared_view_id')

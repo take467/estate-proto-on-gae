@@ -17,6 +17,30 @@ class GroupsController(BaseController):
         self.v_id = self.cookies['cv_id']
       pass
 
+    def shared_member_list(self):
+      #自分のDBをとりだす
+      dbs = UserDb.all()
+      dbs.filter('user =',self.user)
+
+      members = {}
+      for db in dbs:
+        views = UserView.all()
+        views.filter('user_db_id = ',db) 
+        for v in views:
+          # shareしているユーザの取得
+          share_users = ShareUser.all()
+          share_users.filter(' share_view_id = ',v)
+          for su in share_users:
+            if su.email in  members:
+              members[su.email].append(su)
+            else:
+              members[su.email]=[su]
+
+          self.member_list = []
+          for m in members.keys():
+            self.member_list.append({'email':m,'share_views':members[m]})
+              
+
     def shared_treeview(self):
       self.user_dbs= []
 
