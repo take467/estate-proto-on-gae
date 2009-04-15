@@ -23,81 +23,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from google.appengine.api import mail
 
 class NoticeMail:
-  def send_reply(self,request,inquiry):
-    server_url = request.environ['SERVER_NAME'] +":" + request.environ['SERVER_PORT']
-    link  = "http://" + server_url + "/inquiry/show/" + str(inquiry.key().id())
+  def notice_share(self,request,share_user):
 
-    s = u"お問い合わせ番号[%06d]に対する回答" % inquiry.key().id()
-    subject=s.encode('utf-8')
-
-    id = inquiry.key().id()
-
-    s=u"""
-%s様
-
-ご利用ありがとうございます。
- 
-%s
-
- 今回いただいたごお問い合わせに関して、追加質問をいただく場合は、
- サイト内の「お問い合せ」のページから、
- お問い合わせ番号「%06d」を入力の上、送信ください。
-
- /=============================================================/
-    http://%s/
- /=============================================================/
-""" % (inquiry.from_email,inquiry.reply_content,id,server_url)
-    body = s.encode('utf-8')
-    if mail.is_email_valid(inquiry.from_email):
-      mail.send_mail(sender="inquiry <fuji1967@gmail.com>", to=inquiry.from_email, subject=subject, body=body)
-
-  def send_confirm(self,request,inquiry):
-    server_url = request.environ['SERVER_NAME'] +":" + request.environ['SERVER_PORT']
-    link  = "http://" + server_url + "/inquiry/show/" + str(inquiry.key().id())
-
-    s = u"お問い合わせをお受け致しました"
+    view = share_user.share_view_id
+    udb = view.user_db_id
+    owner_email = udb.user.email()
+    s = u"%sさんがDBを公開しました。" % owner_email
     subject=s.encode('utf-8')
 
     s=u"""
-%s様
+%sさんがデータベース[%s]のビュー[%s]をあなたに公開しました。　
 
- ご利用ありがとうございます。
- ご案内、回答まで今しばらくお待ちください。
-
- 今回のご質問に関するお問合せ番号は「%06d」です。
-
- 本メールアドレスは発信専用です。このメールへのご返信には、お応え
- 致しかねますので、予めご了承ください。
-
- ■=============================================================■
-    http://%s/
- ■=============================================================■
-""" % (inquiry.from_email,inquiry.key().id(),server_url)
+-- 
+  noticed by estate-proto <http://estate-proto.appsopt.com/>
+""" % (owner_email,udb.name,view.name)
     body = s.encode('utf-8')
-    if mail.is_email_valid(inquiry.from_email):
-      mail.send_mail(sender="supuremo <fuji1967@gmail.com>", to=inquiry.from_email, subject=subject, body=body)
-
-  def notice(self,request,inquiry):
-
-    server_url = request.environ['SERVER_NAME'] +":" + request.environ['SERVER_PORT']
-    link  = "http://" + server_url + "/inquiry/show_by_id/" + str(inquiry.key().id())
-   
-    wk = ""
-    if inquiry.category:
-      wk = inquiry.category.name
-
-    s=u"[お問い合わせ番号:%06d] %s" % (inquiry.key().id(),wk)
-    subject=s.encode('utf-8')
-
-    s=u"""
-%sさん
-
-お問い合わせが届いています。
-%s
---
-  http://%s/
-""" % (inquiry.to,link,server_url)
-
-    body = s.encode('utf-8')
-    if mail.is_email_valid(inquiry.to):
-      mail.send_mail(sender="supuremo <fuji1967@gmail.com>", to=inquiry.to, subject=subject, body=body)
+    if mail.is_email_valid(owner_email):
+      mail.send_mail(sender="estate-proto <takeshi.fujisawa@gmail.com>", to=share_user.email, subject=subject, body=body)
+      return True
+    else:
+      return False

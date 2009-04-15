@@ -153,6 +153,10 @@ function shareView(){
 			alert('共有に失敗しました:' + data.msg);
 		}else{
 			alert('共有を開始しました');
+			$("#shared_member_list").load('/groups/shared_member_list',function(){
+				$(this).treeview({});
+				$(".file").contextMenu({ menu: 'sharedViewMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+			});
 		}
 		$.unblockUI();
 	   },
@@ -259,7 +263,7 @@ function initSharedViewContextMenu(action,el,pos){
 				}
 			   },
 			   error: function(){
-				alert('delete システムエラー');
+				alert('share delete システムエラー');
 			   }
 			 });
 		}

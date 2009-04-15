@@ -4,6 +4,7 @@ from google.appengine.ext import db
 from gaeo.controller import BaseController
 from model.share_user import ShareUser
 from model.view import UserView
+from model.notice_mail import *
 
 import copy
 import yaml
@@ -38,11 +39,19 @@ class Share_userController(BaseController):
         col['val']= False
 
     yaml_data = yaml.dump(config)
-
     wk = self.params.get('share_users')
     # 改行で分解
-    for email in wk.split("\n"):
-      ShareUser(share_view_id = view,email = email,config = yaml_data).put()
+    email = ''
+    try:
+      for e  in wk.split("\n"):
+        email = e
+        res = {'status':'success'}
+        su = ShareUser(share_view_id = view,email = email,config = yaml_data)
+        # メールで通知する
+        m = NoticeMail()
+        m.notice_share(self.request,su)
+        su.put()
+    except:
+        res = {'status':'error','msg':u"%sへの共有に失敗しました" % email}
 
-    res = {'status':'success'}
     self.render(json=self.to_json(res))
