@@ -1,0 +1,11 @@
+        {% for m in member_list %}
+                <li id="{{m.email}}"><span id="d_{{m.email}}" class="folder">{{ m.email }}</span>
+                {% if m.share_views %}
+                        <ul>
+                        {% for v in m.share_views %}
+                                <li id="v_{{v.key.id}}"><span id="f_{{v.key.id}}" class="file"><a href="javascript:void(0)" onclick="changeView('{{v.share_view_id.key.id}}')">{{v.share_view_id.name}}</a></span></li>
+                        {% endfor %}
+                        </ul>
+                {% endif %}
+                </li>
+        {% endfor %}
