@@ -61,3 +61,4 @@
 .contextMenu LI.paste A { background-image: url(/img/contextMenu/page_white_paste.png); }
 .contextMenu LI.delete A { background-image: url(/img/contextMenu/page_white_delete.png); }
 .contextMenu LI.quit A { background-image: url(/img/contextMenu/door.png); }
+.contextMenu LI.share A { background-image: url(/img/contextMenu/world.png); }

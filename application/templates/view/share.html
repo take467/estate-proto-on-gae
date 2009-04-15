@@ -1,23 +1,21 @@
-<form id="blockui_form" class="niceform" >
-	<input type="hidden" name="action_url" id="action_url" value="/share_user/create"
-	<input type="hidden" name="share_view_id" id="share_view_id" value="{{view.key.id}}">
-	<table>
-	<tr>
-		<td><label for="text">ビュー名</label></td>
-		<td><input type="text" name="view_name" value="{{view.name}}"size="20"></td>
-	</tr>
-	<tr>
-		<td valign="top" align="left"><label for="text">項目</label></td>
-		<td align="left"><font size="-3">使用する項目にチェックを付けてください</font><br/>
-		{% for col in config %}{% ifnotequal col.type 'hidden' %}
 
-			<div style="margin-top:0.2em">
-			<input type="checkbox" name="disp_{{col.name}}" id="check_{{col.name}}" value="yes" {{col.checked}}><label for="check_{{col.name}}">{{col.label}}</label>
-			</div>
-		{% endifnotequal %}{% endfor %}
-		</td>
-	</tr>
-	</table>
-	<input type="button" id="submit_called_by_treeview" value="保存" onclick="update_view();return false"> -
+<form id="blockui_form" class="niceform" >
+	<input type="hidden" name="shared_view_id" id="shared_view_id" value="{{view.key.id}}"
+
+<div style="text-align:left">
+<p style="margin:0.2em">共有設定：{{view.user_db_id.name}} &gt; {{view.name}}</p>
+	<label for="share_users">共有するユーザのメールアドレス(複数指定可)</label><br />
+	<textarea id="share_users" name="share_users" rows="10" cols="35"></textarea>
+	<br />
+	<input type="checkbox" id='w' name='w' value="yes"><label for="w">書き込み権限</label><br/>
+	<input type="checkbox" id='d' name='d' value="yes"><label for="d">削除権限</label><br/>
+	<input type="checkbox" id='dl' name='dl' value="yes"><label for="dl">ダウンロード権限</label><br/>
+	<br />
+	<label for="msg">メッセージ</label><br />
+	<textarea id="msg" name="msg" rows="5" cols="35"></textarea>
+	<br/>
+</div>
+
+	<input type="button" id="submit_called_by_treeview" value="実行" onclick="shareView();return false"> -
 	<input type="button" class="close_form" value="閉じる">
 </form>

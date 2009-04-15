@@ -2,10 +2,10 @@
 from google.appengine.ext import db
 from gaeo.controller import BaseController
 
-from model.site import Site
 from model.user_db import UserDb
 from model.view import UserView
 from model.profile import ProfileCore
+from model.share_user import ShareUser
 from google.appengine.api import users
 import yaml
 import copy
@@ -17,20 +17,30 @@ class GroupsController(BaseController):
         self.v_id = self.cookies['cv_id']
       pass
 
+    def shared_treeview(self):
+      self.user_dbs= []
+
+      dbs = {}
+      for u in db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1",self.user.email()):
+        id =  u.share_view_id.user_db_id.key().id() 
+        if id in dbs:
+          dbs[id].append(u.share_view_id)
+        else:
+          dbs[id] = [u.share_view_id]
+
+      # keyでループ
+      for id in dbs.keys(): 
+        u =  UserDb.get_by_id(id)
+        self.user_dbs.append({'db':u,'views':dbs[id]})
+
+      self.render(template='treeview')
+
+
     def treeview(self):
-      user = users.get_current_user()
       self.user_dbs = []
-      for u in db.GqlQuery("SELECT * FROM UserDb WHERE user = :1",user):
+      for u in db.GqlQuery("SELECT * FROM UserDb WHERE user = :1",self.user):
         list = db.GqlQuery("SELECT * FROM UserView WHERE user_db_id = :1",u)
         self.user_dbs.append({'db':u,'views':list})
-
-      #list  = []
-      #views = []
-      #for u in db.GqlQuery("SELECT * FROM UserDb WHERE user = :1",self.user):
-      #  for v in db.GqlQuery("SELECT * FROM UserView WHERE user_db_id = :1",u):
-      #    views.append({'id':v.key().id(),"text":v.name})
-      #  list.append({'id':u.key().id(),'text':u.name,'children':views,'classes':'folder','expand':True})
-      #self.render(json=self.to_json(list))
 
     def edit(self):
       id = self.params.get('id')

@@ -104,6 +104,14 @@ indexes:
   - name: post_at
     direction: desc
 
+# Used 4 times in query history.
+- kind: ProfileCore
+  properties:
+  - name: status
+  - name: user_db_id
+  - name: post_at
+    direction: desc
+
 # Unused in query history -- copied from input.
 - kind: ProfileCore
   properties:
@@ -247,7 +255,7 @@ indexes:
   - name: organization
     direction: desc
 
-# Unused in query history -- copied from input.
+# Used 26 times in query history.
 - kind: ProfileCore
   properties:
   - name: user
@@ -343,6 +351,13 @@ indexes:
   - name: user
   - name: user_db_id
   - name: zipcode
+    direction: desc
+
+# Used 38 times in query history.
+- kind: ProfileCore
+  properties:
+  - name: user_db_id
+  - name: post_at
     direction: desc
 
 # Unused in query history -- copied from input.

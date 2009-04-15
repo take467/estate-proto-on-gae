@@ -6,6 +6,7 @@ from google.appengine.ext import db
 from model.user_db import UserDb
 from model.profile import *
 from model.view import UserView
+from model.share_user import ShareUser
 import yaml
 
 class WelcomeController(BaseController):
@@ -37,7 +38,20 @@ class WelcomeController(BaseController):
 
         self.width = 33
         i = 1
-        if self.view and self.view.user_db_id.user == self.user: 
+        #if self.view and self.view.user_db_id.user == self.user: 
+        if self.view:
+          self.auth = {'w':True,'d':True,'dl':True}
+          if self.view.user_db_id.user != self.user: 
+            # 共有ビュー？
+            v = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1 and share_view_id = :2",self.user.email(),self.view).get()
+            if v:
+              # 権限の設定
+              config = yaml.load(v.config)
+              for item in config:
+                self.auth[item['name']] = item['val']
+            else:
+              self.view = None
+              return
 
           configs =  yaml.load(self.view.config)
           self.colModels.append({'name':'id','label':'ID','width':'20','align':'center','hidden':'false'})

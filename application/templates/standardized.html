@@ -57,6 +57,9 @@ $(document).ready(function(){
 		$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
 		$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
 	});
+	$("#shared_treeview").load('/groups/shared_treeview',function(){
+		$(this).treeview({});
+	});
 	{% if view %}
                 $('#search_refinement_area').load('/profile/search_refinement',function(){initSearchRefinment();$.unblockUI();});
 		initFlexigrid()
@@ -86,10 +89,10 @@ function initFlexigrid(){
 			{% endfor %}
 				],
 			buttons : [
-				{name: '追加', bclass: 'add', onpress : newData},
+				{% if auth.w %}{name: '追加', bclass: 'add', onpress : newData},
 				{name: '編集', bclass: 'edit', onpress : editData},
-				{separator: true},
-				{name: '削除', bclass: 'delete', onpress : deleteData}
+				{separator: true},{% endif %}
+				{% if auth.d %}{name: '削除', bclass: 'delete', onpress : deleteData}{% endif %}
 				],
 			searchitems : [
 				{display: 'ID', name : 'id',is_default: true}{% for item in searchitems %}
@@ -133,6 +136,27 @@ function changeView(vid){
 	$.cookie('cv_id',vid)
 	$.blockUI({ message: "<b>少々お待ちください...</b>" });
         location.reload()
+}
+function shareView(){
+	$.blockUI({ message: "<b>少々お待ちください...</b>" });
+	$.ajax({
+	   type: "POST",
+	   dataType: "json",
+	   url: '/share_user/create',
+	   data: $('#blockui_form').serialize(),
+	   success: function(data){
+		if( data.status != 'success' ){
+			alert('共有に失敗しました:' + data.msg);
+		}else{
+			alert('共有を開始しました');
+		}
+		$.unblockUI();
+	   },
+	   error: function(){
+		alert('システムエラー');
+		$.unblockUI();
+	   }
+	 });
 }
 function newData() {
 	$('#blockui_area').html('');
@@ -215,7 +239,6 @@ function initFileContextMenu(action,el,pos){
 			$(".close_form").click(function(){ $.unblockUI(); });
 			$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
 		});
-	}
 	}else if( action=="delete" ) {
 		var url = '/view/delete'
 		if( confirm($(el).text() +'を本当に削除しますか？') != true ){
@@ -376,12 +399,10 @@ function initContextMenu(action,el,pos){
 <body>
 <div id="outer">
 	<div id="header">
-<!--
-		<div id="logo" style="float:right">
+		<div id="logo" >
 			<h1><a href="#">ESTATE - PROTOTYPE</a></h1>
-			<h2>by 健康deねっと IT事業部</h2>
+			<h2>logged in as {{user.email}} </h2>
 		</div>
--->
 		<div id="menu">
 		<ul class="dropdown jd_menu ">
 			<li><a href="#">ファイル</a>
@@ -401,18 +422,20 @@ function initContextMenu(action,el,pos){
 	<div id="content">
 		<div id="primaryContentContainer">
 			<div id="primaryContent">
-				<h3 id="breadClumbs">{{view.user_db_id.name}} &gt; {{view.name}}</h3>
+				{% if view %}
+				<h3 id="breadClumbs">{{view.user_db_id.name}}(所有者:{{ view.user_db_id.user.email}}) &gt; {{view.name}}</h3>
 				<div class="boxContent" id="search_refinement_area">
 				</div>
 				<br clear="all">
 				<div class="box" style="margin:0.5em 0">
 					<div class="" id="flexigrid01"></div>
 				</div>
+				{% endif %}
 			</div>
 		</div>
 		<div id="secondaryContent">
 			<div class="box">
-				<h3>データベース一覧</h3>
+				<h3>所有データベース</h3>
 				<div class="boxContent" id="sheet_list">
 					<ul id="myFileMenu" class="contextMenu">
 						<li class="share"><a href="#share">共有</a></li>
@@ -427,12 +450,25 @@ function initContextMenu(action,el,pos){
 					<ul id="treeview" class="filetree treeview"></ul>
 					<div id="blockui_area" style="margin:1em;display:none; cursor: default"></div>
 				</div>
+				<h3>利用データベース</h3>
+				<div class="boxContent" id="shared_view_lists">
+					<ul id="shared_treeview" class="filetree treeview"></ul>
+				</div>
+				<h3>共有　メンバー一覧</h3>
+				<div class="boxContent" id="member_list">
+					<ul id="myMemberMenu" class="contextMenu">
+						<li class="edit separator"><a href="#edit">編集</a></li>
+						<li class="delete"><a href="#delete">削除</a></li>
+					</ul>
+					<ul id="members" class=""></ul>
+				</div>
+	
 			</div>
 		</div>
 		<div class="clear"></div>
 	</div>
 	<div id="footer">
-		<p>Copyright &copy; 2009 健康deねっと IT事業部 Designed by <a href="http://www.freecsstemplates.org">Free CSS Templates</a></p>
+		<p>Copyright &copy; 2009 <a href="http://kenkoude-it.appspot.com/">健康deねっと IT事業部</a> Designed by <a href="http://www.freecsstemplates.org">Free CSS Templates</a></p>
 	</div>
 </div>
 <div id="edit_category" style="margin:1em;display:none; cursor: default">

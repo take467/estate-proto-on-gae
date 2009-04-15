@@ -5,6 +5,7 @@ from google.appengine.ext import db
 from google.appengine.api import users
 from model.profile import ProfileCore
 from model.view    import UserView
+from model.share_user    import ShareUser
 from model.user_db import *
 
 import json
@@ -54,7 +55,19 @@ class ProfileController(BaseController):
       view = UserView.get_by_id(int(v))
 
       rec = ProfileCore.get_by_id(int(id))
-      if rec.user == self.user:
+      #データの所有者が違う場合は共有利用しているデータベースかチェック
+      #もでるに隠蔽するべきか。
+      # あと、本当に権限があるかShareUser.config を取得してチェックすべき！
+      editable = False
+      if rec.user != self.user and rec.user_db_id.user != self.user:
+       sv = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1 and share_view_id = :2",self.user.email(), view).get()
+       if sv:
+         if rec.user_db_id.key() == sv.share_view_id.user_db_id.key():
+           editable = True
+      else:
+           editable = True
+
+      if editable:
         config = yaml.load(view.config)
         for col in config:
           if col['checked'] == 'checked':
@@ -74,7 +87,20 @@ class ProfileController(BaseController):
         self.profile_id = id
         self.view = UserView.get_by_id(int(v))
         data = ProfileCore.get_by_id(int(id))
-        if data.user == self.user:
+
+
+        #データの所有者が違う場合は共有利用しているデータベースかチェック
+        editable = False
+        if data.user != self.user and data.user_db_id.user != self.user:
+         sv = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1 and share_view_id = :2",self.user.email(), self.view).get()
+         if sv:
+           #self.dump2=[data.user_db_id.key().id(),sv.share_view_id.user_db_id.key().id()]
+           if data.user_db_id.key() == sv.share_view_id.user_db_id.key():
+             editable = True
+        else:
+             editable = True
+
+        if editable:
           self.config = yaml.load(self.view.config)
           for col in self.config:
             if col['checked'] == 'checked':
@@ -185,6 +211,13 @@ class ProfileController(BaseController):
         self.render(json=self.to_json([]))
         return
 
+      # ビューの所有者とカレントのユーザが同じでなければ共有されたビュー
+      user = self.user
+      if self.view.user_db_id.user != self.user:
+         sv = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1 and share_view_id = :2",self.user.email(), self.view).get()
+         if sv:
+           user = sv.share_view_id.user_db_id.user
+
       self.config = yaml.load(self.view.config)
 
       query = self.params.get("query")
@@ -220,13 +253,13 @@ class ProfileController(BaseController):
           except:
             pass
           total = 0
-          if p != None and (p.user == users.get_current_user()):
+          if p != None and (p.user == user):
             total = 1
             results.append(p)
         else:
           p = ProfileCore.all()
           p.filter(" user_db_id = ",self.view.user_db_id)
-          p.filter(" user = ",users.get_current_user())
+          #p.filter(" user = ",user)
           p.filter(qtype + " = ",query)
           for f in add_filters:
             p.filter(f['name'] + " = ",f['val'])
@@ -236,7 +269,7 @@ class ProfileController(BaseController):
       else:
         p = ProfileCore.all()
         p.filter(" user_db_id = ",self.view.user_db_id)
-        p.filter(" user = ",users.get_current_user())
+        #p.filter(" user = ",user)
         for f in add_filters:
           p.filter(f['name'] + " = ",f['val'])
         is_id_sort = False
