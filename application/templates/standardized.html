@@ -41,9 +41,11 @@
 <script src="/js/jquery.treeview.js" 		type="text/javascript"></script>
 <script src="/js/jquery.treeview.async.js" 	type="text/javascript"></script>
 <script src="/js/jquery.contextMenu.js" 	type="text/javascript"></script>
+<script src="/js/preloadCssImages.jQuery_v5.js" type="text/javascript"></script>
 <script src="/js/nicejforms.js"></script>
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
+	$.preloadCssImages();
         {% if fields %}
 	$('{% for f in fields %}#sr_{{f.name}},{% endfor %}').change(function(){
 		var _selectedObj = $(this).children("option[@selected]");
@@ -122,11 +124,13 @@ function createDatabase(){
 	   success: function(data){
 	     if( data.status == 'success' ){
 		$.unblockUI();
-		$("#treeview").load('/groups/treeview?createDatabase',function(){
-			$(this).treeview({});
-			$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
-			$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
-		});
+	        $.cookie('cv_id',data.cv_id)
+		location.reload()
+		//treeview").load('/groups/treeview?createDatabase',function(){
+		//	$(this).treeview({});
+		//	$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
+		//	$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+		//
 	     }else{
 		alert('エラー:',data.msg);
 	     }
@@ -448,6 +452,7 @@ function initContextMenu(action,el,pos){
 			<li><a href="#">ファイル</a>
 				<ul>
 				<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase()">新規データベース</a>
+				<li><a id="new_openid_provider" href="javascript:void(0);" onclick="createOP()">新規OpenID Provider</a>
 				</ul>
 			</li>
 <!--

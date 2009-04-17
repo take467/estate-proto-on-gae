@@ -114,7 +114,7 @@ class GroupsController(BaseController):
         g.delete()
         data = {'status':'success'}
 
-        if id == self.v_id:
+        if self.v_id and id == self.v_id:
   	  self.response.headers.add_header('Set-Cookie','cv_id=-1 ;expires=Fri, 5-Oct-1979 08:10:00 GMT')
 
       self.render(json=self.to_json(data))
@@ -131,7 +131,8 @@ class GroupsController(BaseController):
           cols = copy.deepcopy(ProfileCore.disp_columns)
           v = UserView(user_db_id = category,config=yaml.dump(cols))
           v.put()
-          data = {'status':'success','id':category.key().id(),'name':category.name}
+          # カレントのビューをこれにするためにクッキーにセット
+          data = {'status':'success','cv_id':v.key().id()}
       #except Exception,ex:
       #   data = {'status':'error','msg':ex}
         
