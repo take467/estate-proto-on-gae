@@ -394,7 +394,9 @@ function initContextMenu(action,el,pos){
 				}
 				$.unblockUI();
 				if( data.status == 'success' ){
-					init_treeview();
+					$.cookie('cv_id',data.cv_id)
+      					location.reload()
+					//init_treeview();
 				}
 			   },
 			   error: function(data){

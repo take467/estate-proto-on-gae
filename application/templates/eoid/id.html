@@ -1,0 +1,14 @@
+{% extends '../openid.html' %}
+{% block openid_server %}
+<link rel="openid.server" href="{{openid_server}}">
+{% endblock %}
+{% block x_xrds_location %}
+<meta http-equiv="x-xrds-location" content="{{x_xrds_location}}">
+{% endblock %}
+{% block message %}
+<p>This is an identity page for {{ claimed_id}}.</p>
+<p>Approved trust root:</p>
+<ul>
+<li><tt>{{trust_root}}</tt></li>
+</ul>
+{% endblock %}

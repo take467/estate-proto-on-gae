@@ -353,7 +353,7 @@ indexes:
   - name: zipcode
     direction: desc
 
-# Used 4 times in query history.
+# Unused in query history -- copied from input.
 - kind: ProfileCore
   properties:
   - name: user_db_id

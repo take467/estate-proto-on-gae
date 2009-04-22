@@ -1,0 +1,10 @@
+{% extends '../openid.html' %}
+{% block message %}
+        <form method="GET" action="/loginsubmit">
+          <input type="hidden" name="success_to" value="{{success_to}}" />
+          <input type="hidden" name="fail_to" value="{{fail_to}}" />
+          <input type="text" name="user" value="" />
+          <input type="submit" name="submit" value="ログイン" />
+          <input type="submit" name="cancel" value="キャンセル" />
+        </form>
+{% endblock %}

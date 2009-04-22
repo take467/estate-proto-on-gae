@@ -24,6 +24,9 @@ handlers:
   script: main.py
   login: admin
 
+- url: /eoid/.*
+  script: main.py
+
 - url: .*
   script: main.py
   login: required

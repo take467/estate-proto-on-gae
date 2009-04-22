@@ -91,6 +91,7 @@ class ViewController(BaseController):
          config = yaml.dump(cols)
          v = UserView(user_db_id=udb,config=config)
          v.put()
+         res= {"status":"success",'cv_id':v.key().id()}
        else:
          res= {"status":"error","msg":"missing user db"}
      #except Exception, ex:

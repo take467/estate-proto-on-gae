@@ -1,0 +1,12 @@
+{% extends '../openid.html' %}
+{% block x_xrds_location %}
+<meta http-equiv="x-xrds-location" content="{{x_xrds_location}}">
+{% endblock %}
+{% block message %}
+   <p>これは ESTATEが提供している OpenID プロバイダーです。 実装には<a href="http://openid.schtuff.com/">Python OpenID library</a>を使用しています。</p>
+  {% if user %}
+  <p>こんにちは {{user.email}} さん。 あなたの OpenID identity URL は <tt><a href={{openid_url}}>{{openid_url}}</a></tt>です。 あなたが利用するサービス(コンシューマ）にこのURLを入力してください。</p>
+  {% endif %}
+
+     <p>このOpenId プロバイダーのURLは <a href={{base_url}}><tt>{{base_url}}</tt></a>です。</p>
+{% endblock %}
