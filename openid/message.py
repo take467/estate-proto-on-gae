@@ -26,6 +26,9 @@ SREG_URI = 'http://openid.net/sreg/1.0'
 
 # The OpenID 1.X namespace URI
 OPENID1_NS = 'http://openid.net/signon/1.0'
+THE_OTHER_OPENID1_NS = 'http://openid.net/signon/1.1'
+
+OPENID1_NAMESPACES = OPENID1_NS, THE_OTHER_OPENID1_NS
 
 # The OpenID 2.0 namespace URI
 OPENID2_NS = 'http://specs.openid.net/auth/2.0'
@@ -57,6 +60,18 @@ OPENID_PROTOCOL_FIELDS = [
 class UndefinedOpenIDNamespace(ValueError):
     """Raised if the generic OpenID namespace is accessed when there
     is no OpenID namespace set for this message."""
+
+class InvalidOpenIDNamespace(ValueError):
+    """Raised if openid.ns is not a recognized value.
+
+    For recognized values, see L{Message.allowed_openid_namespaces}
+    """
+    def __str__(self):
+        s = "Invalid OpenID Namespace"
+        if self.args:
+            s += " %r" % (self.args[0],)
+        return s
+
 
 # Sentinel used for Message implementation to indicate that getArg
 # should raise an exception instead of returning a default.
@@ -109,24 +124,31 @@ class Message(object):
         URI.
     """
 
-    allowed_openid_namespaces = [OPENID1_NS, OPENID2_NS]
+    allowed_openid_namespaces = [OPENID1_NS, THE_OTHER_OPENID1_NS, OPENID2_NS]
 
     def __init__(self, openid_namespace=None):
-        """Create an empty Message"""
+        """Create an empty Message.
+
+        @raises InvalidOpenIDNamespace: if openid_namespace is not in
+            L{Message.allowed_openid_namespaces}
+        """
         self.args = {}
         self.namespaces = NamespaceMap()
         if openid_namespace is None:
             self._openid_ns_uri = None
         else:
-            self.setOpenIDNamespace(openid_namespace)
+            implicit = openid_namespace in OPENID1_NAMESPACES
+            self.setOpenIDNamespace(openid_namespace, implicit)
 
     def fromPostArgs(cls, args):
-        """Construct a Message containing a set of POST arguments"""
+        """Construct a Message containing a set of POST arguments.
+
+        """
         self = cls()
 
         # Partition into "openid." args and bare args
         openid_args = {}
-        for key, value in args.iteritems():
+        for key, value in args.items():
             if isinstance(value, list):
                 raise TypeError("query dict must have one value for each key, "
                                 "not lists of values.  Query is %r" % (args,))
@@ -149,7 +171,11 @@ class Message(object):
     fromPostArgs = classmethod(fromPostArgs)
 
     def fromOpenIDArgs(cls, openid_args):
-        """Construct a Message from a parsed KVForm message"""
+        """Construct a Message from a parsed KVForm message.
+
+        @raises InvalidOpenIDNamespace: if openid.ns is not in
+            L{Message.allowed_openid_namespaces}
+        """
         self = cls()
         self._fromOpenIDArgs(openid_args)
         return self
@@ -157,8 +183,6 @@ class Message(object):
     fromOpenIDArgs = classmethod(fromOpenIDArgs)
 
     def _fromOpenIDArgs(self, openid_args):
-        global registered_aliases
-
         ns_args = []
 
         # Resolve namespaces
@@ -173,49 +197,56 @@ class Message(object):
                 self.namespaces.addAlias(value, ns_key)
             elif ns_alias == NULL_NAMESPACE and ns_key == 'ns':
                 # null namespace
-                self.namespaces.addAlias(value, NULL_NAMESPACE)
+                self.setOpenIDNamespace(value, False)
             else:
                 ns_args.append((ns_alias, ns_key, value))
 
-        # Ensure that there is an OpenID namespace definition
-        openid_ns_uri = self.namespaces.getNamespaceURI(NULL_NAMESPACE)
-        if openid_ns_uri is None:
-            openid_ns_uri = OPENID1_NS
-
-        self.setOpenIDNamespace(openid_ns_uri)
+        # Implicitly set an OpenID namespace definition (OpenID 1)
+        if not self.getOpenIDNamespace():
+            self.setOpenIDNamespace(OPENID1_NS, True)
 
         # Actually put the pairs into the appropriate namespaces
         for (ns_alias, ns_key, value) in ns_args:
             ns_uri = self.namespaces.getNamespaceURI(ns_alias)
             if ns_uri is None:
-                # Only try to map an alias to a default if it's an
-                # OpenID 1.x message.
-                if openid_ns_uri == OPENID1_NS:
-                    for _alias, _uri in registered_aliases.iteritems():
-                        if _alias == ns_alias:
-                            ns_uri = _uri
-                            break
-
+                # we found a namespaced arg without a namespace URI defined
+                ns_uri = self._getDefaultNamespace(ns_alias)
                 if ns_uri is None:
-                    ns_uri = openid_ns_uri
+                    ns_uri = self.getOpenIDNamespace()
                     ns_key = '%s.%s' % (ns_alias, ns_key)
                 else:
-                    self.namespaces.addAlias(ns_uri, ns_alias)
+                    self.namespaces.addAlias(ns_uri, ns_alias, implicit=True)
 
             self.setArg(ns_uri, ns_key, value)
 
-    def setOpenIDNamespace(self, openid_ns_uri):
-        if openid_ns_uri not in self.allowed_openid_namespaces:
-            raise ValueError('Invalid null namespace: %r' % (openid_ns_uri,))
+    def _getDefaultNamespace(self, mystery_alias):
+        """OpenID 1 compatibility: look for a default namespace URI to
+        use for this alias."""
+        global registered_aliases
+        # Only try to map an alias to a default if it's an
+        # OpenID 1.x message.
+        if self.isOpenID1():
+            return registered_aliases.get(mystery_alias)
+        else:
+            return None
 
-        self.namespaces.addAlias(openid_ns_uri, NULL_NAMESPACE)
+    def setOpenIDNamespace(self, openid_ns_uri, implicit):
+        """Set the OpenID namespace URI used in this message.
+
+        @raises InvalidOpenIDNamespace: if the namespace is not in
+            L{Message.allowed_openid_namespaces}
+        """
+        if openid_ns_uri not in self.allowed_openid_namespaces:
+            raise InvalidOpenIDNamespace(openid_ns_uri)
+
+        self.namespaces.addAlias(openid_ns_uri, NULL_NAMESPACE, implicit)
         self._openid_ns_uri = openid_ns_uri
 
     def getOpenIDNamespace(self):
         return self._openid_ns_uri
 
     def isOpenID1(self):
-        return self.getOpenIDNamespace() == OPENID1_NS
+        return self.getOpenIDNamespace() in OPENID1_NAMESPACES
 
     def isOpenID2(self):
         return self.getOpenIDNamespace() == OPENID2_NS
@@ -236,26 +267,17 @@ class Message(object):
 
         # Add namespace definitions to the output
         for ns_uri, alias in self.namespaces.iteritems():
+            if self.namespaces.isImplicit(ns_uri):
+                continue
             if alias == NULL_NAMESPACE:
-                if ns_uri != OPENID1_NS:
-                    args['openid.ns'] = ns_uri
-                else:
-                    # drop the default null namespace definition. This
-                    # potentially changes a message since we have no
-                    # way of knowing whether it was explicitly
-                    # specified at the time the message was
-                    # parsed. The vast majority of the time, this will
-                    # be the right thing to do. Possibly this could
-                    # look in the signed list.
-                    pass
+                ns_key = 'openid.ns'
             else:
-                if self.getOpenIDNamespace() != OPENID1_NS:
-                    ns_key = 'openid.ns.' + alias
-                    args[ns_key] = ns_uri
+                ns_key = 'openid.ns.' + alias
+            args[ns_key] = ns_uri
 
         for (ns_uri, ns_key), value in self.args.iteritems():
             key = self.getKey(ns_uri, ns_key)
-            args[key] = value
+            args[key] = value.encode('UTF-8')
 
         return args
 
@@ -299,6 +321,8 @@ class Message(object):
         """
         if ElementTree is None:
             raise RuntimeError('This function requires ElementTree.')
+
+        assert action_url is not None
 
         form = ElementTree.Element('form')
 
@@ -479,7 +503,10 @@ class Message(object):
         if aliased_key.startswith('ns.'):
             uri = self.namespaces.getNamespaceURI(aliased_key[3:])
             if uri is None:
-                return default
+                if default == no_default:
+                    raise KeyError
+                else:
+                    return default
             else:
                 return uri
 
@@ -503,6 +530,7 @@ class NamespaceMap(object):
     def __init__(self):
         self.alias_to_namespace = {}
         self.namespace_to_alias = {}
+        self.implicit_namespaces = []
 
     def getAlias(self, namespace_uri):
         return self.namespace_to_alias.get(namespace_uri)
@@ -525,7 +553,7 @@ class NamespaceMap(object):
         """
         return self.namespace_to_alias.iteritems()
 
-    def addAlias(self, namespace_uri, desired_alias):
+    def addAlias(self, namespace_uri, desired_alias, implicit=False):
         """Add an alias from this namespace URI to the desired alias
         """
         # Check that desired_alias is not an openid protocol field as
@@ -565,8 +593,11 @@ class NamespaceMap(object):
 
         assert (desired_alias == NULL_NAMESPACE or
                 type(desired_alias) in [str, unicode]), repr(desired_alias)
+        assert namespace_uri not in self.implicit_namespaces
         self.alias_to_namespace[desired_alias] = namespace_uri
         self.namespace_to_alias[namespace_uri] = desired_alias
+        if implicit:
+            self.implicit_namespaces.append(namespace_uri)
         return desired_alias
 
     def add(self, namespace_uri):
@@ -595,3 +626,6 @@ class NamespaceMap(object):
 
     def __contains__(self, namespace_uri):
         return self.isDefined(namespace_uri)
+
+    def isImplicit(self, namespace_uri):
+        return namespace_uri in self.implicit_namespaces

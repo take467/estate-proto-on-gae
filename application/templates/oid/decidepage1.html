@@ -1,0 +1,27 @@
+{% extends '../openid.html' %}
+{% block openid_server %}
+{% endblock %}
+{% block x_xrds_location %}
+{% endblock %}
+{% block message %}
+<!-- decidepage 1 -->
+<p>
+この外部サービスを利用するには以下の情報を外部サービスに提供することになります。以下の注意事項をご確認いただき、いずれかのボタンを押してください。
+</p>
+<table>
+<tr>
+	<td>Trust Root:</td><td>{{trust_root}}</td>
+</tr>
+<tr>
+	<td>あなたのOpenID </td><td>{{id_url_base}}{{user.user_id}}</td>
+</tr>
+</table>
+            <form method="POST" action="/oid/allow">
+              <input type='hidden' name='identifier' value='{{user.user_id}}'>
+            <input type="checkbox" id="remember" name="remember" value="yes"
+                /><label for="remember">次回から自動ログイン</label><br />
+            <input type="submit" name="yes" value="ログイン" />
+            <!-- input type="submit" name="no" value="キャンセル" / -->
+            </form>
+</p>
+{% endblock %}

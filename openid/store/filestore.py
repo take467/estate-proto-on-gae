@@ -200,7 +200,6 @@ class FileOpenIDStore(OpenIDStore):
 
         filename = '%s-%s-%s-%s' % (proto, domain, url_hash, handle_hash)
 
-        oidutil.log('filename for %s %s is %s' % (server_url, handle, filename))
         return os.path.join(self.association_dir, filename)
 
     def storeAssociation(self, server_url, association):
@@ -251,7 +250,6 @@ class FileOpenIDStore(OpenIDStore):
 
         (str, str or NoneType) -> Association or NoneType
         """
-        oidutil.log('getting association %s for url %s' % (handle, server_url))
         if handle is None:
             handle = ''
 
@@ -289,7 +287,6 @@ class FileOpenIDStore(OpenIDStore):
                 return None
 
     def _getAssociation(self, filename):
-        oidutil.log('getting association from file %s' % filename)
         try:
             assoc_file = file(filename, 'rb')
         except IOError, why:
@@ -306,7 +303,6 @@ class FileOpenIDStore(OpenIDStore):
 
             try:
                 association = Association.deserialize(assoc_s)
-                oidutil.log('got association %s' % association)
             except ValueError:
                 _removeIfPresent(filename)
                 return None
@@ -314,7 +310,6 @@ class FileOpenIDStore(OpenIDStore):
         # Clean up expired associations
         if association.getExpiresIn() == 0:
             _removeIfPresent(filename)
-            oidutil.log('association expired')
             return None
         else:
             return association

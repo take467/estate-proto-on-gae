@@ -85,9 +85,12 @@ class OpenIDServiceEndpoint(object):
     def getDisplayIdentifier(self):
         """Return the display_identifier if set, else return the claimed_id.
         """
-        if self.display_identifier is None:
-            return self.claimed_id
-        return self.display_identifier
+        if self.display_identifier is not None:
+            return self.display_identifier
+        if self.claimed_id is None:
+            return None
+        else:
+            return urlparse.urldefrag(self.claimed_id)[0]
 
     def compatibilityMode(self):
         return self.preferredNamespace() != OPENID_2_0_MESSAGE_NS
@@ -430,7 +433,7 @@ def discoverXRI(iname):
 
 def discoverNoYadis(uri):
     http_resp = fetchers.fetch(uri)
-    if http_resp.status != 200:
+    if http_resp.status not in (200, 206):
         raise DiscoveryFailure(
             'HTTP Response status from identity URL host is not 200. '
             'Got status %r' % (http_resp.status,), http_resp)

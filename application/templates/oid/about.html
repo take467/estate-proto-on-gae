@@ -1,0 +1,17 @@
+{% extends '../openid.html' %}
+{% block openid_server %}
+{% endblock %}
+{% block x_xrds_location %}
+{% endblock %}
+{% block message %}
+ <p>{{endpoint_url}} は ESTATE OpenID プロバイダーのエンドポイントです。<p>
+ <dl>
+    <dt><a href="{{base_url}}"><code>{{base_url}}</code></a></td>
+	<dd>これはESTATE OpenIDのトップページです。</dd>
+    <dt><a href="http://www.openidenabled.com"><code>http://www.openidenabled.com</code></a></td>
+	<dd>OpenID コミュニティのウェブサイトです。使用しているライブラリのホームサイトでもあります。</dd>
+    <dt><a href="http://www.openid.net"><code>http://www.openid.net</code></a></td>
+	<dd>OpenID のオフィシャルウェブサイトです。</dd>
+
+ </dl>
+{% endblock %}

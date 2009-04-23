@@ -1,0 +1,29 @@
+{% extends '../openid.html' %}
+{% block openid_server %}
+{% endblock %}
+{% block x_xrds_location %}
+{% endblock %}
+{% block message %}
+<!-- decidepage 3 -->
+            <p>A site has asked for an identity belonging to
+            {{expected_user}}, but you are logged in as {{user.email}}.  To
+            log in as {{expected_user}} and approve the login request,
+            hit OK below.  The "Remember this decision" checkbox
+            applies only to the trust root decision.</p>
+
+<p>
+            <table>
+              <tr><td>Identity:</td><td>{{identity}}</td></tr>
+              <tr><td>Trust Root:</td><td>{{trust_root}}</td></tr>
+            </table>
+            <p>Allow this authentication to proceed?</p>
+            <form method="POST" action="/oid/allow">
+              <input type="checkbox" id="remember" name="remember" value="yes"
+                  /><label for="remember">Remember this
+                  decision</label><br />
+              <input type="hidden" name="login_as" value="{{expected_user}}"/>
+              <input type="submit" name="yes" value="yes" />
+              <input type="submit" name="no" value="no" />
+            </form>
+</p>
+{% endblock %}

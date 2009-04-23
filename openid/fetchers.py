@@ -30,6 +30,7 @@ except ImportError:
     pycurl = None
 
 USER_AGENT = "python-openid/%s (%s)" % (openid.__version__, sys.platform)
+MAX_RESPONSE_KB = 1024
 
 def fetch(url, body=None, headers=None):
     """Invoke the fetch method on the default fetcher. Most users
@@ -172,8 +173,6 @@ class ExceptionWrappingFetcher(HTTPFetcher):
         except self.uncaught_exceptions:
             raise
         except:
-            import logging
-            logging.exception('qwert2')
             exc_cls, exc_inst = sys.exc_info()[:2]
             if exc_inst is None:
                 # string exceptions
@@ -199,6 +198,9 @@ class Urllib2Fetcher(HTTPFetcher):
         headers.setdefault(
             'User-Agent',
             "%s Python-urllib/%s" % (USER_AGENT, urllib2.__version__,))
+        headers.setdefault(
+            'Range',
+            '0-%s' % (1024*MAX_RESPONSE_KB,))
 
         req = urllib2.Request(url, data=body, headers=headers)
         try:
@@ -215,7 +217,7 @@ class Urllib2Fetcher(HTTPFetcher):
 
     def _makeResponse(self, urllib2_response):
         resp = HTTPResponse()
-        resp.body = urllib2_response.read()
+        resp.body = urllib2_response.read(MAX_RESPONSE_KB * 1024)
         resp.final_url = urllib2_response.geturl()
         resp.headers = dict(urllib2_response.info().items())
 
@@ -311,11 +313,18 @@ class CurlHTTPFetcher(HTTPFetcher):
                     raise HTTPError("Fetching URL not allowed: %r" % (url,))
 
                 data = cStringIO.StringIO()
+                def write_data(chunk):
+                    if data.tell() > 1024*MAX_RESPONSE_KB:
+                        return 0
+                    else:
+                        return data.write(chunk)
+                    
                 response_header_data = cStringIO.StringIO()
-                c.setopt(pycurl.WRITEFUNCTION, data.write)
+                c.setopt(pycurl.WRITEFUNCTION, write_data)
                 c.setopt(pycurl.HEADERFUNCTION, response_header_data.write)
                 c.setopt(pycurl.TIMEOUT, off)
                 c.setopt(pycurl.URL, openid.urinorm.urinorm(url))
+                c.setopt(pycurl.RANGE, '0-%s'%(MAX_RESPONSE_KB*1024))
 
                 c.perform()
 
@@ -382,6 +391,12 @@ class HTTPLib2Fetcher(HTTPFetcher):
             method = 'POST'
         else:
             method = 'GET'
+
+        if headers is None:
+            headers = {}
+        headers.setdefault(
+            'Range',
+            '0-%s' % (1024*MAX_RESPONSE_KB,))
 
         # httplib2 doesn't check to make sure that the URL's scheme is
         # 'http' so we do it here.

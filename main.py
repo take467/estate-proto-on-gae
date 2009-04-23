@@ -50,6 +50,15 @@ def initPlugins():
                 except SyntaxError:
                     logging.error('Unable to import name %s' % (plugin))
 
+from openid.server import server as OpenIDServer
+import store
+
+
+def InitializeOpenId():
+  oidserver = OpenIDServer.Server(store.DatastoreStore())
+  OpenIDServer.Server.server_instance = oidserver
+
+
 def main():
     # add the project's directory to the import path list.
     sys.path.append(os.path.dirname(__file__))
@@ -64,6 +73,9 @@ def main():
     initRoutes()
     # initialize the installed plugins
     initPlugins()
+
+    # initialize the OpenID server
+    InitializeOpenId()
 
     app = webapp.WSGIApplication([
                 (r'.*', gaeo.MainHandler),
