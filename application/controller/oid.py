@@ -46,6 +46,8 @@ class OidController(BaseController):
       self.server.setEndpoint(self.endpoint_url)
 
     def index(self):
+      if self.user:
+        self.openid2_local_id = self.base_url + 'id/'+ self.user.user_id() 
       self.x_xrds_location = self.base_url + 'serveryadis'
 
     def allow(self):
@@ -124,14 +126,35 @@ class OidController(BaseController):
         pass
 
     def id(self):
-      self.x_xrds_location = self.base_url + 'yadis/'+self.params.get('id')
-      self.claimed_id = self.base_url + "id/"+ self.params.get('id')
+      id = self.params.get('id')
+      self.x_xrds_location = self.base_url + 'yadis/'+ id
+      ident = self.claimed_id = self.base_url + "id/"+ id
+
+      if self.user and (self.user.user_id() == id):
+        self.approved_trust_roots = []
+        for (aident, trust_root) in OidController.approved.keys():
+            logging.debug("id() [aident,ident]=[" + aident + "," + ident + "]")
+            if aident == ident:
+                self.approved_trust_roots.append(cgi.escape(trust_root))
+
       pass
 
-    def yadis(self):
-      endpoint_url = self.base_url + 'openidserver'
-      user_url = self.base_url + 'id/' + self.params.get('id')
-      buff="""\
+    serveryadis_xrds="""\
+<?xml version="1.0" encoding="UTF-8"?>
+<xrds:XRDS
+    xmlns:xrds="xri://$xrds"
+    xmlns="xri://$xrd*($v*2.0)">
+  <XRD>
+
+    <Service priority="0">
+      <Type>%s</Type>
+      <URI>%s</URI>
+    </Service>
+
+  </XRD>
+</xrds:XRDS>
+""" 
+    yadis_xrds="""\
 <?xml version="1.0" encoding="UTF-8"?>
 <xrds:XRDS
     xmlns:xrds="xri://$xrds"
@@ -147,27 +170,23 @@ class OidController(BaseController):
 
   </XRD>
 </xrds:XRDS>
-"""%(discover.OPENID_2_0_TYPE, discover.OPENID_1_0_TYPE,
-     endpoint_url, user_url)
+"""
+
+    def yadis(self):
+      endpoint_url = self.base_url + 'openidserver'
+      user_url = self.base_url + 'id/' + self.params.get('id')
+      buff = OidController.yadis_xrds %(discover.OPENID_2_0_TYPE, discover.OPENID_1_0_TYPE, endpoint_url, user_url)
       self.render(binary=buff,content_type='application/xrds+xml')
 
     def serveryadis(self):
       endpoint_url = self.base_url + 'openidserver'
-      buff="""\
-<?xml version="1.0" encoding="UTF-8"?>
-<xrds:XRDS
-    xmlns:xrds="xri://$xrds"
-    xmlns="xri://$xrd*($v*2.0)">
-  <XRD>
+      buff = ''
+      if self.user:
+        user_url = self.base_url + 'id/' + self.user.user_id()
+        buff = OidController.yadis_xrds %(discover.OPENID_2_0_TYPE, discover.OPENID_1_0_TYPE, endpoint_url, user_url)
+      else:
+        buff = OidController.serveryadis_xrds %(discover.OPENID_IDP_2_0_TYPE, endpoint_url,)
 
-    <Service priority="0">
-      <Type>%s</Type>
-      <URI>%s</URI>
-    </Service>
-
-  </XRD>
-</xrds:XRDS>
-"""%(discover.OPENID_IDP_2_0_TYPE, endpoint_url,)
       self.render(binary=buff,content_type='application/xrds+xml')
 
 

@@ -1,5 +1,15 @@
 {% extends '../openid.html' %}
-{% block x_xrds_location %}<meta http-equiv="x-xrds-location" content="{{x_xrds_location}}">{% endblock %}
+{% block openid_server %}
+<link rel="openid.server" href="{{openid_server}}">
+<link rel="openid2.provider" href="{{openid_server}}">
+{% endblock %}
+{% block openid2_local_id %}
+<link rel="openid.delegate" href="{{openid2_local_id}}">
+<link rel="openid2.local_id" href="{{openid2_local_id}}">
+{% endblock %}
+{% block x_xrds_location %}
+<meta http-equiv="x-xrds-location" content="{{x_xrds_location}}">
+{% endblock %}
 {% block message %}
    <p>これは ESTATEが提供している OpenID プロバイダーです。 実装には<a href="http://openid.schtuff.com/">Python OpenID library</a>を使用しています。</p>
   {% if user %}

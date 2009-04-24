@@ -7,6 +7,7 @@ class ProfileCore(BaseModel):
   claimed_id      = db.StringProperty()
   user_db_id      = db.ReferenceProperty(UserDb)
   user            = db.UserProperty(required=True)
+  passwd          = db.StringProperty(default='')
   status          = db.StringProperty(default='active')
   email           = db.StringProperty(default='')
   organization    = db.StringProperty(default='')

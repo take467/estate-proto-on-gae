@@ -7,8 +7,12 @@
 {% endblock %}
 {% block message %}
 <p>This is an identity page for {{ claimed_id}}.</p>
+{% if approved_trust_roots %}
 <p>Approved trust root:</p>
 <ul>
-<li><tt>{{trust_root}}</tt></li>
+{% for tr in approved_trust_roots %}
+<li><a href="{{tr}}"><tt>{{tr}}</tt></a></li>
+{% endfor %}
 </ul>
+{% endif %}
 {% endblock %}
