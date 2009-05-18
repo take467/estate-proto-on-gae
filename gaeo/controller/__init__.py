@@ -129,6 +129,7 @@ class BaseController(object):
 
         # check the default Content-Type is 'text/html; charset=utf-8'
         h['Content-Type'] = 'text/html; charset=utf-8'
+        h['If-Modified-Since']= "Thu, 01 Jun 1970 00:00:00 GMT"
         if html:
             for h in html:
                 o.write(h.decode('utf-8'))
@@ -155,6 +156,7 @@ class BaseController(object):
                 h['Content-Type'] = 'text/html; charset=utf-8'
                 s = opt.get('json').decode('utf-8')
                 h['Content-Length'] = str(len(s))
+
                 o.write(s)
             elif opt.has_key('xml'):
                 h['Content-Type'] = 'text/xml; charset=utf-8'

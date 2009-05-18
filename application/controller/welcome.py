@@ -22,14 +22,13 @@ class WelcomeController(BaseController):
       pass
     
     def index(self):
-      #v_id = self.params.get('v')
       v_id = None
       if 'cv_id' in self.cookies:
         v_id = self.cookies['cv_id'] 
 
+      self.colModels = []
+      self.searchitems = []
       if v_id:
-        self.colModels = []
-        self.searchitems = []
         self.view = UserView.get_by_id(int(v_id))
         if self.view == None:
           self.response.headers.add_header('Set-Cookie','cv_id=-1 ;expires=Fri, 5-Oct-1979 08:10:00 GMT')
@@ -54,7 +53,7 @@ class WelcomeController(BaseController):
               return
 
           configs =  yaml.load(self.view.config)
-          self.colModels.append({'name':'id','label':'ID','width':'20','align':'center','hidden':'false'})
+          self.colModels.append({'display':'ID','name':'id','width':'20','align':'center','hidden':'false','sortable':'true'})
           for col in configs:
             if col['checked'] == 'checked':
               if 'hidden' not in col:
@@ -62,7 +61,7 @@ class WelcomeController(BaseController):
               elif col['hidden'] == '':
                 col['hidden'] = 'false'
 
-              self.colModels.append(col)
+              self.colModels.append({'display':col['label'],'name':col['name'],'width':col['width'],'align':col['align'],'hidden':col['hidden'],'sortable':'true'})
               if col['type'] != 'radio' and col['type'] != 'select':
                 if isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
                   self.searchitems.append({'display':col['label'],'name':col['name']})
@@ -73,9 +72,12 @@ class WelcomeController(BaseController):
                   i = i+1
                   col['items'] = yaml.load(rec.yaml_data)
                   self.fields.append(col)
+
+          self.colModelsJson = self.to_json(self.colModels)
           m = 100 / i
           if m < self.width:
             self.width = m
       
         else:
           self.view = None
+          self.colModelsJson = None

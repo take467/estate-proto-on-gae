@@ -1,5 +1,5 @@
 <form id="blockui_form" class="niceform" >
-	<input type="hidden" name="action_url" id="action_url" value="/view/update"
+	<input type="hidden" name="action_url" id="action_url" value="/view/update">
 	<input type="hidden" name="edit_view_id" id="edit_view_id" value="{{view.key.id}}">
 	<table>
 	<tr>
@@ -19,5 +19,5 @@
 	</tr>
 	</table>
 	<input type="button" id="submit_called_by_treeview" value="保存" onclick="update_view();return false"> -
-	<input type="button" class="close_form" value="閉じる">
+	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
 </form>

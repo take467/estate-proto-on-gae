@@ -15,7 +15,7 @@ class UserView(BaseModel):
     if key in prop:
       return prop.get(key) 
     else:
-      return None:
+      return None
 
   def setProperty(self,key,val):
     prop =  yaml.load(self.config)

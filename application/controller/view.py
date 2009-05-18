@@ -9,6 +9,9 @@ from model.profile import ProfileCore
 
 import yaml
 import copy
+import logging
+
+from google.appengine.ext.webapp import template
 
 class ViewController(BaseController):
     def before_action(self):
@@ -34,7 +37,6 @@ class ViewController(BaseController):
 #            colModels.append(col)
 #      self.render(json=self.to_json(colModels))
 
-
     def share(self):
       id = self.params.get('id')
       if id == None:
@@ -54,6 +56,9 @@ class ViewController(BaseController):
       name = self.params.get('view_name')
 
       # build yaml for config
+      if not id:
+        return
+
       self.view = UserView.get_by_id(int(self.params.get('edit_view_id')))
       config = yaml.load(self.view.config)
       for col in config:
@@ -70,17 +75,9 @@ class ViewController(BaseController):
       self.view.config = yaml.dump(config)
       self.view.put()
       self.config = config
-          
 
-      pass
+    #self.render(json=self.to_json({'status':'success'}))
 
-    #def reset(self):
-    #  cols = copy.deepcopy(ProfileCore.disp_columns)
-    #  config = yaml.dump(cols)
-    #  v = UserView.get_by_id(id)
-    #  if v.user_db_id.user == self.user:
-    #     v.config = config
-    #     v.put()
 
     def create(self):
        res= {"status":"success"}
@@ -91,7 +88,7 @@ class ViewController(BaseController):
          config = yaml.dump(cols)
          v = UserView(user_db_id=udb,config=config)
          v.put()
-         res= {"status":"success",'cv_id':v.key().id()}
+         res= {"status":"success",'cv_id':v.key().id(),'r':'/'}
        else:
          res= {"status":"error","msg":"missing user db"}
      #except Exception, ex:
@@ -101,7 +98,8 @@ class ViewController(BaseController):
        self.render(json=self.to_json(res))
 
     def delete(self):
-      res= {"status":"success"}
+      res= {"status":"success",'reload':'true'}
+      #logging.debug('deleting view(' + self.params.get('id') + ')')
       v = UserView.get_by_id(int(self.params.get('id')))
       v.delete()
       self.render(json=self.to_json(res))

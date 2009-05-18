@@ -10,7 +10,6 @@ a  { text-decoration: none; }
 	LEVEL ONE
 */
 ul.dropdown                         {
-	//background:transparent url(/img/jdMenu/gradient.png) repeat-x scroll 0 0;
 	background:transparent url(/img/wbg.gif) repeat-x scroll 0 0;
 	border-color:#A5AFB8 #70777D #70777D #A5AFB8;
 	border-style:solid;
@@ -19,10 +18,8 @@ ul.dropdown                         {
 	height:19px;
 }
 ul.dropdown li { 
-	//font-weight: bold; 
 	float: left; 
 	zoom: 1; 
-	//background: #558800;
 	color:#FFFFFF;
 	cursor:pointer;
 	font-family:Tahoma,sans-serif;
@@ -33,7 +30,6 @@ ul.dropdown li {
 ul.dropdown a:hover		    { color: #000; }
 ul.dropdown a:active                { color: #ffa500; }
 ul.dropdown li a                    { 
-	//padding: 4px 8px; 
 	padding:0px 6px 4px;
 	border-right: 0px solid #333; 
 	color: #000; 
@@ -41,8 +37,6 @@ ul.dropdown li a                    {
 ul.dropdown li:last-child a         { border-right: none; } /* Doesn't work in IE */
 ul.dropdown li.hover,
 ul.dropdown li:hover                { 
-	//background: #F3D673; 
-	//color: black; 
 	position: relative; 
         padding-left: 5px;
 	padding-bottom: 0px;
@@ -64,7 +58,6 @@ ul.dropdown ul 						{
 }
 ul.dropdown ul li { 
 	font-weight: normal; 
-	//background: #558800; 
         background: url(/img/wbg.gif) repeat-x;
 	color: #000; 
 	border-bottom: 0px solid #558800; 

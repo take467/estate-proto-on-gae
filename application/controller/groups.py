@@ -13,6 +13,7 @@ import copy
 class GroupsController(BaseController):
     def before_action(self):
       self.user = users.get_current_user()
+      self.v_id = None
       if 'cv_id' in self.cookies:
         self.v_id = self.cookies['cv_id']
       pass
@@ -112,7 +113,7 @@ class GroupsController(BaseController):
           p.delete()
 
         g.delete()
-        data = {'status':'success'}
+        data = {'status':'success','r':'/'}
 
         if self.v_id and id == self.v_id:
   	  self.response.headers.add_header('Set-Cookie','cv_id=-1 ;expires=Fri, 5-Oct-1979 08:10:00 GMT')
@@ -120,20 +121,18 @@ class GroupsController(BaseController):
       self.render(json=self.to_json(data))
 
     def create(self):
-        data = {'status':'error'}
-      #try:
-        if self.request.method.upper() != "POST":
-          data = {'status':'error','msg':'forbidden method '}
-        else:
-          category = UserDb(user=self.user)
-          category.put()
-          # ついでにビューもつくってしまう
-          cols = copy.deepcopy(ProfileCore.disp_columns)
-          v = UserView(user_db_id = category,config=yaml.dump(cols))
-          v.put()
-          # カレントのビューをこれにするためにクッキーにセット
-          data = {'status':'success','cv_id':v.key().id()}
-      #except Exception,ex:
-      #   data = {'status':'error','msg':ex}
-        
+      data = {'status':'success'}
+      if self.request.method.upper() != "POST":
+        data = {'status':'error','msg':'forbidden method '}
         self.render(json=self.to_json(data))
+        return
+
+      category = UserDb(user=self.user)
+      category.put()
+      # ついでにビューもつくってしまう
+      cols = copy.deepcopy(ProfileCore.disp_columns)
+      v = UserView(user_db_id = category,config=yaml.dump(cols))
+      v.put()
+      # カレントのビューをこれにするためにクッキーにセット
+      data = {'status':'success','r':'/','cv_id':str(v.key().id())}
+      self.render(json=self.to_json(data))
