@@ -86,11 +86,29 @@ indexes:
   - name: post_at
     direction: desc
 
+# Used 2 times in query history.
+- kind: ProfileCore
+  properties:
+  - name: prefecture
+  - name: status
+  - name: user_db_id
+  - name: post_at
+    direction: desc
+
 # Unused in query history -- copied from input.
 - kind: ProfileCore
   properties:
   - name: prefecture
   - name: user
+  - name: user_db_id
+  - name: post_at
+    direction: desc
+
+# Used 2 times in query history.
+- kind: ProfileCore
+  properties:
+  - name: sex
+  - name: status
   - name: user_db_id
   - name: post_at
     direction: desc
@@ -104,7 +122,7 @@ indexes:
   - name: post_at
     direction: desc
 
-# Unused in query history -- copied from input.
+# Used 8 times in query history.
 - kind: ProfileCore
   properties:
   - name: status
@@ -360,7 +378,7 @@ indexes:
   - name: name
     direction: desc
 
-# Used 138 times in query history.
+# Used 368 times in query history.
 - kind: ProfileCore
   properties:
   - name: user_db_id

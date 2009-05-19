@@ -25,13 +25,19 @@ var isIE = false;
 var resizeTest = 1;
 
 //Initialization function
-function NFInit() {
+function NFInit(ox,oy) {
 	try {
 		document.execCommand('BackgroundImageCache', false, true);
 	} catch(e) {}
 	if(!document.getElementById) {return false;}
 	//alert("click me first");
-	NFDo('start');
+        if( ox != undefined && oy != undefined){
+		offsetX = ox;
+		offsetY = oy;
+		NFDo('start',ox,oy);
+	}else{
+		NFDo('start');
+	}
 }
 function NFDo(what,ox,oy) {
         if( ox != undefined && oy != undefined){
@@ -41,9 +47,13 @@ function NFDo(what,ox,oy) {
 	var niceforms = document.getElementsByTagName('form');
 	var identifier = new RegExp('(^| )'+'niceform'+'( |$)');
 	if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+		/*
 		var ieversion=new Number(RegExp.$1);
+		//alert("ver is " + ieversion);
 		if(ieversion < 7) {return false;} //exit script if IE6
+		*/
 		isIE = true;
+		return false;
 	}
 	for(var q = 0; q < niceforms.length; q++) {if(identifier.test(niceforms[q].className)) {
 		if(what == "start") { //Load Niceforms
@@ -158,8 +168,8 @@ function inputRadio(el) { //extent Radio buttons
 	if(el.checked) {el.dummy.className = "NFRadio NFh";}
 	else {el.dummy.className = "NFRadio";}
 	el.dummy.ref = el;
-	if(isIE == false) {el.dummy.style.left = findPosX(el) + 'px'; el.dummy.style.top = findPosY(el) + 'px';}
-	else {el.dummy.style.left = findPosX(el) + 4 + 'px'; el.dummy.style.top = findPosY(el) + 4 + 'px';}
+	if(isIE == false) {el.dummy.style.left = findPosX(el) + 'px'; el.dummy.style.top = findPosY(el) + 4 + 'px';}
+	else {el.dummy.style.left = findPosX(el) + 0 + 'px'; el.dummy.style.top = findPosY(el) + 4 + 'px';}
 	el.dummy.onclick = function() {
 		if(!this.ref.checked) {
 			var siblings = getInputsByName(this.ref.name);
@@ -198,8 +208,8 @@ function inputCheck(el) { //extend Checkboxes
 	if(el.checked) {el.dummy.className = "NFCheck NFh";}
 	else {el.dummy.className = "NFCheck";}
 	el.dummy.ref = el;
-	if(isIE == false) {el.dummy.style.left = findPosX(el) + 'px'; el.dummy.style.top = findPosY(el) + 'px';}
-	else {el.dummy.style.left = findPosX(el) + 4 + 'px'; el.dummy.style.top = findPosY(el) + 4 + 'px';}
+	if(isIE == false) {el.dummy.style.left = findPosX(el) + 'px'; el.dummy.style.top = findPosY(el) + 4 +  'px';}
+	else {el.dummy.style.left = findPosX(el) + -1 + 'px'; el.dummy.style.top = findPosY(el) + 4 + 'px';}
 	el.dummy.onclick = function() {
 		if(!this.ref.checked) {
 			this.ref.checked = true;

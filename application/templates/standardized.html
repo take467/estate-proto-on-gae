@@ -74,15 +74,22 @@ $(document).ready(function(){
                 $('#primaryContent').load('/welcome/greeting')
 	{% endif %}
 });
-function blockuiForm(url){
+function blockuiForm(url,what_to_callback){
         var offsetX =  ($(window).width() - 400) /2
-        var offsetY =  ($(window).height() / 5)
+        var offsetY =  ($(window).height() / 6)
 
-        $('#blockui_area').html('')
-        $('#blockui_area').load(url,function(text,status){
+	var callback_function = function(text,status){
                 $(".close_form").click(function(){ $.unblockUI(); });
                 NFDo('start',offsetX,offsetY);
-        });
+		//NFInit()
+	}
+
+	if( what_to_callback != undefined) {
+		callback_function = what_to_callback
+	}
+
+        $('#blockui_area').html('')
+        $('#blockui_area').load(url,callback_function);
         $.blockUI({ message: $('#blockui_area'),css: {
                 top:  offsetY + 'px',
                 left: offsetX + 'px',
@@ -205,16 +212,17 @@ function newData() {
 	{% else %}
           var url = '/profile/new/';
 	{% endif %}
-        $('#blockui_area').load(url ,function(text,status){
-		$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
-		$(".close_form").click(function(){ $.unblockUI(); });
+        var offsetX =  ($(window).width() - 400) /2
+        var offsetY =  ($(window).height() / 6)
+	blockuiForm(url,function(){
+                $(".close_form").click(function(){ $.unblockUI(); });
+                NFDo('start',offsetX,offsetY);
 		$('#birthday').datepicker({
 			yearRange:'-50:0',
 			changeMonth: true,
 			changeYear: true
 		});
                 $('#ui-datepicker-div').css('z-index','2000')
-        	$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
 	});
 }
 function deleteData(com,grid){if($('.trSelected',grid).length>0){
@@ -224,7 +232,7 @@ function deleteData(com,grid){if($('.trSelected',grid).length>0){
                 itemlist.push(items[i].id.substr(3));
         }
 	itemlist_s = itemlist.join(',')
-	if(confirm('本当に削除しますか？')){
+	if(confirm('本当に削除しますか？ 削除レコード数(' + items.length + ')')){
 		$.ajax({
 		   type: "POST",
 		   dataType: "json",
@@ -257,9 +265,11 @@ function editData(com,grid) {
         }
         var id = items[0].id.substr(3);
         var url = '/profile/edit/' + id + '?v={{view.key.id}}';
-	$('#blockui_area').load(url,function(text,status){
-		$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
-		$(".close_form").click(function(){ $.unblockUI(); });
+        var offsetX =  ($(window).width() - 400) /2
+        var offsetY =  ($(window).height() / 6)
+	blockuiForm(url,function(){
+                $(".close_form").click(function(){ $.unblockUI(); });
+                NFDo('start',offsetX,offsetY);
 		$('#birthday').datepicker({
 			yearRange:'-50:0',
 			changeMonth: true,
@@ -267,7 +277,6 @@ function editData(com,grid) {
 		});
                 $('#ui-datepicker-div').css('z-index','2000')
 	});
-	$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
 }
 function initSharedViewContextMenu(action,el,pos){
 	var id = $(el).attr('id').slice(2)
@@ -305,12 +314,7 @@ function initFileContextMenu(action,el,pos){
 	var id = $(el).attr('id').slice(2)
 	if( action=="share" ) {
    		url = '/view/share/' + id
-		$('#blockui_area').html('');
-		$('#blockui_area').load(url,function(text,status){
-			$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
-			$(".close_form").click(function(){ $.unblockUI(); });
-			$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
-		});
+		blockuiForm(url)
 	}else if( action=="delete" ) {
 		var url = '/view/delete'
 		if( confirm($(el).text() +'を本当に削除しますか？') != true ){
@@ -359,11 +363,7 @@ function initContextMenu(action,el,pos){
 			submitData('db_id=' + id)
                 }else if( action == 'edit' ){
                         var url = '/groups/edit?id='+id
-			$('#blockui_area').load(url,function(text,status){
-				$.NiceJForms.build({ imagesPath:"/css/niceforms/images/default/" })
-				$(".close_form").click(function(){ $.unblockUI(); });
-			});
-			$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
+			blockuiForm(url)
                 }else if( action=="delete" ) {
                         var url = '/groups/delete'
                         if( confirm('['+$(el).text() +']を本当に削除しますか？') != true ){
@@ -373,7 +373,6 @@ function initContextMenu(action,el,pos){
 				submitData('id=' + id)
                         }
                 }
-        
 }
 </script>
 

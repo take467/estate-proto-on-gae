@@ -55,6 +55,8 @@ class ViewController(BaseController):
       id = self.params.get('edit_view_id')
       name = self.params.get('view_name')
 
+      logging.debug("[ViewController#update] (params)="+ self.to_json(self.params) +")")
+
       # build yaml for config
       if not id:
         return
@@ -65,7 +67,8 @@ class ViewController(BaseController):
         if col['type'] == 'hidden':
           continue
         key = "disp_%s" % col['name']
-        val = self.params.get(key)
+        val = self.params.get(key,'None')
+
         if val == 'yes':
           col['checked']= 'checked'
         else:

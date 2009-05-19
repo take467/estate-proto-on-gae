@@ -37,16 +37,19 @@ class ProfileController(BaseController):
       self.render(text="done")
 
     def delete(self):
-      user = user=users.get_current_user()
+      user=users.get_current_user()
       items = self.params.get('items')
       # split by ','
       msg = {'status':'success'}
       for id in items.split(','):
           if id != None and id != '':
-            #data = ProfileCore().get_by_id(int(id))
-            data = db.GqlQuery("SELECT * FROM ProfileCore WHERE  user = :1 and id = :2",user,int(id)).get()
-            if data:
+            data = ProfileCore().get_by_id(int(id))
+            #data = db.GqlQuery("SELECT * FROM ProfileCore WHERE  user = :1 and id = :2",user,int(id)).get()
+            if data and data.user == user:
               data.delete()
+            else:
+              msg = {'status':'error','msg':'不正な操作です(' + str(data) + ')'}
+
       self.render(json=self.to_json(msg))
 
     def update(self):
@@ -75,7 +78,7 @@ class ProfileController(BaseController):
             if val and val != '':
               setattr(rec,col['name'],val)
         rec.put()
-      data = {'status':'success'}
+      data = {'status':'success','flexReload':'true'}
       self.render(json=self.to_json(data))
 
     def edit(self):
@@ -160,7 +163,7 @@ class ProfileController(BaseController):
             setattr(rec,col['name'],val)
 
       rec.put()
-      data = {'status':'success'}
+      data = {'status':'success','flexReload':'true'}
       self.render(json=self.to_json(data))
 
     def search_refinement(self):

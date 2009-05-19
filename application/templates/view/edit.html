@@ -8,16 +8,15 @@
 	</tr>
 	<tr>
 		<td valign="top" align="left"><label for="text">項目</label></td>
-		<td align="left"><font size="-3">使用する項目にチェックを付けてください</font><br/>
+		<td align="left"><font size="-3">使用する項目にチェックを付けてください</font><br />
 		{% for col in config %}{% ifnotequal col.type 'hidden' %}
-
-			<div style="margin-top:0.2em">
-			<input type="checkbox" name="disp_{{col.name}}" id="check_{{col.name}}" value="yes" {{col.checked}}><label for="check_{{col.name}}">{{col.label}}</label>
-			</div>
+				<input type="checkbox" name="disp_{{col.name}}" id="disp_{{col.name}}" value="yes" {{col.checked}}>
+				<label for="check_{{col.name}}">{{col.label}}</label><br clear="all">
 		{% endifnotequal %}{% endfor %}
 		</td>
 	</tr>
 	</table>
-	<input type="button" id="submit_called_by_treeview" value="保存" onclick="update_view();return false"> -
+	<input type="button" id="submit_blockui_form" value="保存" onclick="update_view();return false"> -
+	<!-- input type="submit" id="submit_blockui_form" value="保存" > - -->
 	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
 </form>

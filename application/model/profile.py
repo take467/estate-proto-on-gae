@@ -6,7 +6,7 @@ from model.user_db import UserDb
 class ProfileCore(BaseModel):
   claimed_id      = db.StringProperty()
   user_db_id      = db.ReferenceProperty(UserDb)
-  user            = db.UserProperty(required=True)
+  user            = db.UserProperty()
   passwd          = db.StringProperty(default='')
   status          = db.StringProperty(default='active')
   email           = db.StringProperty(default='')
@@ -34,7 +34,7 @@ class ProfileCore(BaseModel):
 
   disp_columns = [
 	{'name':'post_at','label':'登録日','checked':'checked','width':'80','align':'right','type':'hidden','hidden':'true','format':'%Y/%m/%d %H:%M:%S','search_refinement':'false'}
-	,{'name':'status','label':'ステータス','checked':'checked','width':'80','align':'left','type':'radio','search_refinement':True,'hidden':'true'}
+	,{'name':'status','label':'ステータス','checked':'checked','width':'80','align':'left','type':'select','search_refinement':True,'hidden':'true'}
 	,{'name':'name','label':'氏名','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
 	,{'name':'name_yomi','label':'氏名(かな)','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
 	,{'name':'organization','label':'企業/団体','checked':'checked','width':'180','align':'left','type':'text','search_refinement':True,'hidden':'false'}

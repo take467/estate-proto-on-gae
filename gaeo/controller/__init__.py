@@ -129,7 +129,10 @@ class BaseController(object):
 
         # check the default Content-Type is 'text/html; charset=utf-8'
         h['Content-Type'] = 'text/html; charset=utf-8'
-        h['If-Modified-Since']= "Thu, 01 Jun 1970 00:00:00 GMT"
+        #h['Last-Modified']= "Thu, 01 Jun 2030 00:00:00 GMT"
+        h['Pragma']       = 'no-cache'
+        h['Cache_Control']= 'no-store'
+        h['Expires']      = 'now'
         if html:
             for h in html:
                 o.write(h.decode('utf-8'))
