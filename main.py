@@ -33,6 +33,7 @@ def initRoutes():
     r.connect('/product/thumbnail/:id/:filename.:suffix',controller='product',action='thumbnail')
     r.connect('/product/thumbnail/:id/:filename',controller='product',action='thumbnail')
     r.connect('/google7562b62e5c4ce30a.:sufix',controller='welcome',action='google')
+    r.connect('/view/export/:id/:filename.:suffix',controller='view',action='export')
 
 def initPlugins():
     """

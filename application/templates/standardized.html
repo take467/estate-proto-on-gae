@@ -62,10 +62,11 @@ $(document).ready(function(){
 	});
 	$("#shared_treeview").load('/groups/shared_treeview',function(){
 		$(this).treeview({});
+		$(".file").contextMenu({ menu: 'sharedViewrMenu' }, function(action,el,pos){});
 	});
 	$("#shared_member_list").load('/groups/shared_member_list',function(){
 		$(this).treeview({});
-		$(".file").contextMenu({ menu: 'sharedViewMenu' }, function(action,el,pos){initSharedViewContextMenu(action, el, pos)});
+		$(".file").contextMenu({ menu: 'sharedViewMemberMenu' }, function(action,el,pos){initSharedViewContextMenu(action, el, pos)});
 	});
 	{% if view %}
                 $('#search_refinement_area').load('/profile/search_refinement',function(){initSearchRefinment();$.unblockUI();});
@@ -313,19 +314,24 @@ function initSharedViewContextMenu(action,el,pos){
 function initFileContextMenu(action,el,pos){
 	var id = $(el).attr('id').slice(2)
 	if( action=="share" ) {
-   		url = '/view/share/' + id
-		blockuiForm(url)
+		blockuiForm('/view/share/'+id)
 	}else if( action=="delete" ) {
-		var url = '/view/delete'
-		if( confirm($(el).text() +'を本当に削除しますか？') != true ){
-			return;
-		}else{  
-			$('#action_url').val(url)
+		if( confirm($(el).text() +'を本当に削除しますか？')){
+			$('#action_url').val('/view/delete')
 			submitData('id='+id)
 		}
 	}else if( action =="edit"){
-   		url = '/view/edit?id=' + id
-		blockuiForm(url)
+		blockuiForm('/view/edit?id=' + id)
+	}else if( action=="export"){
+		if( confirm($(el).text() +'のデータをダウンロードします。(文字コード:SJIS/フォーマット:CSV)')){
+			isIE = 'false';
+			if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+				isIE = 'true'
+			}
+			location = '/view/export/' + id + '/' + $(el).text() + '.csv?ie='+isIE
+		}
+	}else if( action =="import" ){
+		blockuiForm('/view/import_csv/' + id)
 	}
 }
 function init_treeview(){
@@ -374,6 +380,30 @@ function initContextMenu(action,el,pos){
                         }
                 }
 }
+function upload_csv(){
+  $("#upload_form").ajaxForm({
+    dataType: "json",
+    success: function (data) {
+	$.unblockUI()
+	if( data.msg != undefined ){
+	  alert(data.msg);
+	}
+	if (data.status == 'success') {
+		if( data.flexReload == 'true' ){
+			$("#flexigrid01").flexReload();
+		}
+		if( data.cv_id != undefined ){
+			$.cookie('cv_id',data.cv_id)
+		}
+	}
+    },
+    error: function (xml, status, e) {
+	alert("Server Error:" + e);
+	$.unblockUI()
+    }
+  });
+
+}
 </script>
 
 </head>
@@ -417,6 +447,8 @@ function initContextMenu(action,el,pos){
 						<li class="share"><a href="#share">共有</a></li>
 						<li class="edit separator"><a href="#edit">編集</a></li>
 						<li class="delete"><a href="#delete">削除</a></li>
+						<li class="export separator"><a href="#export">書き出し</a></li>
+						<li class="import"><a href="#import">アップロード</a></li>
 					</ul>
 					<ul id="myMenu" class="contextMenu">
 						<li class="add"><a href="#addview">ビューの追加</a></li>
@@ -433,11 +465,13 @@ function initContextMenu(action,el,pos){
 				</div>
 				<h3>利用データベース</h3>
 				<div class="boxContent" id="shared_view_lists">
+					<ul id="sharedViewMenu" class="contextMenu">
+					</ul>
 					<ul id="shared_treeview" class="filetree treeview"></ul>
 				</div>
 				<h3>共有　メンバー一覧</h3>
 				<div class="boxContent" id="shared_member">
-					<ul id="sharedViewMenu" class="contextMenu">
+					<ul id="sharedViewMemberMenu" class="contextMenu">
 						<li class="delete"><a href="#delete">削除</a></li>
 					</ul>
 					<ul id="shared_member_list" class="filetree treeview"></ul>

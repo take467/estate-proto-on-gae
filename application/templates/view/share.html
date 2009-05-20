@@ -2,16 +2,32 @@
 <form id="blockui_form" class="niceform" >
 	<input type="hidden" name="shared_view_id" id="shared_view_id" value="{{view.key.id}}">
 
-<div style="text-align:left">
-<p style="margin:0.2em">共有設定：{{view.user_db_id.name}} &gt; {{view.name}}</p>
-	<label for="share_users">共有するユーザのメールアドレス(複数指定可)</label><br />
-	<textarea id="share_users" name="share_users" rows="10" cols="35"></textarea>
-	<br />
-	<input type="checkbox" id='w' name='w' value="yes"><label for="w">書き込み権限</label><br/>
-	<input type="checkbox" id='d' name='d' value="yes"><label for="d">削除権限</label><br/>
-	<input type="checkbox" id='dl' name='dl' value="yes"><label for="dl">ダウンロード権限</label><br/>
+        <table>
+	<tr>
+		<td>
+			<div style="text-align:left;margin:0px;padding:0px">
+			<p style="margin:0.2em">共有設定：{{view.user_db_id.name}} &gt; {{view.name}}</p>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<div style="text-align:left">
+			<label for="share_users">共有するユーザのメールアドレス</label><br />
+			<!-- textarea id="share_users" name="share_users" rows="10" cols="35"></textarea -->
+			<input type="text" id="share_users" name="share_users" value="" size="40">
+			</div>
+		</td>
+	</tr>
+        <tr>
+                <td align="left"><font size="-3">ユーザの権限にチェックを付けてください</font><br />
+			<input type="checkbox" id='w' name='w' value="yes"><label for="w">書き込み権限</label><br/>
+			<input type="checkbox" id='d' name='d' value="yes"><label for="d">削除権限</label><br/>
+			<input type="checkbox" id='dl' name='dl' value="yes"><label for="dl">ダウンロード権限</label><br/>
+                </td>
+        </tr>
+        </table>
 	<br/>
-</div>
 
 	<input type="button" id="submit_called_by_treeview" value="実行" onclick="shareView();return false"> -
 	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">

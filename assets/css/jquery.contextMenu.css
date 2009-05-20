@@ -63,3 +63,5 @@
 .contextMenu LI.quit A { background-image: url(/img/contextMenu/door.png); }
 .contextMenu LI.share A { background-image: url(/img/contextMenu/world.png); }
 .contextMenu LI.openid A { background-image: url(/img/oid.gif); }
+.contextMenu LI.export A { background-image: url(/img/contextMenu/application_put.png); }
+.contextMenu LI.import A { background-image: url(/img/contextMenu/application_get.png); }

@@ -199,16 +199,6 @@ class ProfileController(BaseController):
         else:
           self.view = None
 
-    def download(self):
-      vid = self.params.get('view_id')
-      if not vid:
-        self.render(text="不正なリクエスト")
-        return
-
-      # ユーザーに権限があるかチェック
-
-      view = UserView.get_by_id(int(vid))
-
     def json(self):
       #id = self.params.get('id')
       #retrive from cookie

@@ -104,6 +104,9 @@ class BaseController(object):
     def after_action(self):
         pass
         
+    def getResponse(self):
+      return self.resp
+
     def invalid_action(self):
         """ If the router went to an invalid action """
         self.hnd.error(404)
@@ -149,6 +152,7 @@ class BaseController(object):
                 else:
                   h['Content-Type'] = 'application/octet-stream'
                 o.write(opt.get('binary'))
+
             elif opt.has_key('text'):
                 h['Content-Type'] = 'text/plain; charset=utf-8'
                 o.write(str(opt.get('text')).decode('utf-8'))
@@ -196,6 +200,9 @@ class BaseController(object):
                 raise errors.ControllerRenderTypeError('Render type error')
         self.has_rendered = True
 
+    def skip_rendering(self):
+      self.has_rendered = True
+ 
     def redirect(self, url, perm = False):
         self.has_rendered = True # dirty hack, make gaeo don't find the template
         self.hnd.redirect(url, perm)

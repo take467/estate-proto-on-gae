@@ -10,6 +10,7 @@ from model.profile import ProfileCore
 import yaml
 import copy
 import logging
+import datetime
 
 from google.appengine.ext.webapp import template
 
@@ -21,21 +22,85 @@ class ViewController(BaseController):
         self.v_id = self.cookies['cv_id']
       pass
 
-#    def cols(self):
-#      colModels=[]
-#      if self.v_id:
-#        view = UserView.get_by_id(int(self.v_id))
-#        configs =  yaml.load(view.config)
-#        colModels.append({'name':'id','label':'ID','width':'20','align':'center','hidden':'false'})
-#        for col in configs:
-#          if col['checked'] == 'checked':
-#            if 'hidden' not in col:
-#              col['hidden'] = 'false'
-##            elif col['hidden'] == '':
-#              col['hidden'] = 'false'
-#
-#            colModels.append(col)
-#      self.render(json=self.to_json(colModels))
+    def import_csv(self):
+      if self.request.method.upper() == "GET":
+        self.view = UserView.get_by_id(int(self.params.get('id')))
+        pass
+
+      if self.request.method.upper() == "POST":
+        data={'status':'success','msg':'アップロードが完了しました'}
+        view = UserView.get_by_id(int(self.params.get('edit_view_id')))
+
+        view.data = self.params.get('file')
+        view.put()
+        
+
+        if self.v_id == self.params.get('edit_view_id'):
+          data['flexReload']='true'
+
+        self.render(json=self.to_json(data))
+        pass
+
+    def export(self):
+      id = self.params.get('id')
+      if id == None:
+        self.render(text='不正なリクエスト')
+        return
+
+      view = UserView.get_by_id(int(id))
+      # 所有者 or 権限のあるユーザかチェック
+
+      canDL = False
+      if self.user == view.user_db_id.user:
+        canDL = True
+      else:
+        view.getProperty
+        su = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1 and share_view_id = :2",self.user.email(), view.key().id()).get()
+        if su.isDownloadable(): 
+          canDL = True
+
+      if not canDL:
+        self.render(text="不正なリクエスト(permission denied)")
+        return
+
+      results = ProfileCore.all().filter(' user_db_id =',view.user_db_id)
+      config = yaml.load(view.config)
+
+      # CSVのヘッダ情報
+      line = []
+      for col in config:
+        if col['checked'] == 'checked':
+          line.append('"' + col['label']+'"')
+      header= ','.join(line) + "\r\n"
+
+      self.skip_rendering()
+      res = self.getResponse()
+      res.headers['Content-Type'] = "application/x-csv;charset:Shift_JIS"
+      #res.headers['Content-Type'] = "application/octet-stream"
+      if self.params.get('ie','false') == 'true' :
+        res.headers["Content-Disposition"]="attachment; filename=" + self.params.get('filename') + ".csv"
+
+      res.out.write(header.encode('cp932'))
+
+      for rec in results:
+        line = []
+        for col in config:
+          if col['checked'] == 'checked':
+            val = getattr(rec,col['name'])
+            #if col['type'] == 'radio' or col['type'] == 'select':
+            #  udm = db.GqlQuery("SELECT  * FROM UserDbMaster WHERE name = :1",col['name']).get()
+            #  for item in yaml.load(udm.yaml_data):
+            #    if item['code'] == val:
+            #      val = item['name']
+            if isinstance(getattr(ProfileCore,col['name']),db.DateTimeProperty):
+              wk2 = val + datetime.timedelta(hours=9)
+              if 'format' in col:
+                val = wk2.strftime(col['format'])
+              else:
+                val = wk2.strftime('%Y/%m/%d %H:%M:%S')
+            line.append('"' + val.replace('"','""') + '"')
+        wk = ','.join(line) + "\r\n"
+        res.out.write(wk.encode('cp932'))
 
     def share(self):
       id = self.params.get('id')

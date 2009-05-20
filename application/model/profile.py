@@ -33,24 +33,24 @@ class ProfileCore(BaseModel):
   post_at         = db.DateTimeProperty(auto_now_add=True)
 
   disp_columns = [
-	{'name':'post_at','label':'登録日','checked':'checked','width':'80','align':'right','type':'hidden','hidden':'true','format':'%Y/%m/%d %H:%M:%S','search_refinement':'false'}
-	,{'name':'status','label':'ステータス','checked':'checked','width':'80','align':'left','type':'select','search_refinement':True,'hidden':'true'}
-	,{'name':'name','label':'氏名','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'name_yomi','label':'氏名(かな)','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'organization','label':'企業/団体','checked':'checked','width':'180','align':'left','type':'text','search_refinement':True,'hidden':'false'}
+	{'name':'post_at','label':u'登録日','checked':'checked','width':'80','align':'right','type':'hidden','hidden':'true','format':'%Y/%m/%d %H:%M:%S','search_refinement':'false'}
+	,{'name':'status','label':u'ステータス','checked':'checked','width':'80','align':'left','type':'select','search_refinement':True,'hidden':'true'}
+	,{'name':'name','label':u'氏名','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'name_yomi','label':u'氏名(かな)','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'organization','label':u'企業/団体','checked':'checked','width':'180','align':'left','type':'text','search_refinement':True,'hidden':'false'}
 	,{'name':'section','label':'所属/部署','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'title','label':'役職','checked':'checked','width':'80','align':'left','type':'text','search_refinement':True,'hidden':'false'}
-	,{'name':'birthday','label':'生年月日','checked':'checked','width':'100','align':'left','type':'date','format':'yyyy/mm/dd','search_refinement':'false','hidden':'false'}
-	,{'name':'sex','label':'性別','checked':'checked','width':'30','align':'left','type':'radio','search_refinement':True,'hidden':'false'}
-	,{'name':'zipcode','label':'郵便番号','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'prefecture','label':'都道府県','checked':'checked','width':'60','align':'left','type':'select','search_refinement':True,'hidden':'false'}
-	,{'name':'city','label':'市町村区','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'address','label':'それ以降の住所','checked':'checked','width':'180','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'email','label':'電子メール','checked':'checked','width':'120','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'mobile_email','label':'電子メール(携帯)','checked':'checked','width':'120','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'tel_no','label':'電話番号','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'cellphone_no','label':'電話番号(携帯)','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'fax_no','label':'FAX番号','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'title','label':u'役職','checked':'checked','width':'80','align':'left','type':'text','search_refinement':True,'hidden':'false'}
+	,{'name':'birthday','label':u'生年月日','checked':'checked','width':'100','align':'left','type':'date','format':'yyyy/mm/dd','search_refinement':'false','hidden':'false'}
+	,{'name':'sex','label':u'性別','checked':'checked','width':'30','align':'left','type':'radio','search_refinement':True,'hidden':'false'}
+	,{'name':'zipcode','label':u'郵便番号','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'prefecture','label':u'都道府県','checked':'checked','width':'60','align':'left','type':'select','search_refinement':True,'hidden':'false'}
+	,{'name':'city','label':u'市町村区','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'address','label':u'それ以降の住所','checked':'checked','width':'180','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'email','label':u'電子メール','checked':'checked','width':'120','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'mobile_email','label':u'電子メール(携帯)','checked':'checked','width':'120','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'tel_no','label':u'電話番号','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'cellphone_no','label':u'電話番号(携帯)','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'fax_no','label':u'FAX番号','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
   ]
 
 class ProfileEx(BaseModel):
