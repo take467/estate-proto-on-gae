@@ -34,9 +34,9 @@ class Share_userController(BaseController):
       key = col['name']
       val = self.params.get(key)
       if val == 'yes':
-        col['val']= True
+        col['val']= 'true'
       else:
-        col['val']= False
+        col['val']= 'false'
 
     yaml_data = yaml.dump(config)
     wk = self.params.get('share_users')

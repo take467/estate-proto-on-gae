@@ -45,6 +45,11 @@
 <script src="/js/niceforms-v20.js"></script>
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
+	# 右クリック禁止
+	$(document).bind("contextmenu",function(e){
+	  return false;
+	});
+
 	//$.preloadCssImages();
         $.ajaxSetup({cache: false });
         {% if fields %}
@@ -62,11 +67,11 @@ $(document).ready(function(){
 	});
 	$("#shared_treeview").load('/groups/shared_treeview',function(){
 		$(this).treeview({});
-		$(".file").contextMenu({ menu: 'sharedViewrMenu' }, function(action,el,pos){});
+		$(".file").contextMenu({ menu: 'sharedViewMenu' }, function(action,el,pos){initSharedViewContextMenu(action, el, pos)});
 	});
 	$("#shared_member_list").load('/groups/shared_member_list',function(){
 		$(this).treeview({});
-		$(".file").contextMenu({ menu: 'sharedViewMemberMenu' }, function(action,el,pos){initSharedViewContextMenu(action, el, pos)});
+		$(".file").contextMenu({ menu: 'sharedViewMemberMenu' }, function(action,el,pos){initSharedMemberContextMenu(action, el, pos)});
 	});
 	{% if view %}
                 $('#search_refinement_area').load('/profile/search_refinement',function(){initSearchRefinment();$.unblockUI();});
@@ -195,7 +200,7 @@ function shareView(){
 			alert('共有を開始しました');
 			$("#shared_member_list").load('/groups/shared_member_list',function(){
 				$(this).treeview({});
-				$(".file").contextMenu({ menu: 'sharedViewMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+				$(".file").contextMenu({ menu: 'sharedViewMemberMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
 			});
 		}
 		$.unblockUI();
@@ -281,6 +286,18 @@ function editData(com,grid) {
 }
 function initSharedViewContextMenu(action,el,pos){
 	var id = $(el).attr('id').slice(2)
+	if( action=="export" ) {
+		if( confirm($(el).text() +'のデータをダウンロードします。(文字コード:SJIS/フォーマット:CSV)')){
+			isIE = 'false';
+			if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+				isIE = 'true'
+			}
+			location = '/view/export/' + id + '/' + $(el).text() + '.csv?ie='+isIE
+		}
+	}
+}
+function initSharedMemberContextMenu(action,el,pos){
+	var id = $(el).attr('id').slice(2)
 	if( action=="delete" ) {
 		var url = '/share_user/delete'
 		if( confirm($(el).text() +'の共有を解除しますか？') != true ){
@@ -296,7 +313,7 @@ function initSharedViewContextMenu(action,el,pos){
 				if( data.status == 'success' ){
 					$("#shared_member_list").load('/groups/shared_member_list',function(){
 						$(this).treeview({});
-						$(".file").contextMenu({ menu: 'sharedViewMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+						$(".file").contextMenu({ menu: 'sharedViewMemberMenu' }, function(action,el,pos){initShareViewContextMenu(action, el, pos)});
 					});
 					$.unblockUI();
 				}else{
@@ -330,8 +347,6 @@ function initFileContextMenu(action,el,pos){
 			}
 			location = '/view/export/' + id + '/' + $(el).text() + '.csv?ie='+isIE
 		}
-	}else if( action =="import" ){
-		blockuiForm('/view/import_csv/' + id)
 	}
 }
 function init_treeview(){
@@ -395,6 +410,13 @@ function upload_csv(){
 		if( data.cv_id != undefined ){
 			$.cookie('cv_id',data.cv_id)
 		}
+                if( data.r != undefined ){
+                        location = data.r
+                }else{
+			if( data.reload == 'true' ){
+				location.reload()
+			}
+		}
 	}
     },
     error: function (xml, status, e) {
@@ -419,6 +441,7 @@ function upload_csv(){
 			<li><a href="#">ファイル</a>
 				<ul>
 				<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase()">新規データベース</a>
+				<li><a id="new_database_anchor" href="javascript:void(0);" onclick="blockuiForm('/groups/import_csv')">インポート</a>
 				</ul>
 			</li>
 			<li style="float:right"><a href="{{logout_url}}">ログアウト</a></li>
@@ -448,7 +471,6 @@ function upload_csv(){
 						<li class="edit separator"><a href="#edit">編集</a></li>
 						<li class="delete"><a href="#delete">削除</a></li>
 						<li class="export separator"><a href="#export">書き出し</a></li>
-						<li class="import"><a href="#import">アップロード</a></li>
 					</ul>
 					<ul id="myMenu" class="contextMenu">
 						<li class="add"><a href="#addview">ビューの追加</a></li>
@@ -466,13 +488,14 @@ function upload_csv(){
 				<h3>利用データベース</h3>
 				<div class="boxContent" id="shared_view_lists">
 					<ul id="sharedViewMenu" class="contextMenu">
+						<li class="export separator"><a href="#export">書き出し</a></li>
 					</ul>
 					<ul id="shared_treeview" class="filetree treeview"></ul>
 				</div>
 				<h3>共有　メンバー一覧</h3>
 				<div class="boxContent" id="shared_member">
 					<ul id="sharedViewMemberMenu" class="contextMenu">
-						<li class="delete"><a href="#delete">削除</a></li>
+						<li class="delete"><a href="#delete">共有解除</a></li>
 					</ul>
 					<ul id="shared_member_list" class="filetree treeview"></ul>
 				</div>

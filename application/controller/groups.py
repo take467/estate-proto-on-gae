@@ -9,6 +9,8 @@ from model.share_user import ShareUser
 from google.appengine.api import users
 import yaml
 import copy
+import csv
+import logging
 
 class GroupsController(BaseController):
     def before_action(self):
@@ -17,6 +19,104 @@ class GroupsController(BaseController):
       if 'cv_id' in self.cookies:
         self.v_id = self.cookies['cv_id']
       pass
+
+    def sample(self):
+
+      self.skip_rendering()
+      res = self.getResponse()
+      res.headers['Content-Type'] = "application/x-csv;charset:Shift_JIS"
+      res.headers["Content-Disposition"]="attachment; filename=" + "e-sample.csv"
+
+      labels = []
+      names   = []
+      i = 0
+      for col in ProfileCore.disp_columns:
+        if col['type'] != 'hidden':
+          labels.append( self.__conv(col['label'],'cp932'))
+          names.append('"' + col['name'] + '"')
+
+
+      wk = '#'+','.join(labels) + "\r\n"
+      res.out.write(wk)
+      wk = ','.join(names) + "\r\n"
+      res.out.write(wk.encode('cp932'))
+
+    def import_csv(self):
+      if self.request.method.upper() == "GET":
+        pass
+
+      if self.request.method.upper() == "POST":
+        data={'status':'success','msg':'アップロードが完了しました','r':'/'}
+        if not self.user:
+          self.render(json=self.to_json({'status':'error','msg':'不正なリクエスト'}))
+          return
+
+        # いったんワークエリアにデータをコピー
+        bin = self.params.get('file')
+        if not bin:
+          self.render(json=self.to_json({'status':'error','msg':'ファイルを指定してください'}))
+          return
+
+        fname =  self.request.body_file.vars['file'].filename
+        udb = UserDb(user=self.user,name=unicode(fname,self.__guess_charset(fname)))
+        udb.put()
+
+        # ついでにビューもつくってしまう (viewのカラムのcheckedを一反外す)
+        v = UserView(user_db_id = udb)
+        v.put()
+        # カレントのビューをこれにするためにcv_idをセット
+        data['cv_id']=str(v.key().id())
+
+        # viewのカラムのcheckedを一反外し、csvにあるカラムのみ有効にする
+        config = copy.deepcopy(ProfileCore.disp_columns)
+        for col in config:
+          if col['type'] != 'hidden':
+            col['checked'] = ''
+
+        #try:
+        lines = []
+        colinfo = None
+        for line in bin.splitlines():
+          if line[0] == '#' or line[0:2] == '"#':
+            continue
+
+          # カラム情報の取得
+          if not colinfo:
+            for row in csv.reader(line):
+              for e in row:
+                if colinfo == None:
+                  colinfo = []
+                colinfo.append(e)
+                # カラムにcheckedをいれる
+                for col in config:
+                  if col['name'] == e:
+                     col['checked'] = 'checked'
+                     break
+
+            #data['msg'] = '|'.join(colinfo) 
+            v.config = yaml.dump(config)
+            v.put()
+          else:
+            rec = ProfileCore(user_db_id=udb,user=self.user)
+            rec.put()
+            cols = copy.deepcopy(colinfo)
+            wk = []
+            for row in csv.reader(line):
+              for e in row:
+                name = cols.pop(0)
+                if name:
+                  setattr(rec,name,unicode(e,self.__guess_charset(e)))
+                  #wk.append("(%s,%s)" % (name,e))
+
+            #data['msg'] = '|'.join(wk) 
+            rec.put()
+
+        #except Exception, ex:
+        #  data = {'status':'error','msg':'ファイルの読み込みに失敗しました'}
+         
+        self.render(json=self.to_json(data))
+
+        pass
 
     def shared_member_list(self):
       #自分のDBをとりだす
@@ -49,16 +149,16 @@ class GroupsController(BaseController):
       for u in db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1",self.user.email()):
         id =  u.share_view_id.user_db_id.key().id() 
         if id in dbs:
-          dbs[id].append(u.share_view_id)
+          dbs[id].append(u)
         else:
-          dbs[id] = [u.share_view_id]
+          dbs[id] = [u]
 
       # keyでループ
       for id in dbs.keys(): 
-        u =  UserDb.get_by_id(id)
-        self.user_dbs.append({'db':u,'views':dbs[id]})
+        udb =  UserDb.get_by_id(id)
+        self.user_dbs.append({'db':udb,'share_users':dbs[id]})
 
-      self.render(template='treeview')
+      #self.render(template='treeview')
 
 
     def treeview(self):
@@ -136,3 +236,24 @@ class GroupsController(BaseController):
       # カレントのビューをこれにするためにクッキーにセット
       data = {'status':'success','r':'/','cv_id':str(v.key().id())}
       self.render(json=self.to_json(data))
+
+    def __guess_charset(self,data):
+      f = lambda d, enc: d.decode(enc) and enc
+
+      try: return f(data, 'utf-8')
+      except: pass
+      try: return f(data, 'shift-jis')
+      except: pass
+      try: return f(data, 'euc-jp')
+      except: pass
+      try: return f(data, 'iso2022-jp')
+      except: pass
+      return None
+
+    def __conv(self,data,enc):
+      charset = self.__guess_charset(data)
+      u = data
+      if charset:
+        u = data.decode(charset)
+      return u.encode(enc)
+

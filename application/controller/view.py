@@ -6,6 +6,7 @@ from gaeo.controller import BaseController
 from model.user_db import UserDb
 from model.view    import UserView
 from model.profile import ProfileCore
+from model.share_user import ShareUser
 
 import yaml
 import copy
@@ -22,25 +23,6 @@ class ViewController(BaseController):
         self.v_id = self.cookies['cv_id']
       pass
 
-    def import_csv(self):
-      if self.request.method.upper() == "GET":
-        self.view = UserView.get_by_id(int(self.params.get('id')))
-        pass
-
-      if self.request.method.upper() == "POST":
-        data={'status':'success','msg':'アップロードが完了しました'}
-        view = UserView.get_by_id(int(self.params.get('edit_view_id')))
-
-        view.data = self.params.get('file')
-        view.put()
-        
-
-        if self.v_id == self.params.get('edit_view_id'):
-          data['flexReload']='true'
-
-        self.render(json=self.to_json(data))
-        pass
-
     def export(self):
       id = self.params.get('id')
       if id == None:
@@ -48,16 +30,19 @@ class ViewController(BaseController):
         return
 
       view = UserView.get_by_id(int(id))
-      # 所有者 or 権限のあるユーザかチェック
 
+      # 所有者 or 権限のあるユーザかチェック
       canDL = False
       if self.user == view.user_db_id.user:
         canDL = True
       else:
-        view.getProperty
-        su = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1 and share_view_id = :2",self.user.email(), view.key().id()).get()
-        if su.isDownloadable(): 
-          canDL = True
+        results = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1",self.user.email())
+        #results = ShareUser.all()
+        for rec in results:
+          if rec.share_view_id.key().id() == view.key().id(): 
+            if rec.isDownloadable(): 
+              canDL = True
+              break
 
       if not canDL:
         self.render(text="不正なリクエスト(permission denied)")
@@ -70,7 +55,8 @@ class ViewController(BaseController):
       line = []
       for col in config:
         if col['checked'] == 'checked':
-          line.append('"' + col['label']+'"')
+          #line.append('"' + col['label']+'"')
+          line.append('"' +  self.__conv(col['label'],'cp932') + '"')
       header= ','.join(line) + "\r\n"
 
       self.skip_rendering()
@@ -80,7 +66,8 @@ class ViewController(BaseController):
       if self.params.get('ie','false') == 'true' :
         res.headers["Content-Disposition"]="attachment; filename=" + self.params.get('filename') + ".csv"
 
-      res.out.write(header.encode('cp932'))
+      #res.out.write(header.encode('cp932'))
+      res.out.write(header)
 
       for rec in results:
         line = []
@@ -172,3 +159,22 @@ class ViewController(BaseController):
       v.delete()
       self.render(json=self.to_json(res))
 
+    def __guess_charset(self,data):
+      f = lambda d, enc: d.decode(enc) and enc
+
+      try: return f(data, 'utf-8')
+      except: pass
+      try: return f(data, 'shift-jis')
+      except: pass
+      try: return f(data, 'euc-jp')
+      except: pass
+      try: return f(data, 'iso2022-jp')
+      except: pass
+      return None
+
+    def __conv(self,data,enc):
+      charset = self.__guess_charset(data)
+      u = data
+      if charset:
+        u = data.decode(charset)
+      return u.encode(enc)

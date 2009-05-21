@@ -9,7 +9,6 @@ class UserView(BaseModel):
   user_db_id     = db.ReferenceProperty(UserDb)
   name   = db.StringProperty(default=u'新規ビュー')
   config = db.TextProperty()
-  data   = db.BlobProperty()
 
   def getProperty(self,key):
     prop =  yaml.load(self.config)
