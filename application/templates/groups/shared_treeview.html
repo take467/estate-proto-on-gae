@@ -1,0 +1,11 @@
+        {% for udb in user_dbs %}
+                <li id="udb_{{udb.db.key.id}}"><span id="d_{{udb.db.key.id}}" class="folder">{{ udb.db.name }}</span>
+                {% if udb.share_users %}
+                        <ul>
+                        {% for su in udb.share_users %}
+                                <li id="v_{{su.share_view_id.key.id}}"><span id="f_{{su.share_view_id.key.id}}" class="{% if su.isDownloadable %}file{% else %}file_nodl{% endif %}"><a href="javascript:void(0)" onclick="changeView('{{su.share_view_id.key.id}}')">{{su.share_view_id.name}}</a></span></li>
+                        {% endfor %}
+                        </ul>
+                {% endif %}
+                </li>
+        {% endfor %}
