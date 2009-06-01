@@ -9,3 +9,4 @@ class UserDbMaster(BaseModel):
 class UserDb(BaseModel):
   user  = db.UserProperty(required=True)
   name  = db.StringProperty(default=u'新規データベース')
+  service_type = db.StringProperty(default='p') # 'c': 問い合わせ

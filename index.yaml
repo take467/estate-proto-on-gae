@@ -378,7 +378,7 @@ indexes:
   - name: name
     direction: desc
 
-# Used 354 times in query history.
+# Used 22 times in query history.
 - kind: ProfileCore
   properties:
   - name: user_db_id

@@ -229,10 +229,18 @@ class GroupsController(BaseController):
 
       category = UserDb(user=self.user)
       category.put()
+      id = category.key().id()
+      category.name = u'新規DB(' + str(id) + ')'
+      category.put()
+
       # ついでにビューもつくってしまう
       cols = copy.deepcopy(ProfileCore.disp_columns)
       v = UserView(user_db_id = category,config=yaml.dump(cols))
       v.put()
+      id= v.key().id()
+      v.name=u'新規ビュー('+str(id)+')'
+      v.put()
+
       # カレントのビューをこれにするためにクッキーにセット
       data = {'status':'success','r':'/','cv_id':str(v.key().id())}
       self.render(json=self.to_json(data))

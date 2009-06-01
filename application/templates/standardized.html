@@ -45,7 +45,7 @@
 <script src="/js/niceforms-v20.js"></script>
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
-	# 右クリック禁止
+	// 右クリック禁止
 	$(document).bind("contextmenu",function(e){
 	  return false;
 	});
@@ -440,8 +440,13 @@ function upload_csv(){
 		<ul class="dropdown jd_menu ">
 			<li><a href="#">ファイル</a>
 				<ul>
-				<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase()">新規データベース</a>
-				<li><a id="new_database_anchor" href="javascript:void(0);" onclick="blockuiForm('/groups/import_csv')">インポート</a>
+				<li><a id="new_database_anchor" href="javascript:void(0);" ">新規</a>
+					<ul>
+					<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase()">個人情報データベース</a>
+					<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase()">お問合せデータベース</a>
+					</ul>
+				</li>
+				<li><a id="new_database_anchor" href="javascript:void(0);" onclick="blockuiForm('/groups/import_csv')">インポート</a></li>
 				</ul>
 			</li>
 			<li style="float:right"><a href="{{logout_url}}">ログアウト</a></li>
