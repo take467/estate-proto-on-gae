@@ -5,9 +5,13 @@ import yaml
 w = UserDbMaster.all()
 if w.count() == 0:
  status = [
-	{'code':'active','name':u'有効'},
-	{'code':'expired','name':u'無効'}
+	{'code':'active','name':u'有効'}
+	,{'code':'expired','name':u'無効'}
  ]
+ iq_status = [
+	{'code':'unanswered','name':u'未回答'}
+	,{'code':'answered','name':u'回答'}
+]
  sex = [
 	{'code':'male','name':u'男性'},
 	{'code':'female','name':u'女性'}

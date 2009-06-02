@@ -23,6 +23,40 @@ class ViewController(BaseController):
         self.v_id = self.cookies['cv_id']
       pass
 
+    def search_refinement(self):
+        
+        self.view = None
+        if self.v_id:
+          self.view = UserView.get_by_id(int(self.v_id))
+      
+        self.fields = []
+        self.width = 33
+        
+        i = 1
+        if self.view and self.view.user_db_id.user == self.user:
+
+          configs =  yaml.load(self.view.config)
+          for col in configs: 
+            if col['checked'] == 'checked':
+              if 'hidden' not in col:
+                col['hidden'] = 'false'
+              elif col['hidden'] == '':
+                col['hidden'] = 'false'
+
+              if col['type'] == 'radio' or col['type'] == 'select':
+                result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
+                if result.count() > 0:
+                  rec = result.get()
+                  i = i+1
+                  col['items'] = yaml.load(rec.yaml_data)
+                  self.fields.append(col)
+
+          m = 100 / i
+          if m < self.width:
+            self.width = m
+        else:
+          self.view = None
+
     def export(self):
       id = self.params.get('id')
       if id == None:

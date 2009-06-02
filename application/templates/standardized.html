@@ -74,8 +74,12 @@ $(document).ready(function(){
 		$(".file").contextMenu({ menu: 'sharedViewMemberMenu' }, function(action,el,pos){initSharedMemberContextMenu(action, el, pos)});
 	});
 	{% if view %}
-                $('#search_refinement_area').load('/profile/search_refinement',function(){initSearchRefinment();$.unblockUI();});
+          $('#search_refinement_area').load('/view/search_refinement',function(){initSearchRefinment();$.unblockUI();});
+     	  {% ifequal view.user_db_id.service_type 'c' %}
+		initInquiryFlexigrid()
+	  {% else %}
 		initFlexigrid()
+	  {% endifequal %}
         {% else %}
                 $('#primaryContent').load('/welcome/greeting')
 	{% endif %}
@@ -144,9 +148,9 @@ function submitData(qs){
         });
 	return status
 }
-function createDatabase(){
+function createDatabase(qs){
 	$('#action_url').val('/groups/create')
-	submitData()
+	submitData(qs)
 }
 
 function initSearchRefinment(){
@@ -172,6 +176,28 @@ function initFlexigrid(){
 					,{display:'{{item.display}}' , name:'{{item.name}}'}{% endfor %}
 				],
 			sortname: "post_at",
+			sortorder: "desc",
+			usepager: true,
+			useRp: true,
+			rp: 15,
+			showTableToggleBtn: true,
+			width: 'auto',
+			height: 350
+	});
+}
+function initInquiryFlexigrid(){
+	$("#flexigrid01").flexigrid({
+			url: '/inquiry/json/',
+			dataType: 'json',
+			procmsg: '読み込んでいます。しばらくお待ちください..',
+			pagestat: '全 {total} 件のうち、{from} - {to} 件目を表示中',
+			colModel :{% if colModelsJson %}{{ colModelsJson }}{% else %} []{% endif %},
+			buttons : [ {% if auth.w %}{name: '編集', bclass: 'edit', onpress : editInquiryData}, {separator: true},{% endif %} {% if auth.d %}{name: '削除', bclass: 'delete', onpress : deleteInquiryData}{% endif %} ],
+			searchitems : [
+				{display: '問い合せ番号', name : 'id',is_default: true}{% for item in searchitems %}
+					,{display:'{{item.display}}' , name:'{{item.name}}'}{% endfor %}
+				],
+			sortname: "iq_post_at",
 			sortorder: "desc",
 			usepager: true,
 			useRp: true,
@@ -231,6 +257,8 @@ function newData() {
                 $('#ui-datepicker-div').css('z-index','2000')
 	});
 }
+function deleteInquiryData(com,grid){
+}
 function deleteData(com,grid){if($('.trSelected',grid).length>0){
         var items = $('.trSelected',grid);
         var itemlist = [];
@@ -261,6 +289,8 @@ function deleteData(com,grid){if($('.trSelected',grid).length>0){
 		alert('削除する項目を選択してください(複数選択可)');
 	}
 }
+}
+function editInquiryData(com,grid) {
 }
 function editData(com,grid) {
 	$('#blockui_area').html('');
@@ -440,13 +470,9 @@ function upload_csv(){
 		<ul class="dropdown jd_menu ">
 			<li><a href="#">ファイル</a>
 				<ul>
-				<li><a id="new_database_anchor" href="javascript:void(0);" ">新規</a>
-					<ul>
-					<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase()">個人情報データベース</a>
-					<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase()">お問合せデータベース</a>
-					</ul>
-				</li>
-				<li><a id="new_database_anchor" href="javascript:void(0);" onclick="blockuiForm('/groups/import_csv')">インポート</a></li>
+					<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase()">新規個人情報データベース</a>
+					<li><a id="new_database_anchor" href="javascript:void(0);" onclick="createDatabase('service_type=c')">新規お問合せデータベース</a> </li>
+					<li><a id="new_database_anchor" href="javascript:void(0);" onclick="blockuiForm('/groups/import_csv')">インポート</a></li>
 				</ul>
 			</li>
 			<li style="float:right"><a href="{{logout_url}}">ログアウト</a></li>

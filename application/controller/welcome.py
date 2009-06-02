@@ -63,8 +63,13 @@ class WelcomeController(BaseController):
 
               self.colModels.append({'display':col['label'],'name':col['name'],'width':col['width'],'align':col['align'],'hidden':col['hidden'],'sortable':'true'})
               if col['type'] != 'radio' and col['type'] != 'select':
-                if isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
-                  self.searchitems.append({'display':col['label'],'name':col['name']})
+                if col['name'].startswith('iq_'):
+                  pass
+                  #if isinstance(getattr(Inquiry,col['name']),db.StringProperty):
+                  #  self.searchitems.append({'display':col['label'],'name':col['name']})
+                else:
+                  if isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
+                    self.searchitems.append({'display':col['label'],'name':col['name']})
               else:
                 result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
                 if result.count() > 0:

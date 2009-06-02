@@ -227,23 +227,55 @@ class GroupsController(BaseController):
         self.render(json=self.to_json(data))
         return
 
-      category = UserDb(user=self.user)
+      category = UserDb(user=self.user,service_type=self.params.get('service_type','p'))
+
       category.put()
       id = category.key().id()
-      category.name = u'新規DB(' + str(id) + ')'
+      name = u'DB(' + str(id) + ')'
+      if category.service_type == 'c':
+        name = u'問い合せDB(' + str(id) + ')'
+      category.name = name
       category.put()
 
       # ついでにビューもつくってしまう
-      cols = copy.deepcopy(ProfileCore.disp_columns)
+      cols = None
+      if category.service_type == 'c':
+        # 問い合わせフォーム専用ビュー
+        cols = self.__set_inquiry_config(ProfileCore.disp_columns)
+      else:
+        cols = copy.deepcopy(ProfileCore.disp_columns)
+
       v = UserView(user_db_id = category,config=yaml.dump(cols))
       v.put()
       id= v.key().id()
-      v.name=u'新規ビュー('+str(id)+')'
+      v.name=u'ビュー('+str(id)+')'
       v.put()
-
       # カレントのビューをこれにするためにクッキーにセット
-      data = {'status':'success','r':'/','cv_id':str(v.key().id())}
+      data={'status':'success','r':'/','cv_id':str(v.key().id())}
+
       self.render(json=self.to_json(data))
+
+    def __set_inquiry_config(self,org_columns):
+      cols = []
+
+      #問い合わせ番号(inquiryのid)
+      # 名前を Inquiry[id] とかにしたほうがよかったか？
+      cols.append({'name':'iq_id','label':u'問い合せ番号','checked':'checked','width':'80','align':'right','type':'text','hidden':'false','search_refinement':'false'})
+      #問い合わせ日
+      cols.append({'name':'iq_post_at','label':u'問い合せ日','checked':'checked','width':'100','align':'left','type':'date','format':'yyyy/mm/dd','search_refinement':'false','hidden':'false'})
+      #ステータス
+      cols.append({'name':'iq_status','label':u'ステータス','checked':'checked','width':'80','align':'left','type':'select','search_refinement':True,'hidden':'true'})
+      #タイトル
+      cols.append({'name':'title','label':u'件名','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'})
+      #送信者(E-Mail)
+      for col in org_columns:
+        if col['name'] != 'email':
+          col['checked'] = ''
+        cols.append(copy.copy(col)) 
+
+      return cols
+ 
+
 
     def __guess_charset(self,data):
       f = lambda d, enc: d.decode(enc) and enc

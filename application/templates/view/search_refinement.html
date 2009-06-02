@@ -1,0 +1,30 @@
+{% if view %}
+<form id="search_refinement">
+{% for f in fields %}
+	{% ifequal f.type 'radio' %}
+	<div style="float:left;width:{{width}}%">
+		<!-- label>{{f.label}}</label><br/ -->
+		<select name="{{f.name}}" size="1" id="sr_{{f.name}}" name="{{f.name}}" style="width:100%">
+		<option value=''>全{{f.label}}</option>
+		{% for item in f.items %}
+			<option id="sr_{{f.name}}_{{item.code}}" value="{{item.code}}">{{item.name}}</option>
+		{% endfor %}
+		</select>
+	</div>
+	{% endifequal %}
+	{% ifequal f.type 'select' %}
+	<div style="float:left;width:{{width}}%">
+		<!-- label>{{f.label}}</label><br/ -->
+		<select name="{{f.name}}" size="1" id="sr_{{f.name}}" name="{{f.name}}" style="width:100%">
+		<option value=''>全{{f.label}}</option>
+		{% for item in f.items %}
+			<option id="sr_{{f.name}}_{{item.code}}" value="{{item.code}}">{{item.name}}</option>
+		{% endfor %}
+		</select>
+	</div>
+	{% endifequal %}
+{% endfor %}
+</form>  
+{% else %}
+	{% include "greeting.html"  %}
+{% endif %}
