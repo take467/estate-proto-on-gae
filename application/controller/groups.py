@@ -5,6 +5,7 @@ from gaeo.controller import BaseController
 from model.user_db import UserDb
 from model.view import UserView
 from model.profile import ProfileCore
+from model.inquiry import *
 from model.share_user import ShareUser
 from google.appengine.api import users
 import yaml
@@ -170,20 +171,50 @@ class GroupsController(BaseController):
     def edit(self):
       id = self.params.get('id')
       self.user_db = UserDb.get_by_id(int(id))
+
+      if self.user_db.service_type == 'c':
+        self.config = yaml.load(self.user_db.config)
+        self.render(template="inquiry_edit")
       pass
 
     def update(self):
       if self.request.method.upper() != "POST":
         return 
 
-      id = self.params.get('id')
-      g = UserDb.get_by_id(int(id))
-      if g:
-        g.name = self.params.get('name')
-	g.put()
+      #logging.debug("[GroupsController#update] (params)="+ self.to_json(self.params) +")")
 
-      data = {'status':'success'}
-      self.render(json=self.to_json(data))
+      id = self.params.get('edit_db_id')
+      self.udb = UserDb.get_by_id(int(id))
+      self.udb.name = self.params.get('edit_db_name')
+
+      if self.udb.service_type != 'c':
+        self.udb.put()
+        data = {'status':'success'}
+        self.render(json=self.to_json(data))
+      else:
+
+        # iq_open
+        iq_open = self.params.get('iq_open','')
+        # recipients 
+        recipients = self.params.get('recipients',self.udb.user.email())
+
+        # columns
+        form_config = copy.deepcopy(self.udb.getProperty('form_config'))
+        for col in form_config:
+          if col['type'] == 'hidden':
+            continue
+          key = "disp_%s" % col['name']
+          val = self.params.get(key,'None')
+
+          if val == 'yes':
+            col['checked']= 'checked'
+          else:
+            col['checked']= ''
+
+        self.config = {'iq_open':iq_open,'recipients':recipients,'form_config':form_config}
+        self.udb.config = yaml.dump(self.config)
+        self.udb.put()
+        self.render(template="inquiry_update")
 
     def delete(self):
       if self.request.method.upper() != "POST":
@@ -234,6 +265,7 @@ class GroupsController(BaseController):
       name = u'DB(' + str(id) + ')'
       if category.service_type == 'c':
         name = u'問い合せDB(' + str(id) + ')'
+        category.config = yaml.dump(self.__set_inquiry_config(category))
       category.name = name
       category.put()
 
@@ -241,7 +273,7 @@ class GroupsController(BaseController):
       cols = None
       if category.service_type == 'c':
         # 問い合わせフォーム専用ビュー
-        cols = self.__set_inquiry_config(ProfileCore.disp_columns)
+        cols = self.__set_inquiry_cols()
       else:
         cols = copy.deepcopy(ProfileCore.disp_columns)
 
@@ -255,23 +287,29 @@ class GroupsController(BaseController):
 
       self.render(json=self.to_json(data))
 
-    def __set_inquiry_config(self,org_columns):
-      cols = []
+    def __set_inquiry_config(self,db):
+      cols = self.__set_inquiry_cols()
+      config = {'recipients':db.user.email(),'form_config':cols}
 
-      #問い合わせ番号(inquiryのid)
-      # 名前を Inquiry[id] とかにしたほうがよかったか？
-      cols.append({'name':'iq_id','label':u'問い合せ番号','checked':'checked','width':'80','align':'right','type':'text','hidden':'false','search_refinement':'false'})
-      #問い合わせ日
-      cols.append({'name':'iq_post_at','label':u'問い合せ日','checked':'checked','width':'100','align':'left','type':'date','format':'yyyy/mm/dd','search_refinement':'false','hidden':'false'})
-      #ステータス
-      cols.append({'name':'iq_status','label':u'ステータス','checked':'checked','width':'80','align':'left','type':'select','search_refinement':True,'hidden':'true'})
-      #タイトル
-      cols.append({'name':'title','label':u'件名','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'})
+      return config
+
+    def __set_inquiry_cols(self):
+
+      # Inquiryの表示情報がメイン
+      cols = [{'name':'iq_id','label':u'お問い合わせ番号','width':'80','align':'left','type':'text','search_refinement':False,'hidden':'false','form':'must','checked':''}]
+      cols.extend(copy.deepcopy(Inquiry.disp_columns))
       #送信者(E-Mail)
-      for col in org_columns:
-        if col['name'] != 'email':
-          col['checked'] = ''
-        cols.append(copy.copy(col)) 
+      for col in ProfileCore.disp_columns:
+        wk = copy.copy(col)
+        if wk['name'] == 'status' or wk['name'] == 'post_at':
+          wk['form'] = 'discard'
+          wk['checked'] = ''
+        elif wk['name'] == 'email':
+          wk['form'] = 'must'
+        else:
+          wk['form'] = 'option'
+          wk['checked'] = ''
+        cols.append(wk) 
 
       return cols
  

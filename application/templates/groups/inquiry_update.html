@@ -1,0 +1,54 @@
+<p>設定を保存しました</p>
+<form class="niceform">
+<table>
+<tr>
+<td valign="top">
+	<table>
+	<tr>
+		<td> <label for="text">公開:</label> </td>
+		<td align="left"> 
+			{% ifequal config.iq_open 'yes' %}公開{% else %}未公開{% endifequal %}
+		</td>
+	</tr>
+	<tr>
+		<td> <label for="text">データベース名:</label> </td>
+		<td align="left"> {{udb.name}}</td>
+	</tr>
+	<tr>
+		<td> <label for="text">通知先(E-Mail):</label> </td>
+		<td align="left"> {{config.recipients}}</td>
+	</tr>
+	<tr>
+		<td valign="top" align="left"><label for="text">固定項目</label></td>
+		<td align="left"><font size="-3">固定項目は必須の入力項目です</font><br />
+		{% for col in config.form_config %}{% ifequal col.form 'must' %}
+				<div class="dummy"></div><label for="check_{{col.name}}">{{col.label}}</label><br clear="all">
+		{% endifequal %}{% endfor %}
+		</td>
+	</tr>
+	</table>
+</td>
+<td valign="top">
+	<table>
+	<tr>
+		<td valign="top" align="left"><label for="text">オプション項目</label></td>
+		<td align="left">
+		{% for col in config.form_config %}{% ifequal col.form 'option' %}
+			{% ifnotequal col.type 'hidden' %}
+			<div style="margin-top:0.2em;margin-left:1em">
+				{% ifequal col.checked 'checked' %}
+					<img src="/img/check_icon.jpg" style="margin-right:0.2em">{{col.label}}
+				{% else %}
+					<img src="/img/cross_icon.jpg" style="margin-right:0.2em">{{col.label}}
+				{% endifequal %}
+			</div>
+			{% endifnotequal %}
+		{% endifequal %}{% endfor %}
+		</td>
+	</tr>
+	</table>
+</td>
+</tr>
+</table>
+	<input type="button" class="close_form" onclick="location.reload();$.unblockUI()" value="閉じる">
+</form>

@@ -62,10 +62,12 @@
 
 
 .filetree li { padding: 3px 0 2px 16px; }
-.filetree span.folder, .filetree span.file,.filetree span.file_nodl,.filetree span.trash_empty,.filetree span.trash_full span.openid {line-height:1.0em; padding: 1px 0 1px 16px; display: block; }
+.filetree span.folder, .filetree span.file,.filetree span.file_nodl,.filetree span.openid,.filetree span.door {line-height:1.0em; padding: 1px 0 1px 16px; display: block; }
 .filetree span.folder { background: url(/img/treeview/folder.gif) 0 0 no-repeat; }
 .filetree li.expandable span.folder { background: url(/img/treeview/folder-closed.gif) 0 0 no-repeat; }
 .filetree span.file { line-height:1.0em;background: url(/img/treeview/file.gif) 0 0 no-repeat; }
 .filetree span.file_nodl { line-height:1.0em;background: url(/img/treeview/file.gif) 0 0 no-repeat; }
 .filetree span.openid { line-height:1.0em;background: url(/img/oid.gif) 0 0 no-repeat; }
 .filetree span.trash_empty { line-height:1.0em;background: url(/img/trash_empty.png) 0 0 no-repeat; }
+.filetree span.door { background: url(/img/treeview/door-open.png) 0 0 no-repeat; }
+.filetree li.expandable span.door { background: url(/img/treeview/door.png) 0 0 no-repeat; }

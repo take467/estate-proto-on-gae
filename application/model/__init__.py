@@ -70,3 +70,4 @@ if w.count() == 0:
  UserDbMaster(name='sex',yaml_data=yaml.dump(sex)).put()
  UserDbMaster(name='prefecture',yaml_data=yaml.dump(prefecture)).put()
  UserDbMaster(name='status',yaml_data=yaml.dump(status)).put()
+ UserDbMaster(name='iq_status',yaml_data=yaml.dump(iq_status)).put()

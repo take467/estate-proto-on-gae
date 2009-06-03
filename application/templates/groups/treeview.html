@@ -1,5 +1,5 @@
         {% for udb in user_dbs %}
-                <li id="udb_{{udb.db.key.id}}"><span id="d_{{udb.db.key.id}}" class="folder">{{ udb.db.name }}</span>
+                <li id="udb_{{udb.db.key.id}}"><span id="d_{{udb.db.key.id}}" class="{% ifequal udb.db.service_type 'c' %}door{% else %}folder{% endifequal %}">{{ udb.db.name }}</span>
                 {% if udb.views %}
                         <ul>
                         {% for v in udb.views %}

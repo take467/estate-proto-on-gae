@@ -1,6 +1,7 @@
 #!-*- coding:utf-8 -*-
 from google.appengine.ext import db
 from gaeo.model import BaseModel, SearchableBaseModel
+import yaml
 
 class UserDbMaster(BaseModel):
   name = db.StringProperty(required=True)

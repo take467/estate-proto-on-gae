@@ -7,17 +7,23 @@ import yaml
 
 class Inquiry(BaseModel):
   user_db_id     = db.ReferenceProperty(UserDb)
-  name   = db.StringProperty(default=u'新規お問い合せ')
 
-  status      = db.StringProperty(default='unprocessed')
-  reference_id  = db.StringProperty(default="")
   post_at     = db.DateTimeProperty(auto_now_add=True)
+  status      = db.StringProperty(default='unanswered')
+  title   = db.StringProperty(default=u'お問い合せ(無題)')
+
+  reference_id  = db.StringProperty(default="")
   content     = db.TextProperty(default='')
   reply_content  = db.TextProperty(default='')
   is_replied     = db.BooleanProperty(default=False)
   reply_at     = db.DateTimeProperty()
 
   config = db.TextProperty()
+  disp_columns = [
+      {'name':'iq_status','label':u'ステータス','checked':'checked','width':'80','align':'left','type':'select','search_refinement':True,'hidden':'false','form':'discard'}
+      ,{'name':'iq_post_at','label':u'問い合せ日','checked':'checked','width':'100','align':'left','type':'date','format':'yyyy/mm/dd','search_refinement':'false','hidden':'false','form':'discard'}
+      ,{'name':'iq_title','label':u'件名','checked':'checked','width':'180','align':'left','type':'text','search_refinement':'false','hidden':'false','form':'must'}
+  ]
 
   def getProperty(self,key):
     prop =  yaml.load(self.config)
@@ -30,3 +36,5 @@ class Inquiry(BaseModel):
     prop =  yaml.load(self.config)
     prop[key] = val
     self.config = yaml.dump(prop)
+
+

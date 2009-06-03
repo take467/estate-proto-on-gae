@@ -2,8 +2,7 @@
 from google.appengine.ext import db
 
 from gaeo.controller import BaseController
-from model.site import Site
-from model.category import Category
+from model.user_db import *
 from model.inquiry import *
 from model.notice_mail import *
 
@@ -12,11 +11,12 @@ import cgi
 
 class ContactController(BaseController):
     def before_action(self):
-      self.site = Site.all().get()
-      self.config = InquiryConfig.all().get()
-      if self.config == None:
-        self.config = InquiryConfig()
-        self.config.put()
+      self.server_name = self.request.environ['SERVER_NAME']
+      self.server_port = int(self.request.environ['SERVER_PORT'])
+      if self.server_port != 80:
+        self.base_url = ('http://%s:%s/' % (self.server_name, self.server_port))
+      else:
+        self.base_url = 'http://%s/' % (self.server_name,)
 
     def confirm(self):
       # チケットの確認
@@ -66,44 +66,42 @@ class ContactController(BaseController):
       self.session.put()
 
 
-    def index(self):
+    def preview(self):
       # チケットの発行
-      self.session['ticket'] = self.config.key()
+      self.udb = UserDb.get_by_id(int(self.params.get('id')))
+
+      self.session['ticket'] = str(self.udb.key())
       self.session.put()
 
 
-      if self.config.categories and len(self.config.categories) > 0:
-        self.contact_categories = []
-        for key in self.config.categories:
-          cc = ContactCategory.get(key)
-          self.contact_categories.append(cc)
 
-      selected = None
-      inquiry = None
-      try:
-        inquiry = self.session['inquiry']
-        if inquiry:
-          selected = inquiry.category
-      except KeyError ,ex:
-        pass
+    def form(self):
+      self.udb = UserDb.get_by_id(int(self.params.get('id')))
+      self.action_url = "/contact/confirm"
 
-      self.inquiry = inquiry
-      self.item_num = 0
       self.fields = []
-      if inquiry:
-        self.form_fields = self.session['form_fields']
-      else:
-        self.form_fields=[]
-        for key in self.config.form_fields:
-          wk = FormField.get(key)
-          if wk:
-            wk.val = ""
-            self.form_fields.append(wk)
-            self.item_num = self.item_num + 1
+      self.form_config = self.udb.getProperty('form_config')
+      for col in self.form_config:
+        if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
+          if col['type'] == 'radio' or col['type'] == 'select':
+            result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
+            if result.count() > 0:
+              rec = result.get()
+              items = yaml.load(rec.yaml_data)
+              for item in items:
+                if item['code'] == col['val']:
+                  if col['type'] == 'radio':
+                    item['checked'] = 'checked'
+                  elif col['type'] == 'select':
+                    item['selected'] = 'selected'
+              col['items'] = items
+          self.fields.append(col)
+      self.dump = yaml.dump(self.fields)
+      self.render(template="form")
 
-      #if self.inquiry.category == None:
-      #  self.inquiry.category = ContactCategory()
-      #  self.inquiry.category.name = "なし"
+
+
+
 
 
     def post(self):

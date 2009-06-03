@@ -5,6 +5,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from model.user_db import UserDb
 from model.profile import *
+from model.inquiry import *
 from model.view import UserView
 from model.share_user import ShareUser
 import yaml
@@ -53,7 +54,7 @@ class WelcomeController(BaseController):
               return
 
           configs =  yaml.load(self.view.config)
-          self.colModels.append({'display':'ID','name':'id','width':'20','align':'center','hidden':'false','sortable':'true'})
+          self.colModels.append({'display':'ID','name':'id','width':'40','align':'center','hidden':'false','sortable':'true'})
           for col in configs:
             if col['checked'] == 'checked':
               if 'hidden' not in col:
@@ -64,9 +65,10 @@ class WelcomeController(BaseController):
               self.colModels.append({'display':col['label'],'name':col['name'],'width':col['width'],'align':col['align'],'hidden':col['hidden'],'sortable':'true'})
               if col['type'] != 'radio' and col['type'] != 'select':
                 if col['name'].startswith('iq_'):
-                  pass
-                  #if isinstance(getattr(Inquiry,col['name']),db.StringProperty):
-                  #  self.searchitems.append({'display':col['label'],'name':col['name']})
+                  # "iq_{name} => {name}
+                  name = col['name'][3:]
+                  if isinstance(getattr(Inquiry,name),db.StringProperty):
+                    self.searchitems.append({'display':col['label'],'name':col['name']})
                 else:
                   if isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
                     self.searchitems.append({'display':col['label'],'name':col['name']})

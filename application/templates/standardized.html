@@ -64,6 +64,7 @@ $(document).ready(function(){
 		$(this).treeview({});
 		$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
 		$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+		$(".door").contextMenu({ menu: 'myInquiryMenu' }, function(action,el,pos){initInquiryContextMenu(action, el, pos)});
 	});
 	$("#shared_treeview").load('/groups/shared_treeview',function(){
 		$(this).treeview({});
@@ -84,9 +85,15 @@ $(document).ready(function(){
                 $('#primaryContent').load('/welcome/greeting')
 	{% endif %}
 });
-function blockuiForm(url,what_to_callback){
-        var offsetX =  ($(window).width() - 400) /2
-        var offsetY =  ($(window).height() / 6)
+function blockuiForm(url,what_to_callback,config){
+        width = 400;
+        if(config != undefined ){
+		if( config.width != undefined ){
+			width = config.width
+		}
+	}
+        var offsetX =  ($(window).width() - width) /2
+        var offsetY =  ($(window).height() / 7)
 
 	var callback_function = function(text,status){
                 $(".close_form").click(function(){ $.unblockUI(); });
@@ -103,7 +110,7 @@ function blockuiForm(url,what_to_callback){
         $.blockUI({ message: $('#blockui_area'),css: {
                 top:  offsetY + 'px',
                 left: offsetX + 'px',
-                width: '400px'
+                width: width + 'px'
         } })
 }
 function submitData(qs){
@@ -194,7 +201,7 @@ function initInquiryFlexigrid(){
 			colModel :{% if colModelsJson %}{{ colModelsJson }}{% else %} []{% endif %},
 			buttons : [ {% if auth.w %}{name: '編集', bclass: 'edit', onpress : editInquiryData}, {separator: true},{% endif %} {% if auth.d %}{name: '削除', bclass: 'delete', onpress : deleteInquiryData}{% endif %} ],
 			searchitems : [
-				{display: '問い合せ番号', name : 'id',is_default: true}{% for item in searchitems %}
+				{display: 'ID', name : 'id',is_default: true}{% for item in searchitems %}
 					,{display:'{{item.display}}' , name:'{{item.name}}'}{% endfor %}
 				],
 			sortname: "iq_post_at",
@@ -391,6 +398,21 @@ function update_view(){
 	$('#blockui_area').load('/view/update',$('#blockui_form').serializeArray())
 	$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
 }
+function update_inquiry_user_db(){
+	var width = 700
+        var offsetX =  ($(window).width() - width) /2
+        var offsetY =  ($(window).height() / 7)
+
+	$.blockUI({ message: "<b>少々お待ちください...</b>" });
+	//alert($('#blockui_form').serializeArray())
+	$('#blockui_area').load('/groups/update',$('#blockui_form').serializeArray())
+	$('#blockui_area').html('')
+        $.blockUI({ message: $('#blockui_area'),css: {
+                top:  offsetY + 'px',
+                left: offsetX + 'px',
+                width: width + 'px'
+	}})
+}
 function update_user_db(){
 	$.blockUI({ message: "<b>少々お待ちください...</b>" });
 	$.ajax({
@@ -406,6 +428,26 @@ function update_user_db(){
 		alert('update システムエラー');
 	   }
 	});
+}
+function initInquiryContextMenu(action,el,pos){
+                var id = $(el).attr('id').slice(2)
+                if( action == 'preview' ){
+			window.open('/contact/preview/' + id)
+                }else if( action == 'addview' ){
+			$('#action_url').val('/view/create')
+			submitData('db_id=' + id)
+                }else if( action == 'edit' ){
+                        var url = '/groups/edit?id='+id
+			blockuiForm(url,null,{'width':'700'})
+                }else if( action=="delete" ) {
+                        var url = '/groups/delete'
+                        if( confirm('['+$(el).text() +']を本当に削除しますか？') != true ){
+                                return;
+                        }else{  
+				$('#action_url').val(url)
+				submitData('id=' + id)
+                        }
+                }
 }
 function initContextMenu(action,el,pos){
                 var id = $(el).attr('id').slice(2)
@@ -506,6 +548,12 @@ function upload_csv(){
 					<ul id="myMenu" class="contextMenu">
 						<li class="add"><a href="#addview">ビューの追加</a></li>
 						<li class="openid"><a href="#addopenid">OpenIDの追加</a></li>
+						<li class="edit separator"><a href="#edit">編集</a></li>
+						<li class="delete"><a href="#delete">削除</a></li>
+					</ul>
+					<ul id="myInquiryMenu" class="contextMenu">
+						<li class="add"><a href="#preview">プレビュー</a></li>
+						<li class="add"><a href="#addview">ビューの追加</a></li>
 						<li class="edit separator"><a href="#edit">編集</a></li>
 						<li class="delete"><a href="#delete">削除</a></li>
 					</ul>

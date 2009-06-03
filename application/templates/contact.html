@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+	Design by Free CSS Templates
+	http://www.freecsstemplates.org
+	Released for free under a Creative Commons Attribution 2.5 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>{% block title %}{% endblock %}</title>
+<link type="text/css"  href="{{ base_url }}css/niceforms-v2.0/niceforms-default.css" rel="stylesheet" media="screen"/>
+<script src="{{base_url}}js/jquery-1.2.6.pack.js"          type="text/javascript"></script>
+<script src="{{base_url}}js/jquery.blockUI.js"             type="text/javascript"></script>
+<script src="{{base_url}}js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="{{base_url}}js/ui.datepicker-ja.js"           type="text/javascript"></script>
+<script src="{{base_url}}js/niceforms.js"></script>
+<script type="text/javascript" language="javascript">
+$(document).ready(function(){
+        $.ajaxSetup({cache: false });
+	$("#contact_form_area").load('{{base_url}}contact/form/{{udb.key.id}}',function(){NFDo('start');});
+});
+function blockuiForm(url,what_to_callback,config){
+        width = 400;
+        if(config != undefined ){
+		if( config.width != undefined ){
+			width = config.width
+		}
+	}
+        var offsetX =  ($(window).width() - width) /2
+        var offsetY =  ($(window).height() / 7)
+
+	var callback_function = function(text,status){
+                $(".close_form").click(function(){ $.unblockUI(); });
+                NFDo('start',offsetX,offsetY);
+		//NFInit()
+	}
+
+	if( what_to_callback != undefined) {
+		callback_function = what_to_callback
+	}
+
+        $('#blockui_area').html('')
+        $('#blockui_area').load(url,callback_function);
+        $.blockUI({ message: $('#blockui_area'),css: {
+                top:  offsetY + 'px',
+                left: offsetX + 'px',
+                width: width + 'px'
+        } })
+}
+function confirmData(){
+	var width = 700
+        var offsetX =  ($(window).width() - width) /2
+        var offsetY =  ($(window).height() / 7)
+
+	$.blockUI({ message: "<b>少々お待ちください...</b>" });
+	//alert($('#blockui_form').serializeArray())
+	$('#blockui_area').load('/groups/update',$('#blockui_form').serializeArray())
+	$('#blockui_area').html('')
+        $.blockUI({ message: $('#blockui_area'),css: {
+                top:  offsetY + 'px',
+                left: offsetX + 'px',
+                width: width + 'px'
+	}})
+}
+function submitData(qs){
+        $.blockUI({ message: "<b>少々お待ちください...</b>"});
+	var status = false;
+	params = $('#blockui_form').serialize()
+        if(qs != undefined){
+		params = qs + '&' + params
+	}
+        $.ajax({
+           type: "POST",
+           dataType: "json",
+           url: $('#action_url').val(),
+           data: params,
+           success: function(data){
+                $.unblockUI();
+                if( data.status == 'success'){
+                        if( data.flexReload == 'true' ){
+                                $("#flexigrid01").flexReload();
+                        }
+			if( data.cv_id != undefined ){
+				$.cookie('cv_id',data.cv_id)
+			}
+			status = true;
+
+                }
+                if( data.msg != undefined ){
+                        alert(data.msg)
+                }
+                if( data.r != undefined ){
+                        location = data.r
+                }else{
+			if( data.reload == 'true' ){
+				location.reload()
+			}
+		}
+           },
+           error: function(){
+                $.unblockUI();
+                alert('システムエラー');
+           }
+        });
+	return status
+}
+</script>
+</head>
+<body>
+<h2 id="title">プレビュー(DB名：{{ udb.name }})</h2>
+{% block content %}
+<div id="contact_form_area"></div>
+{% endblock %}
+<div id="footer">
+	<p>Copyright &copy; 2009 <a href="http://kenkoude-it.appspot.com/">健康deねっと IT事業部</a> Designed by <a href="http://www.freecsstemplates.org">Free CSS Templates</a></p>
+</div>
+</body>
+</html>
