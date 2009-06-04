@@ -27,6 +27,10 @@ handlers:
 - url: /oid/.*
   script: main.py
 
+- url: /contact/.*
+  script: main.py
+
+
 - url: .*
   script: main.py
   login: required

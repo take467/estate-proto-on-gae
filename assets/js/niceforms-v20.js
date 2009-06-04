@@ -562,7 +562,6 @@ function option(el, no) { //extend Options
 //Get Position
 function findPosY(obj) {
 	var posTop = 0 - offsetY;
-	var posTop = 0;
 	do {posTop += obj.offsetTop;} while (obj = obj.offsetParent);
 	return posTop;
 }

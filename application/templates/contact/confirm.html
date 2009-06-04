@@ -1,86 +1,14 @@
-{% extends "../puzzled.html" %}
-{% block title %}お問い合わせ | {{ site.logo_label }} - {{site.logo_subtext }}{% endblock %}
-
-{% block content %}
-<style type="text/css">
-table#inquiryTable {
-	border-collapse:collapse;
-	border-color:#999999;
-	border-spacing:0;
-	border-style:solid;
-	border-width:1px 0 0 1px;
-	margin-bottom:1em;
-	width:100%;
-}
-table#inquiryTable th {
-	background-color:#ECF5F0;
-	border-color:#999999;
-	border-style:solid;
-	border-width:0 1px 1px 0;
-	color:#000000;
-	font-size:1em;
-	padding:5px 3px;
-	vertical-align:top;
-}
-
-table#inquiryTable tr td {
-	border-color:#999999;
-	border-style:solid;
-	border-width:0 1px 1px 0;
-	font-size:1em;
-	font-weight:normal;
-	padding:5px 3px 0 1em;
-	vertical-align:top;
-}
-table#inquiryTable td {
-	background-color:#FFFFFF;
-	color:#000000;
-	margin-left:0.2em;
-	margin-top:0;
-}
-</style>
-
-<h2 class="title" >お問い合わせ</h2>
 <p>この内容で送信します。よろしいでしょうか？</p>
-<div class="entry">
-<form action="/contact/post" method="post">
+<form id="contact_form">
+        <input type="hidden" name="udb_id"   id="udb_id"  value="{{udb.key.id}}">
 <table id="inquiryTable">
-{% if inquiry.category %}
+{% for f in form_fields %}
 <tr>
-	<th>件名</th>
-	<td>
-		{{ inquiry.category.name }}
-	</td>
-</tr>
-{% endif %}
-<tr>
-	<th>お問い合わせ番号</th>
-	<td>
-		{{ inquiry.reference_id }}
-	</td>
-</tr>
-<tr>
-	<th>メールアドレス(PC)</th>
-	<td>
-		{{ inquiry.from_email }}
-	</td>
-<tr>
-<input type="hidden" name="form_fields_num" value="{{form_fields_num}}">
-{% for field in form_fields %}
-<tr>
-	<th>{{ field.label }}<input type="hidden" name="label{{field.order}}" value="{{field.label}}"></th>
-	<td>{{ field.val}}<input type="hidden" name="val{{field.order}}" value="{{field.val}}"></td>
+	<th align="left" width="30%">{{ f.label }}</th>
+	<td align="left" width="70%">{{ f.val}}<input type="hidden" name="{{f.name}}" value="{% if f.code %}{{f.code}}{% else %}{{f.val}}{% endif %}"></td>
 </tr>
 {% endfor %}
-<tr>
-	<th>お問い合わせ内容</th>
-	<td>
-	{{ content }}
-	</td>
-<tr>
 </table>
-<input type="submit" value="送信">&nbsp;&nbsp;&nbsp;<a href="/contact">やり直し</a>
+<input type="button" onclick="submitData('{{action_url}}');return false" value="送信">&nbsp;&nbsp;&nbsp;
+<input type="button" onclick="submitData('{{base_url}}contact/preview/{{udb.key.id}}');return false" value="やり直し">
 </form>
-
-</div>
-{% endblock %}
