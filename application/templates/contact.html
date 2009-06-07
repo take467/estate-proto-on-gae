@@ -13,22 +13,13 @@ body {
 	padding:0;
 	text-align:justify;
 }
-#container {
-	margin:0 auto;
-	padding-top:20px;
-	width:750px;
-}
 #form_area {
 	background:#F4F4F4 none repeat scroll 0 0;
 	font-size:12px;
 	line-height:1.4em;
 	padding:0.5em 20px;
-	width:700px;
+	width:{{width}}px;
 }
-#footer {
-	text-align:right;
-}
-
 table#inquiryTable {
 	border-collapse:collapse;
 	border-color:#999999;
@@ -36,7 +27,8 @@ table#inquiryTable {
 	border-style:solid;
 	border-width:1px 0 0 1px;
 	margin-bottom:1em;
-	width:100%;
+	margin-left: 0.3em;
+	width:95%;
 }
 table#inquiryTable th {
 	background-color:#ECF5F0;
@@ -47,6 +39,7 @@ table#inquiryTable th {
 	font-size:1em;
 	padding:5px 3px;
 	vertical-align:top;
+	width:120px;
 }
 
 table#inquiryTable tr td {
@@ -81,23 +74,5 @@ function submitData(url){
 }
 </script>
 </head>
-<body>
-<div id="container">
-<h2>ESTATE-PROTOTYPE &gt; {{udb.name }}&gt; プレビュー</h2>
-
-<div id="form_area">
-{% block form_area %}
-{% endblock %}
-</div><!-- end of form_area -->
-
-<div id="footer">
-	<p>Copyright &copy; 2009 <a href="http://kenkoude-it.appspot.com/">健康deねっと IT事業部</a></p>
-</div>
-</div><!-- end of container -->
-<div id="blockui_area" style="margin:1em;display:none; cursor: default">
-	<form id="blockui_form" class="" >
-		<input type="hidden" name="action_url" id="action_url" value="">
-	</form>
-</div>
-</body>
+<body><div id="form_area">{% block form_area %}{% endblock %}</div></body>
 </html>

@@ -24,14 +24,14 @@ class ContactController(BaseController):
 
     def confirm(self):
       # チケットの確認
-      try:
-        ticket = self.session['ticket']
-        if ticket == None:
-          self.redirect('/contact' + str(self.udb.key().id()))
-          return
-      except:
-        self.redirect('/contact' + str(self.udb.key().id()))
-        return
+      #try:
+      #  ticket = self.session['ticket']
+      #  if ticket == None:
+      #    self.redirect('/contact/preview/' + str(self.udb.key().id()))
+      #    return
+      #except:
+      #  self.redirect('/contact/preview/' + str(self.udb.key().id()))
+      #  return
 
       self.action_url = self.base_url + "contact/post/" + str(self.udb.key().id())
 
@@ -57,20 +57,28 @@ class ContactController(BaseController):
 
 
     def preview(self):
-      self.action_url = self.base_url + "contact/confirm/" + str(self.udb.key().id())
-      # チケットの確認
-      ticket = None
-      start_over = False
-      try:
-        ticket = self.session['ticket']
-      except:
-        pass
-      if ticket == None:
-        # チケットの発行
-        self.session['ticket'] = str(self.udb.key())
-        self.session.put()
+      pass
 
-      elif ticket != None and self.request.method.upper() == "POST":
+    def form(self):
+      self.action_url = self.base_url + "contact/confirm/" + str(self.udb.key().id())
+      self.width = self.params.get('width','700')
+      self.textarea_w = (int(self.width)  - 120) * 0.9
+      # チケットの確認
+      #ticket = None
+      start_over = False
+      #try:
+      #  ticket = self.session['ticket']
+      #except:
+      #  pass
+
+      #if ticket == None:
+      #  # チケットの発行
+      #  self.session['ticket'] = str(self.udb.key())
+      #  self.session.put()
+      #
+      #elif ticket != None and self.request.method.upper() == "POST":
+
+      if self.request.method.upper() == "POST":
         start_over = True
 
       self.fields = []
@@ -105,27 +113,28 @@ class ContactController(BaseController):
     # 問い合わせを保存
     def post(self):
       # チケットの確認
-      try:
-        ticket = self.session['ticket']
-        if ticket == None:
-          self.redirect('/contact')
-	  return
-      except:
-        self.redirect('/contact')
-	return
+      #try:
+      #  ticket = self.session['ticket']
+      #  if ticket == None:
+      #    self.redirect('/contact/preview/'+str(self.udb.key().id()))
+#	  return
+#      except:
+#        self.redirect('/contact/preview/'+str(self.udb.key().id()))
+#	return
 
-      try:
-        self.session['ticket']=None
-        del self.session['ticket']
-        self.session.put()
-      except KeyError ,ex:
-        self.render(text=ex) 
-        return
+#      try:
+#        self.session['ticket']=None
+#        del self.session['ticket']
+#        self.session.put()
+#      except KeyError ,ex:
+#        self.render(text=ex) 
+#        return
 
       profile = ProfileCore(user_db_id = self.udb,user=self.udb.user)
       profile.put()
       inquiry = Inquiry(user_db_id = self.udb,profile_id = profile)
       # FORM FIELD の更新
+      self.form_config =  self.udb.getProperty('form_config')
       for col in self.udb.getProperty('form_config'):
         if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
 
@@ -139,6 +148,21 @@ class ContactController(BaseController):
 
       inquiry.profile().put()
       inquiry.put() 
+
+      # FORM FIELD の更新
+      self.form_fields = []
+      for col in self.form_config:
+        if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
+          col['val'] = re.sub("\n","<br/>",cgi.escape(self.params.get(col['name'])))
+          if col['type'] == 'radio' or col['type'] == 'select':
+            result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
+            if result.count() > 0:
+              rec = result.get()
+              for item in yaml.load(rec.yaml_data):
+                if item['code'] == col['val']:
+                  col['code'] = item['code']
+                  col['val'] = item['name']
+          self.form_fields.append(col)
 
       # ここで 送信者と問い合わせ担当者にメールを送る
       m = NoticeMail()

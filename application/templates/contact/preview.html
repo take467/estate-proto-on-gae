@@ -1,41 +1,36 @@
-{% extends "../contact.html" %}
-{% block title %}ESTATE-PROTOTYPE &gt; {{udb.name }}&gt; プレビュー{% endblock %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>ESTATE-PROTOTYPE &gt; {{udb.name }}&gt; プレビュー</title>
+<style type="text/css">
+#container {
+        margin:0 auto;
+        width:750px;
+	font-size:12px;
+}
+#footer {
+        text-align:right;
+}
+</style>
+</head>
+<body>
+<div id="container">
+<h2 style="margin:0px">ESTATE-PROTOTYPE &gt; {{udb.name }}&gt; プレビュー</h2>
 
+<h3>お問い合わせ</h3>
+<iframe marginheight="0" marginwidth="0" src="{{base_url}}contact/form/{{udb.key.id}}" scrolling="no" width="750" frameborder="0" height="600"></iframe>
+
+<div id="footer">
+	<p>Copyright &copy; 2009 <a href="http://kenkoude-it.appspot.com/">健康deねっと IT事業部</a></p>
+</div>
+</div><!-- end of container -->
+<div id="blockui_area" style="margin:1em;display:none; cursor: default">
+	<form id="blockui_form" class="" >
+		<input type="hidden" name="action_url" id="action_url" value="">
+	</form>
+</div>
+</body>
+</html>
 {% block form_area %}
-<h3>お問い合せ</h3>
-<p>下記の項目を入力し、「確認画面へ」をクリックしてください。</p>
-<form id="contact_form" >
-	<input type="hidden" name="udb_id"   id="udb_id"  value="{{udb.key.id}}">
-	<table id="inquiryTable">{% for f in fields %}
-		<tr>
-			<th>{{ f.label }}</th>
-			<td>{% ifequal f.type 'text' %}
-				<input type="text" name="{{f.name}}" id="{{f.name}}" value="{{f.val}}" size="25">
-			{% endifequal %}{% ifequal f.type 'date' %}
-				<input type="text" name="{{f.name}}" id="{{f.name}}" value="{{f.val}}" size="15">
-			{% endifequal %}{% ifequal f.type 'radio' %}
-				{% for item in f.items %}
-					<input type="radio" id="{{f.name}}_{{item.code}}" name="{{ f.name }}" value="{{item.code}}" {{item.checked}}>
-					<label for="{{f.name}}_{{item.code}}">{{item.name}}</label><br/>
-				{% endfor %}
-			{% endifequal %}{% ifequal f.type 'select' %}
-				<select name="{{f.name}}" size="1" id="{{f.name}}" class="" style="border:solid 1px #bbbbbb">
-				<option value="" class="" style="width:100px"></option>
-				{% for item in f.items %}<option value="{{item.code}}" {{item.selected}}>{{item.name}}</option>
-				{% endfor %}
-				</select>
-			{% endifequal %}{% ifequal f.type 'textarea' %}
-				<textarea id="{{f.name}}" name="{{ f.name}}" cols="{{f.cols}}" rows="{{f.rows}}">{{f.val}}</textarea>
-			{% endifequal %}
-			</td>
-		</tr>{% endfor %}
-	</table>
-	<input type="button" id="submit_form_submit" value="確認画面へ" onclick="submitData('{{action_url}}');return false;">
-&nbsp;&nbsp;&nbsp;<input type="reset" value="リセット">
-</form>
-<h3>ご注意</h3>
-  <ul>
-  <li>お問合せいただいた方の個人情報、お問合せ内容は厳重に取扱いたします。</li>
-  <li>メールアドレスのご入力が間違っている場合、携帯電話など受信文字数に制限がある場合、公序良俗に反するお問合せにはお返事できません。</li>
-  </ul>
 {% endblock %}
