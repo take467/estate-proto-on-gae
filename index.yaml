@@ -64,6 +64,13 @@ indexes:
   - name: post_at
     direction: desc
 
+# Used 32 times in query history.
+- kind: Inquiry
+  properties:
+  - name: user_db_id
+  - name: post_at
+    direction: desc
+
 # Unused in query history -- copied from input.
 - kind: Page
   properties:
@@ -378,7 +385,7 @@ indexes:
   - name: name
     direction: desc
 
-# Used 4 times in query history.
+# Used 8 times in query history.
 - kind: ProfileCore
   properties:
   - name: user_db_id

@@ -21,7 +21,7 @@ class ProfileCore(BaseModel):
   birthday        = db.StringProperty(default='') 
   sex             = db.StringProperty(default='')
   mobile_email    = db.StringProperty(default='')
-  zipcode        = db.StringProperty(default='')
+  zipcode         = db.StringProperty(default='')
   prefecture      = db.StringProperty(default='')
   city            = db.StringProperty(default='')
   address         = db.StringProperty(default='')
@@ -46,8 +46,8 @@ class ProfileCore(BaseModel):
 	,{'name':'prefecture','label':u'都道府県','checked':'checked','width':'60','align':'left','type':'select','search_refinement':True,'hidden':'false'}
 	,{'name':'city','label':u'市町村区','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
 	,{'name':'address','label':u'それ以降の住所','checked':'checked','width':'180','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'email','label':u'電子メール','checked':'checked','width':'120','align':'left','type':'text','search_refinement':'false','hidden':'false'}
-	,{'name':'mobile_email','label':u'電子メール(携帯)','checked':'checked','width':'120','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'email','label':u'電子メール','checked':'checked','width':'150','align':'left','type':'text','search_refinement':'false','hidden':'false'}
+	,{'name':'mobile_email','label':u'電子メール(携帯)','checked':'checked','width':'150','align':'left','type':'text','search_refinement':'false','hidden':'false'}
 	,{'name':'tel_no','label':u'電話番号','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
 	,{'name':'cellphone_no','label':u'電話番号(携帯)','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}
 	,{'name':'fax_no','label':u'FAX番号','checked':'checked','width':'100','align':'left','type':'text','search_refinement':'false','hidden':'false'}

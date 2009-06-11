@@ -1,1 +1,62 @@
-<h1>InquiryController#edit</h1>
+<form id="blockui_form" class="niceform" >
+  <input type="hidden" id="edit_db_id" name="edit_db_id" value="{{user_db.key.id}}">
+<table noborder>
+<tr>
+<td valign="top" width="50%">
+	<table id="inquiryTable" width="100%">
+	<tr>
+		<th align="left"> <label for="text">ステータス</label> </td>
+		<td align="left"> {{inquiry.status}}</td>
+		<th align="left"> <label for="text">問い合わせ番号</label> </td>
+		<td align="left"> {{inquiry.key.id}}</td>
+	</tr>
+	<tr>
+		<th align="left"> <label for="text">件名</label> </td>
+		<td align="left">{{inquiry.title}}  </td>
+		<th align="left"> <label for="text">参照元</label> </td>
+		<td align="left">{{inquiry.reference_id}}  </td>
+	</tr>
+	<tr>
+		<th valign="top" align="left"><label for="text">問い合わせ者</label></td>
+		<td align="left">{{inquiry.profile.email}} </td>
+		<th align="left"> <label for="text">問い合わせ日</label> </td>
+		<td align="left"> {{inquiry.post_at|date:"Y/m/d H:s"}}</td>
+	</tr>
+	<!--
+		ここでループするんだ。ビューに合せて表示する項目を
+	--> 
+	{% for col in config.form_config %}{% ifequal col.form 'option' %}<tr>
+		<th align="left"><label for="check_{{col.name}}">{{col.label}}</label></th>
+		<td align="left">{{col.val}}</td>
+	</tr>{% endifequal %}{% endfor %}
+                </td>
+	<tr>
+		<th align="left"><label for="text">内容</label></td>
+		<td align="left" colspan="3">{{inquiry.content}}</td>
+	</tr>
+	
+	</table>
+</td>
+<td valign="top" width="50%">
+	<table id="inquiryTable" width="100%">
+	<tr>
+		<th align="left"> <label for="text">回答者(email)</label> </td>
+		<td align="left">{{inquiry.reply_person}} </td>
+		<th align="left"> <label for="text">回答日</label> </td>
+		<td align="left">{{inquiry.reply_at|date:"Y/m/d H:s"}} </td>
+	</tr>
+	<tr>
+		<th colspan="4"><label for="text">回答内容</label></td>
+	</tr>
+	<tr>
+		<td colspan="4" align="left">
+			{{ inquiry.reply_content }}
+		</td>
+	</tr>
+	</table>
+</td>
+</tr>
+</table>
+	<input type="button" id="submit_blockui_form" value="保存" onclick="update_inquiry_user_db();return false"> -
+	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
+</form>

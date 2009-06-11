@@ -133,8 +133,16 @@ class ViewController(BaseController):
  
     def edit(self):
       self.view = UserView.get_by_id(int(self.params.get('id')))
-      self.config = yaml.load(self.view.config)
-      pass
+
+      # UserDBのタイプが"C"だったら項目を制限する
+      if self.view.user_db().service_type == 'c':
+        self.config = []
+        for p in self.view.user_db().getProperty('form_config'):
+          if p['form'] ==  'option' and p['checked'] == 'checked':
+            self.config.append(p)
+      else:
+        self.config = yaml.load(self.view.config)
+
 
 
     def update(self):
@@ -148,7 +156,14 @@ class ViewController(BaseController):
         return
 
       self.view = UserView.get_by_id(int(self.params.get('edit_view_id')))
-      config = yaml.load(self.view.config)
+      config = []
+      if self.view.user_db().service_type == 'c':
+        for p in self.view.user_db().getProperty('form_config'):
+          if p['form'] == 'must' or ( p['checked'] == 'checked'):
+            config.append(p)
+      else:
+        config = yaml.load(self.view.config)
+
       for col in config:
         if col['type'] == 'hidden':
           continue
@@ -163,7 +178,15 @@ class ViewController(BaseController):
       self.view.name = name
       self.view.config = yaml.dump(config)
       self.view.put()
-      self.config = config
+
+      # 問い合わせだったら必須項目が表示されないように削除
+      self.config = []
+      if self.view.user_db().service_type == 'c':
+        for p in config:
+          if p['form'] ==  'option' and (p['checked'] == 'checked' or p['checked'] == ''):
+            self.config.append(p)
+      else:
+        self.config = config
 
     #self.render(json=self.to_json({'status':'success'}))
 
@@ -173,10 +196,11 @@ class ViewController(BaseController):
      #try:
        udb = UserDb.get_by_id(int(self.params.get('db_id')))
        if udb:
-         cols = copy.deepcopy(ProfileCore.disp_columns)
-         config = yaml.dump(cols)
-         v = UserView(user_db_id=udb,config=config)
-         v.put()
+         v = UserView.newInstance(udb)
+     #    cols = copy.deepcopy(ProfileCore.disp_columns)
+     #    config = yaml.dump(cols)
+     #    v = UserView(user_db_id=udb,config=config)
+     #    v.put()
          res= {"status":"success",'cv_id':v.key().id(),'r':'/'}
        else:
          res= {"status":"error","msg":"missing user db"}

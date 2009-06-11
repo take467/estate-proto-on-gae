@@ -9,6 +9,7 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <title>ESTATE - PROTOTYPE</title>
 <link href="/css/standardized.css" rel="stylesheet" type="text/css" />
+<link href="/css/inquiry_table.css" rel="stylesheet" type="text/css" />
 <link href="/css/dropdowns.css" rel="stylesheet" type="text/css" />
 <link type="text/css"  href="/css/smoothness/jquery-ui-1.7.1.custom.css" rel="stylesheet" />
 <link rel="stylesheet" href="/css/flexigrid/flexigrid.css" type="text/css" media="all">
@@ -201,7 +202,7 @@ function initInquiryFlexigrid(){
 			colModel :{% if colModelsJson %}{{ colModelsJson }}{% else %} []{% endif %},
 			buttons : [ {% if auth.w %}{name: '編集', bclass: 'edit', onpress : editInquiryData}, {separator: true},{% endif %} {% if auth.d %}{name: '削除', bclass: 'delete', onpress : deleteInquiryData}{% endif %} ],
 			searchitems : [
-				{display: 'ID', name : 'id',is_default: true}{% for item in searchitems %}
+				{display: 'ID', name : 'iq_id',is_default: true}{% for item in searchitems %}
 					,{display:'{{item.display}}' , name:'{{item.name}}'}{% endfor %}
 				],
 			sortname: "iq_post_at",
@@ -297,9 +298,7 @@ function deleteData(com,grid){if($('.trSelected',grid).length>0){
 	}
 }
 }
-function editInquiryData(com,grid) {
-}
-function editData(com,grid) {
+function __editData(com,grid,path,param,bui_param) {
 	$('#blockui_area').html('');
         var items = $('.trSelected',grid);
         if(items.length != 1){ 
@@ -307,9 +306,10 @@ function editData(com,grid) {
                 return false;
         }
         var id = items[0].id.substr(3);
-        var url = '/profile/edit/' + id + '?v={{view.key.id}}';
         var offsetX =  ($(window).width() - 400) /2
         var offsetY =  ($(window).height() / 6)
+ 
+        var  url = path + id + param
 	blockuiForm(url,function(){
                 $(".close_form").click(function(){ $.unblockUI(); });
                 NFDo('start',offsetX,offsetY);
@@ -319,7 +319,13 @@ function editData(com,grid) {
 			changeYear: true
 		});
                 $('#ui-datepicker-div').css('z-index','2000')
-	});
+	},bui_param);
+}
+function editData(com,grid) {
+  __editData(com,grid,'/profile/edit/','?v={{view.key.id}}')
+}
+function editInquiryData(com,grid) {
+  __editData(com,grid,'/inquiry/edit/','?v={{view.key.id}}',{'width':'900'})
 }
 function initSharedViewContextMenu(action,el,pos){
 	var id = $(el).attr('id').slice(2)

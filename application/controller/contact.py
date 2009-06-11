@@ -146,7 +146,7 @@ class ContactController(BaseController):
           else:
             setattr(inquiry.profile(),name,val)
 
-      inquiry.profile().put()
+      #inquiry.profile().put()
       inquiry.put() 
 
       # FORM FIELD の更新

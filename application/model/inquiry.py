@@ -18,13 +18,14 @@ class Inquiry(BaseModel):
   reference_id  = db.StringProperty(default="")
   content     = db.TextProperty(default='')
   reply_content  = db.TextProperty(default='')
+  reply_person   = db.StringProperty(default='')
   is_replied     = db.BooleanProperty(default=False)
   reply_at     = db.DateTimeProperty()
 
   config = db.TextProperty()
   disp_columns = [
       {'name':'iq_status','label':u'ステータス','checked':'checked','width':'80','align':'left','type':'select','search_refinement':True,'hidden':'false','form':'discard'}
-      ,{'name':'iq_post_at','label':u'問い合せ日','checked':'checked','width':'100','align':'left','type':'date','format':'yyyy/mm/dd','search_refinement':'false','hidden':'false','form':'discard'}
+      ,{'name':'iq_post_at','label':u'問い合せ日','checked':'checked','width':'100','align':'left','type':'date','format':'%Y/%m/%d','search_refinement':'false','hidden':'false','form':'discard'}
       ,{'name':'iq_title','label':u'件名','checked':'checked','width':'180','align':'left','type':'text','search_refinement':'false','hidden':'false','form':'must'}
   ]
 

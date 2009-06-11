@@ -5,11 +5,6 @@
 		<td align="left"><label for="text">ビュー名</label></td>
 		<td align="left"><div style="margin-left:1em">{{view.name}}</div></td>
 	</tr>
-	<tr>
-		<td align="left"><label for="text">通知先(E-mail)</label></td>
-		<td align="left"><div style="margin-left:1em">{{view.name}}</div></td>
-	</tr>
-	<tr>
 		<td valign="top" align="left"><label for="text">項目</label></td>
 		<td align="left">
 		{% for col in config %}{% ifnotequal col.type 'hidden' %}
