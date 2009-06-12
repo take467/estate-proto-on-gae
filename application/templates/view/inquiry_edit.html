@@ -1,0 +1,37 @@
+<form id="blockui_form" class="niceform" >
+  <input type="hidden" id="edit_view_id" name="edit_view_id" value="{{view.key.id}}">
+<table>
+<tr>
+<td valign="top">
+	<table>
+	<tr>
+		<td> <label for="text">ビュー名:</label> </td>
+		<td align="left"> <input type="text" name="view_name" id="view_name" value="{{view.name}}" size="35"> </td>
+	</tr>
+	<tr>
+		<td valign="top" align="left"><label for="text">固定項目</label></td>
+		<td align="left"><font size="-3">固定項目を非表示にすることはできません</font><br />
+		{% for col in must_config %}
+				<div class="dummy"></div><label for="check_{{col.name}}">{{col.label}}</label><br clear="all">
+		{% endfor %}
+		</td>
+	</tr>
+	</table>
+</td>
+<td valign="top">
+	<table>
+	<tr>
+		<td valign="top" align="left"><label for="text">オプション項目</label></td>
+		<td align="left"><font size="-3">表示する項目にチェックを付けてください</font><br />
+		{% for col in config %}
+			<input type="checkbox" name="disp_{{col.name}}" id="disp_{{col.name}}" value="yes" {{col.checked}}>
+			<label for="check_{{col.name}}">{{col.label}}</label><br clear="all"> {% endfor %}
+		</td>
+	</tr>
+	</table>
+</td>
+</tr>
+</table>
+	<input type="button" id="submit_blockui_form" value="保存" onclick="update_view('700');return false"> -
+	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
+</form>

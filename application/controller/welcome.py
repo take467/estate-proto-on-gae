@@ -53,9 +53,17 @@ class WelcomeController(BaseController):
               self.view = None
               return
 
-          configs =  yaml.load(self.view.config)
           self.colModels.append({'display':'ID','name':'id','width':'40','align':'center','hidden':'false','sortable':'true'})
+
+          configs =  yaml.load(self.view.config)
           for col in configs:
+            if col['name'].startswith('iq_') and col['checked'] == 'checked':
+              self.colModels.append({'display':col['label'],'name':col['name'],'width':'100','align':'left','hidden':col['hidden'],'sortable':'true'})
+              continue
+            if col['name'] == 'email':
+              self.colModels.append({'display':col['label'],'name':col['name'],'width':col['width'],'align':col['align'],'hidden':col['hidden'],'sortable':'true'})
+              continue
+
             if col['checked'] == 'checked':
               if 'hidden' not in col:
                 col['hidden'] = 'false'

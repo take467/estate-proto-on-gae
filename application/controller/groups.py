@@ -3,6 +3,7 @@ from google.appengine.ext import db
 from gaeo.controller import BaseController
 
 from model.user_db import UserDb
+from model.user_db_master import UserDbMaster
 from model.view import UserView
 from model.profile import ProfileCore
 from model.inquiry import *
@@ -258,28 +259,27 @@ class GroupsController(BaseController):
         self.render(json=self.to_json(data))
         return
 
-      category = UserDb(user=self.user,service_type=self.params.get('service_type','p'))
+      udb = UserDb(user=self.user,service_type=self.params.get('service_type','p'))
 
-      category.put()
-      id = category.key().id()
+      udb.put()
+      id = udb.key().id()
       name = u'DB(' + str(id) + ')'
-      if category.service_type == 'c':
+      if udb.service_type == 'c':
         name = u'問い合せDB(' + str(id) + ')'
-        category.config = yaml.dump(self.__set_inquiry_config(category))
-      category.name = name
-      category.put()
+        udb.config = yaml.dump({'recipients':udb.user.email(),'form_config':UserDbMaster.getFormConfig()})
+      udb.name = name
+      udb.put()
 
       # ついでにビューもつくってしまう
-      v = UserView.newInstance(category)
+      v = UserView.newInstance(udb)
       # カレントのビューをこれにするためにクッキーにセット
       data={'status':'success','r':'/','cv_id':str(v.key().id())}
 
       self.render(json=self.to_json(data))
 
-    def __set_inquiry_config(self,db):
+    def __set_inquiry_config(self,udb):
       cols = self.__set_inquiry_cols()
       cols.append({'name':'iq_content','label':u'お問い合わせ内容','cols':'60','rows':'10','type':'textarea','search_refinement':False,'hidden':'false','form':'must','checked':''})
-      config = {'recipients':db.user.email(),'form_config':cols}
 
       return config
 

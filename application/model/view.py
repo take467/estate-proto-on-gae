@@ -34,7 +34,7 @@ class UserView(BaseModel):
     cols = None
     if udb.service_type == 'c':
       # 問い合わせフォーム専用ビュー
-      cols = cls.__set_inquiry_cols()
+      cols = udb.getProperty('form_config')
     else:
       cols = copy.deepcopy(ProfileCore.disp_columns)
 
@@ -44,26 +44,3 @@ class UserView(BaseModel):
     v.name=u'ビュー('+str(id)+')'
     v.put()
     return v
-
-
-  @classmethod
-  def __set_inquiry_cols(cls): 
-
-    # Inquiryの表示情報がメイン
-    cols = [{'name':'iq_reference_id','label':u'お問い合わせ番号','width':'80','align':'left','type':'text','search_refinement':False,'hidden':'false','form':'must','checked':'','comment':'以前からのお問い合わせの場合は、お問い合わせ番号を入力してください'}]
-    cols.extend(copy.deepcopy(Inquiry.disp_columns))
-    #送信者(E-Mail)
-    for col in ProfileCore.disp_columns:
-      wk = copy.copy(col)
-      if wk['name'] == 'status' or wk['name'] == 'post_at':
-        wk['form'] = 'discard'
-        wk['checked'] = ''
-      elif wk['name'] == 'email':
-        wk['form'] = 'must'
-        wk['comment'] = '最後に確認のメールをお送りしますので正確に入力してください'
-      else:
-        wk['form'] = 'option'
-        wk['checked'] = ''
-      cols.append(wk)
-
-    return cols

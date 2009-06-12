@@ -134,15 +134,20 @@ class ViewController(BaseController):
     def edit(self):
       self.view = UserView.get_by_id(int(self.params.get('id')))
 
-      # UserDBのタイプが"C"だったら項目を制限する
-      if self.view.user_db().service_type == 'c':
-        self.config = []
-        for p in self.view.user_db().getProperty('form_config'):
-          if p['form'] ==  'option' and p['checked'] == 'checked':
-            self.config.append(p)
-      else:
-        self.config = yaml.load(self.view.config)
+      self.config = []
+      self.must_config = []
+      for c in yaml.load(self.view.config):
+        if not c['name'].startswith('iq_'):
+          if c['name'] == 'email':
+            self.must_config.append(c)
+          else:
+            self.config.append(c)
+        else:
+          if c['name'] != 'iq_content':
+            self.must_config.append(c)
 
+      if self.view.user_db().service_type == 'c':
+        self.render(template="inquiry_edit")
 
 
     def update(self):
@@ -156,13 +161,7 @@ class ViewController(BaseController):
         return
 
       self.view = UserView.get_by_id(int(self.params.get('edit_view_id')))
-      config = []
-      if self.view.user_db().service_type == 'c':
-        for p in self.view.user_db().getProperty('form_config'):
-          if p['form'] == 'must' or ( p['checked'] == 'checked'):
-            config.append(p)
-      else:
-        config = yaml.load(self.view.config)
+      config = yaml.load(self.view.config)
 
       for col in config:
         if col['type'] == 'hidden':
@@ -181,14 +180,19 @@ class ViewController(BaseController):
 
       # 問い合わせだったら必須項目が表示されないように削除
       self.config = []
+      self.must_config = []
       if self.view.user_db().service_type == 'c':
-        for p in config:
-          if p['form'] ==  'option' and (p['checked'] == 'checked' or p['checked'] == ''):
-            self.config.append(p)
-      else:
-        self.config = config
+        for c in yaml.load(self.view.config):
+          if not c['name'].startswith('iq_'):
+            if c['name'] == 'email':
+              self.must_config.append(c)
+            else:
+              self.config.append(c)
+          else:
+            if c['name'] != 'iq_content':
+              self.must_config.append(c)
+        self.render(template="inquiry_update")
 
-    #self.render(json=self.to_json({'status':'success'}))
 
 
     def create(self):
@@ -197,10 +201,6 @@ class ViewController(BaseController):
        udb = UserDb.get_by_id(int(self.params.get('db_id')))
        if udb:
          v = UserView.newInstance(udb)
-     #    cols = copy.deepcopy(ProfileCore.disp_columns)
-     #    config = yaml.dump(cols)
-     #    v = UserView(user_db_id=udb,config=config)
-     #    v.put()
          res= {"status":"success",'cv_id':v.key().id(),'r':'/'}
        else:
          res= {"status":"error","msg":"missing user db"}

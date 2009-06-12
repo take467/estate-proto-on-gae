@@ -1,5 +1,6 @@
 #!-*- coding:utf-8 -*-
 from model.user_db import *
+from model.user_db_master import *
 import yaml
 
 w = UserDbMaster.all()

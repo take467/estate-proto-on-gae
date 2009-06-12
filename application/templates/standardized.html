@@ -66,6 +66,7 @@ $(document).ready(function(){
 		$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
 		$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
 		$(".door").contextMenu({ menu: 'myInquiryMenu' }, function(action,el,pos){initInquiryContextMenu(action, el, pos)});
+		$(".inquiry_view").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initInquiryViewContextMenu(action, el, pos)});
 	});
 	$("#shared_treeview").load('/groups/shared_treeview',function(){
 		$(this).treeview({});
@@ -235,6 +236,7 @@ function shareView(){
 			$("#shared_member_list").load('/groups/shared_member_list',function(){
 				$(this).treeview({});
 				$(".file").contextMenu({ menu: 'sharedViewMemberMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+				$(".inquiry_view").contextMenu({ menu: 'sharedViewMemberMenu' }, function(action,el,pos){initInquiryViewContextMenu(action, el, pos)});
 			});
 		}
 		$.unblockUI();
@@ -371,6 +373,27 @@ function initSharedMemberContextMenu(action,el,pos){
 		}
 	}
 }
+function initInquiryViewContextMenu(action,el,pos){
+	var id = $(el).attr('id').slice(2)
+	if( action=="share" ) {
+		blockuiForm('/view/share/'+id)
+	}else if( action=="delete" ) {
+		if( confirm($(el).text() +'を本当に削除しますか？')){
+			$('#action_url').val('/view/delete')
+			submitData('id='+id)
+		}
+	}else if( action =="edit"){
+		blockuiForm('/view/edit?id=' + id,null,{'width':'700'})
+	}else if( action=="export"){
+		if( confirm($(el).text() +'のデータをダウンロードします。(文字コード:SJIS/フォーマット:CSV)')){
+			isIE = 'false';
+			if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+				isIE = 'true'
+			}
+			location = '/view/export/' + id + '/' + $(el).text() + '.csv?ie='+isIE
+		}
+	}
+}
 function initFileContextMenu(action,el,pos){
 	var id = $(el).attr('id').slice(2)
 	if( action=="share" ) {
@@ -397,12 +420,24 @@ function init_treeview(){
 		$(this).treeview({});
 		$(".folder").contextMenu({ menu: 'myMenu' }, function(action,el,pos){initContextMenu(action, el, pos)});
 		$(".file").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initFileContextMenu(action, el, pos)});
+		$(".inquiry_view").contextMenu({ menu: 'myFileMenu' }, function(action,el,pos){initInquiryViewContextMenu(action, el, pos)});
 	});
 }
-function update_view(){
+function update_view(w){
+        var width = 400
+        if ( w != undefined ){
+		width = w
+	}
+        var offsetX =  ($(window).width() - width) /2
+        var offsetY =  ($(window).height() / 7)
+
 	$.blockUI({ message: "<b>少々お待ちください...</b>" });
 	$('#blockui_area').load('/view/update',$('#blockui_form').serializeArray())
-	$.blockUI({ message: $('#blockui_area'),css: { top: '10%',width: '400px' } })
+	$.blockUI({ message: $('#blockui_area'),css: {
+                top:  offsetY + 'px',
+                left: offsetX + 'px',
+                width: width + 'px'
+	}})
 }
 function update_inquiry_user_db(){
 	var width = 700

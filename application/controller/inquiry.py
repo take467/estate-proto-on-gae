@@ -64,8 +64,8 @@ class InquiryController(BaseController):
       # RDBなら簡単なのに。。。
       add_filters =[]
       if self.view:
-        configs =  yaml.load(self.view.config)
-        for col in configs:
+        #configs =  yaml.load(self.view.config)
+        for col in self.config:
           if col['checked'] == 'checked':
             if col['type'] == 'radio' or col['type'] == 'select':
 
@@ -168,6 +168,7 @@ class InquiryController(BaseController):
                 #val = wk2.strftime('%Y/%m/%d')
               else:
                 val = wk2.strftime('%Y/%m/%d %H:%M:%S')
+
             wk['cell'].append(val)
 
         rows.append(wk)
