@@ -34,12 +34,14 @@
 				<!-- textarea id="{{f.name}}" name="{{ f.name}}" cols="{{f.cols}}" rows="{{f.rows}}">{{f.val}}</textarea -->
 				<textarea id="{{f.name}}" name="{{ f.name}}">{{f.val}}</textarea>
 			{% endifequal %}
+			{% if f.comment  %}<p style="font-size:0.8em;margin:0;padding:0">{{f.comment}}</p>{% endif %}
 			</td>
 		</tr>{% endfor %}
 	</table>
 	<input type="button" id="submit_form_submit" value="確認画面へ" onclick="submitData('{{action_url}}');return false;">
 &nbsp;&nbsp;&nbsp;<input type="reset" value="リセット">
 </form>
+<!--
 <h3>ご注意</h3>
 <div style="width:95%">
   <ul>
@@ -47,4 +49,5 @@
   <li>メールアドレスのご入力が間違っている場合、携帯電話など受信文字数に制限がある場合、公序良俗に反するお問合せにはお返事できません。</li>
   </ul>
 </div>
+-->
 {% endblock %}

@@ -3,6 +3,7 @@ from google.appengine.ext import db
 from gaeo.model import BaseModel, SearchableBaseModel
 
 from model.user_db import UserDb
+#from model.user_db_master import UserDbMaster
 from model.profile import ProfileCore
 
 import yaml
@@ -17,9 +18,8 @@ class Inquiry(BaseModel):
 
   reference_id  = db.StringProperty(default="")
   content     = db.TextProperty(default='')
-  reply_content  = db.TextProperty(default='')
+  reply_content  = db.TextProperty(default=None)
   reply_person   = db.StringProperty(default='')
-  is_replied     = db.BooleanProperty(default=False)
   reply_at     = db.DateTimeProperty()
 
   config = db.TextProperty()
@@ -36,6 +36,14 @@ class Inquiry(BaseModel):
   def profile(self):
     return self.profile_id
 
+  def getStatusLabel(self):
+    label = u'未定義'
+    m = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",'iq_status').get()
+    for data in  yaml.load(m.yaml_data):
+      if self.status == data['code']:
+        label = data['name']
+        break
+    return label
 
   def getProperty(self,key):
     prop =  yaml.load(self.config)

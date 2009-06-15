@@ -1,14 +1,68 @@
-<form id="blockui_form" class="niceform" >
-  <input type="hidden" id="edit_db_id" name="edit_db_id" value="{{user_db.key.id}}">
-<table noborder>
+<script type="text/javascript" language="javascript">
+
+function edit_reply(w){
+        var width = 400
+        if ( w != undefined ){
+                width = w
+        }
+        var offsetX =  ($(window).width() - width) /2
+        var offsetY =  ($(window).height() / 7)
+
+        $.blockUI({ message: "<b>少々お待ちください...</b>" });
+        $('#blockui_area').load('/inquiry/edit/' + $('#iq_id').val() + '?mode=edit&v='+ $('#view_id').val())
+        $.blockUI({ message: $('#blockui_area'),css: {
+                top:  offsetY + 'px',
+                left: offsetX + 'px',
+                width: width + 'px'
+        }})
+}
+function submit_reply(url,w){
+        var width = 400
+        if ( w != undefined ){
+                width = w
+        }
+        $.blockUI({ message: "<b>少々お待ちください...</b>" });
+	$.ajax({
+	   type: "POST",
+	   dataType: "json",
+	   url: url,
+	   data: $('#blockui_form').serializeArray(),
+	   success: function(data){
+		if( data.status == 'success' ){
+			if( data.msg != '' ){
+				alert(data.msg);
+			}
+			blockuiForm('/inquiry/edit/'+ data.iq_id + '?v='+data.view_id,function(){
+				$(".close_form").click(function(){ $.unblockUI();$("#flexigrid01").flexReload();});
+			},{'width':width});
+		}else{  
+			alert(data.msg);
+			$.unblockUI();
+		}
+	   },
+	   error: function(){
+		alert('システムエラー');
+	   }
+	 });
+}
+function send_reply(){
+	if(confirm('本当に送信しますか？')){
+		submit_reply('/inquiry/send_reply',950)
+	}
+}
+</script>
+<form id="blockui_form" class="" >
+  <input type="hidden" id="iq_id" name="iq_id" value="{{inquiry.key.id}}">
+  <input type="hidden" id="view_id" name="v" value="{{view.key.id}}">
+<table noborder width="100%">
 <tr>
 <td valign="top" width="50%">
 	<table id="inquiryTable" width="100%">
 	<tr>
-		<th align="left"> <label for="text">ステータス</label> </td>
-		<td align="left"> {{inquiry.status}}</td>
-		<th align="left"> <label for="text">問い合わせ番号</label> </td>
-		<td align="left"> {{inquiry.key.id}}</td>
+		<th align="left" width="20%"> <label for="text">問い合わせ番号</label> </td>
+		<td align="left" width="30%"> {{inquiry.key.id}}</td>
+		<th align="left" width="20%"> <label for="text">ステータス</label> </td>
+		<td align="left" width="30%"> {{inquiry.getStatusLabel }}
 	</tr>
 	<tr>
 		<th align="left"> <label for="text">件名</label> </td>
@@ -25,14 +79,16 @@
 	<!--
 		ここでループするんだ。ビューに合せて表示する項目を
 	--> 
-	{% for col in config.form_config %}{% ifequal col.form 'option' %}<tr>
-		<th align="left"><label for="check_{{col.name}}">{{col.label}}</label></th>
-		<td align="left">{{col.val}}</td>
-	</tr>{% endifequal %}{% endfor %}
+	{% for col in option_cols %}
+		<th align="left" ><label for="check_{{col.name}}">{{col.label}}</label></th>
+		<td align="left" colspan="3">{{col.val}}</td>
+	</tr>{% endfor %}
                 </td>
 	<tr>
-		<th align="left"><label for="text">内容</label></td>
-		<td align="left" colspan="3">{{inquiry.content}}</td>
+		<th colspan="4"><label for="text">内容</label></td>
+	</tr>
+	<tr>
+		<td align="left" colspan="4">{{inquiry.content}}</td>
 	</tr>
 	
 	</table>
@@ -42,21 +98,45 @@
 	<tr>
 		<th align="left"> <label for="text">回答者(email)</label> </td>
 		<td align="left">{{inquiry.reply_person}} </td>
+	</tr>
+	<tr>
 		<th align="left"> <label for="text">回答日</label> </td>
 		<td align="left">{{inquiry.reply_at|date:"Y/m/d H:s"}} </td>
 	</tr>
 	<tr>
-		<th colspan="4"><label for="text">回答内容</label></td>
+		<th colspan="2"><label for="text">回答内容</label></td>
 	</tr>
 	<tr>
-		<td colspan="4" align="left">
-			{{ inquiry.reply_content }}
+		<td colspan="2" align="left">
+			<div id="reply_content">
+			{% ifequal mode 'edit'  %}
+				<p style="font-size:0.9em">個人情報は極力書き込まないでください。宛名はメールに自動で付与されます。</p>
+				<textarea id="reply_textarea" name="reply_content" style="width:100%"  rows="20">{{inquiry.reply_content}}</textarea>
+				<p style="font-size:0.9em">保存するだけでは送信されません。保存した後に送信手続きを行ってください。</p>
+				<input type="button" id="save_reply" value="回答内容を保存" onclick="submit_reply('/inquiry/save_reply',959);return false">
+			{% else %}
+				{{ inquiry.reply_content }}
+			{% endifequal %}
+			</div>
 		</td>
 	</tr>
+	{% ifequal mode 'show' %}
+	<tr>
+		{% ifequal inquiry.status 'answered' %}
+		<td colspan="2" align="center">
+			<p style="font-size:0.9em">送信した後は回答を編集することはできません</p>
+		</td>
+		{% else %}
+		<td colspan="2" align="center">
+			<input type="button" value="回答を編集" onclick="edit_reply(950);return false"> -
+			<input type="button" value="送信" onclick="send_reply();return false"> 
+		</td>
+		{% endifequal %}
+	</tr>
+	{% endifequal %}
 	</table>
 </td>
 </tr>
 </table>
-	<input type="button" id="submit_blockui_form" value="保存" onclick="update_inquiry_user_db();return false"> -
 	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
 </form>

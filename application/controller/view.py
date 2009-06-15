@@ -166,6 +166,9 @@ class ViewController(BaseController):
       for col in config:
         if col['type'] == 'hidden':
           continue
+        if col['name'].startswith('iq_'):
+          continue
+
         key = "disp_%s" % col['name']
         val = self.params.get(key,'None')
 

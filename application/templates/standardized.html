@@ -201,7 +201,7 @@ function initInquiryFlexigrid(){
 			procmsg: '読み込んでいます。しばらくお待ちください..',
 			pagestat: '全 {total} 件のうち、{from} - {to} 件目を表示中',
 			colModel :{% if colModelsJson %}{{ colModelsJson }}{% else %} []{% endif %},
-			buttons : [ {% if auth.w %}{name: '編集', bclass: 'edit', onpress : editInquiryData}, {separator: true},{% endif %} {% if auth.d %}{name: '削除', bclass: 'delete', onpress : deleteInquiryData}{% endif %} ],
+			buttons : [ {% if auth.w %}{name: '詳細', bclass: 'edit', onpress : editInquiryData}, {separator: true},{% endif %} {% if auth.d %}{name: '削除', bclass: 'delete', onpress : deleteInquiryData}{% endif %} ],
 			searchitems : [
 				{display: 'ID', name : 'iq_id',is_default: true}{% for item in searchitems %}
 					,{display:'{{item.display}}' , name:'{{item.name}}'}{% endfor %}
@@ -268,19 +268,27 @@ function newData() {
 	});
 }
 function deleteInquiryData(com,grid){
+  __deleteData(com,grid,'/inquiry/delete/')
 }
-function deleteData(com,grid){if($('.trSelected',grid).length>0){
+function deleteData(com,grid){
+  __deleteData(com,grid,'/profile/delete/')
+}
+function __deleteData(com,grid,url){
         var items = $('.trSelected',grid);
         var itemlist = [];
         for(i=0 ; i< items.length ; i++) {
                 itemlist.push(items[i].id.substr(3));
         }
 	itemlist_s = itemlist.join(',')
+	if( items.length == 0){
+		alert('削除する項目を選択してください(複数選択可)');
+		return false
+	}
 	if(confirm('本当に削除しますか？ 削除レコード数(' + items.length + ')')){
 		$.ajax({
 		   type: "POST",
 		   dataType: "json",
-		   url: '/profile/delete/',
+		   url: url,
 		   data: "items="+itemlist_s,
 		   success: function(data){
 			if( data.status == 'success' ){
@@ -294,11 +302,7 @@ function deleteData(com,grid){if($('.trSelected',grid).length>0){
 			alert('システムエラー');
 		   }
 		 });
-
-	}else{
-		alert('削除する項目を選択してください(複数選択可)');
 	}
-}
 }
 function __editData(com,grid,path,param,bui_param) {
 	$('#blockui_area').html('');
@@ -326,8 +330,12 @@ function __editData(com,grid,path,param,bui_param) {
 function editData(com,grid) {
   __editData(com,grid,'/profile/edit/','?v={{view.key.id}}')
 }
-function editInquiryData(com,grid) {
-  __editData(com,grid,'/inquiry/edit/','?v={{view.key.id}}',{'width':'900'})
+function editInquiryData(com,grid,view_id) {
+  if( view_id != undefined ){
+	  __editData(com,grid,'/inquiry/edit/','?v=' + view_id,{'width':'950'})
+  }else{
+	  __editData(com,grid,'/inquiry/edit/','?v={{view.key.id}}',{'width':'950'})
+  }
 }
 function initSharedViewContextMenu(action,el,pos){
 	var id = $(el).attr('id').slice(2)
@@ -447,7 +455,7 @@ function update_inquiry_user_db(){
 	$.blockUI({ message: "<b>少々お待ちください...</b>" });
 	//alert($('#blockui_form').serializeArray())
 	$('#blockui_area').load('/groups/update',$('#blockui_form').serializeArray())
-	$('#blockui_area').html('')
+	//$('#blockui_area').html('')
         $.blockUI({ message: $('#blockui_area'),css: {
                 top:  offsetY + 'px',
                 left: offsetX + 'px',

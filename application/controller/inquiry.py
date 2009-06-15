@@ -1,10 +1,11 @@
 #!-*- coding:utf-8 -*-
 from google.appengine.ext import db
+from google.appengine.api import users
 
 from gaeo.controller import BaseController
 from model.user_db import *
 from model.inquiry import *
-from model.notice_mail import *
+from model.inquiry_mail import *
 from model.view import *
 
 import re
@@ -14,18 +15,118 @@ import logging
 import datetime
 
 class InquiryController(BaseController):
-    #def before_action(self):
+    def before_action(self):
     #  self.server_name = self.request.environ['SERVER_NAME']
     #  self.server_port = int(self.request.environ['SERVER_PORT'])
     #  if self.server_port != 80:
     #    self.base_url = ('http://%s:%s/' % (self.server_name, self.server_port))
     #  else:
     #    self.base_url = 'http://%s/' % (self.server_name,)
+      self.user=users.get_current_user()
+
+    def delete(self):
+      view = UserView.get_by_id(int(self.cookies['cv_id']))
+      items = self.params.get('items')
+      # split by ','
+      msg = {'status':'success'}
+      for id in items.split(','):
+        if id != None and id != '':
+          data = Inquiry().get_by_id(int(id))
+
+          # 権限チェックが必要
+          if data.user_db_id.user == self.user:
+            #所有者であれば無条件
+            data.delete()
+          else:
+            #そうでなければ権限があるかチェック
+            su = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1 and share_view_id = :2",user.email(), view).get()
+            if su.isDeletable():
+              data.delete()
+            else:
+              msg = {'status':'error','msg':'不正な操作です(' + str(data) + ')'}
+
+      self.render(json=self.to_json(msg))
+
+    def send_reply(self):
+      self.inquiry = Inquiry.get_by_id(int(self.params.get('iq_id')))
+      self.view = UserView.get_by_id(int(self.params.get('v')))
+      # 権限チェックが必要
+      editable = False
+      if self.inquiry.user_db_id.user == self.user:
+        editable=True
+      else:
+        #そうでなければ権限があるかチェック
+        su = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1 and share_view_id = :2",user.email(), view).get()
+        if su.isWritable():
+          editable = True
+
+      msg = {'status':'success','msg':'回答を送信しました','view_id':self.view.key().id(),'iq_id':self.inquiry.key().id()}
+      if editable:
+        # メール送信
+        m = InquiryMail()
+        m.send_reply(self.request,self.inquiry,self.inquiry.profile().email)
+
+        self.inquiry.reply_person = self.user.email()
+        now = datetime.datetime.now() + datetime.timedelta(hours=9)
+        self.inquiry.reply_at = now
+        self.inquiry.status = 'answered'
+        self.inquiry.put()
+
+      else:
+        msg = {'status':'error','msg':'不正な処理です'}
+
+      self.render(json=self.to_json(msg))
+
+    def save_reply(self):
+      self.inquiry = Inquiry.get_by_id(int(self.params.get('iq_id')))
+      self.view = UserView.get_by_id(int(self.params.get('v')))
+
+      # 権限チェックが必要
+      editable = False
+      if self.inquiry.user_db_id.user == self.user:
+        editable=True
+      else:
+        #そうでなければ権限があるかチェック
+        su = db.GqlQuery("SELECT * FROM ShareUser WHERE email = :1 and share_view_id = :2",user.email(), view).get()
+        if su.isWritable():
+          editable = True
+
+      msg = {'status':'success','msg':'回答を保存しました','view_id':self.view.key().id(),'iq_id':self.inquiry.key().id()}
+      if editable:
+        #内部利用だし、JSでのチェックだけでとりあえず良いだろう
+        self.inquiry.reply_content = self.params.get('reply_content')
+        #now = datetime.datetime.now() + datetime.timedelta(hours=9)
+        self.inquiry.reply_person = self.user.email()
+        self.inquiry.put()
+      else:
+        msg = {'status':'error','msg':'不正な処理です'}
+
+      self.render(json=self.to_json(msg))
+
 
     def edit(self):
+      self.mode = self.params.get('mode','show')
+      self.view = UserView.get_by_id(int(self.params.get('v')))
       self.inquiry = Inquiry.get_by_id(int(self.params.get('id')))
-      self.user_db = UserView.get_by_id(int(self.params.get('v')))
-      self.config = yaml.load(self.user_db.config)
+      self.inquiry.content       = re.sub("\n","<br/>",cgi.escape(self.inquiry.content))
+      if self.inquiry.reply_content == None or self.inquiry.reply_content == '':
+        self.mode = 'edit'
+
+      if self.inquiry.status == 'answered':
+        self.mode='show' ;#強制的に変更
+
+      if self.mode == 'show':
+        self.inquiry.reply_content = re.sub("\n","<br/>",cgi.escape(self.inquiry.reply_content))
+
+
+      self.option_cols = []
+      for c in yaml.load(self.view.config):
+        if not c['name'].startswith('iq_'):
+          if c['name'] != 'email':
+            if c['checked'] == 'checked':
+              self.option_cols.append(c)
+
+
 
     def json(self):
       # ビューの確定
@@ -93,7 +194,7 @@ class InquiryController(BaseController):
         except:
           pass
         total = 0
-        if p != None and (p.user == user):
+        if p != None and (p.user == self.user):
           total = 1
           iqs=[p]
       else:
@@ -134,42 +235,51 @@ class InquiryController(BaseController):
       if is_id_sort and (sortorder != None and sortorder.upper() == 'DESC'):
         results.reverse()
 
-
+      config = []
+      for col in self.config:
+        if col['name'].startswith('iq_') and col['checked'] == 'checked':
+          config.append(col)
+          continue
+        if col['name'] == 'email':
+          config.append(col)
+          continue
+        if col['checked'] == 'checked':
+          config.append(col)
+   
       rows = []
       total = len(results)
       for rec in results:
         wk = {'id':rec.key().id(),"cell":[rec.key().id()]}
-        for col in self.config:
-          if col['checked'] == 'checked':
-            val = None
-            clazz = None
-            name = None
-            if col['name'].startswith('iq_'): 
-              # "iq_{name} => {name}
-              name = col['name'][3:]
-              val = getattr(rec,name)
-              clazz = Inquiry
+        for col in config:
+          val = None
+          clazz = None
+          name = None
+          if col['name'].startswith('iq_'): 
+            # "iq_{name} => {name}
+            name = col['name'][3:]
+            val = getattr(rec,name)
+            clazz = Inquiry
+          else:
+            name = col['name']
+            val = getattr(rec.profile(),name)
+            clazz = ProfileCore
+
+          if col['type'] == 'radio' or col['type'] == 'select':
+            udm = db.GqlQuery("SELECT  * FROM UserDbMaster WHERE name = :1",col['name']).get()
+            for item in yaml.load(udm.yaml_data):
+              if item['code'] == val:
+                val = item['name']
+
+          if isinstance(getattr(clazz,name),db.DateTimeProperty):
+            logging.debug(">>> BINGO <<< name is " + col['name'] + " val is " + str(val))
+            wk2 = val + datetime.timedelta(hours=9)
+            if 'format' in col:
+              val = wk2.strftime(col['format'])
+              #val = wk2.strftime('%Y/%m/%d')
             else:
-              name = col['name']
-              val = getattr(rec.profile(),name)
-              clazz = ProfileCore
+              val = wk2.strftime('%Y/%m/%d %H:%M:%S')
 
-            if col['type'] == 'radio' or col['type'] == 'select':
-              udm = db.GqlQuery("SELECT  * FROM UserDbMaster WHERE name = :1",col['name']).get()
-              for item in yaml.load(udm.yaml_data):
-                if item['code'] == val:
-                  val = item['name']
-
-            if isinstance(getattr(clazz,name),db.DateTimeProperty):
-              logging.debug(">>> BINGO <<< name is " + col['name'] + " val is " + str(val))
-              wk2 = val + datetime.timedelta(hours=9)
-              if 'format' in col:
-                val = wk2.strftime(col['format'])
-                #val = wk2.strftime('%Y/%m/%d')
-              else:
-                val = wk2.strftime('%Y/%m/%d %H:%M:%S')
-
-            wk['cell'].append(val)
+          wk['cell'].append(val)
 
         rows.append(wk)
 

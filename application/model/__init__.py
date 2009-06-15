@@ -11,7 +11,7 @@ if w.count() == 0:
  ]
  iq_status = [
 	{'code':'unanswered','name':u'未回答'}
-	,{'code':'answered','name':u'回答'}
+	,{'code':'answered','name':u'回答済み'}
 ]
  sex = [
 	{'code':'male','name':u'男性'},

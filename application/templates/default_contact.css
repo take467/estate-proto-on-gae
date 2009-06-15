@@ -1,0 +1,52 @@
+body {
+        color:#404040;
+        font-family:Tahoma,Arial,Helvetica,sans-serif;
+        font-size:12px;
+        margin:0;
+        padding:0;
+        text-align:justify;
+}
+#form_area {
+        background:#F4F4F4 none repeat scroll 0 0;
+        font-size:12px;
+        line-height:1.4em;
+        padding:0.5em 20px;
+        width:{{width}}px;
+}
+table#inquiryTable {
+        border-collapse:collapse;
+        border-color:#999999;
+        border-spacing:0;
+        border-style:solid;
+        border-width:1px 0 0 1px;
+        margin-bottom:1em;
+        margin-left: 0.3em;
+        width:95%;
+}
+table#inquiryTable th {
+        background-color:#ECF5F0;
+        border-color:#999999;
+        border-style:solid;
+        border-width:0 1px 1px 0;
+        color:#000000;
+        font-size:1em;
+        padding:5px 3px;
+        vertical-align:top;
+        width:120px;
+}
+
+table#inquiryTable tr td {
+        border-color:#999999;
+        border-style:solid;
+        border-width:0 1px 1px 0;
+        font-size:1em;
+        font-weight:normal;
+        padding:2px 3px;
+        vertical-align:top;
+}
+table#inquiryTable td {
+        background-color:#FFFFFF;
+        color:#000000;
+        margin-left:0.2em;
+        margin-top:0;
+}

@@ -9,11 +9,18 @@ from model.notice_mail import *
 import re
 import cgi
 import copy
+import yaml
 
 class ContactController(BaseController):
     def before_action(self):
       # かならずURLの最後にはUserDbのIDが付与される
       self.udb = UserDb.get_by_id(int(self.params.get('id')))
+
+      self.config = yaml.load(self.udb.config)
+      self.css = ''
+      if  'css' in self.config: 
+        self.css =  self.config['css']
+      self.form_config = self.config['form_config']
 
       self.server_name = self.request.environ['SERVER_NAME']
       self.server_port = int(self.request.environ['SERVER_PORT'])
@@ -37,7 +44,7 @@ class ContactController(BaseController):
 
       # FORM FIELD の更新
       self.form_fields = []
-      self.form_config = self.udb.getProperty('form_config')
+      #self.form_config = self.udb.getProperty('form_config')
       for col in self.form_config:
         if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
 
@@ -82,7 +89,10 @@ class ContactController(BaseController):
         start_over = True
 
       self.fields = []
-      self.form_config = self.udb.getProperty('form_config')
+      #self.config = yaml.load(self.udb)
+      #self.form_config = self.udb.getProperty('form_config')
+      #self.css = self.config['css']
+      #self.form_config = self.config['form_config']
       for col in self.form_config:
         if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
           if start_over:
@@ -134,19 +144,20 @@ class ContactController(BaseController):
       profile.put()
       inquiry = Inquiry(user_db_id = self.udb,profile_id = profile)
       # FORM FIELD の更新
-      self.form_config =  self.udb.getProperty('form_config')
-      for col in self.udb.getProperty('form_config'):
-        if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
+      #self.form_config =  self.udb.getProperty('form_config')
+      for col in self.form_config:
+        #if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
 
-          name = col['name']
-          val =self.params.get(name)
+        name = col['name']
+        val =self.params.get(name,'None')
+        if val != 'None':
           if name.startswith('iq_'):
             name = name[3:]
             setattr(inquiry,name,val)
           else:
             setattr(inquiry.profile(),name,val)
 
-      #inquiry.profile().put()
+      inquiry.profile().put()
       inquiry.put() 
 
       # FORM FIELD の更新
