@@ -1,10 +1,10 @@
 #!-*- coding:utf-8 -*-
 from google.appengine.ext import db
+from google.appengine.api import mail
 
 from gaeo.controller import BaseController
 from model.user_db import *
 from model.inquiry import *
-from model.notice_mail import *
 
 import re
 import cgi
@@ -63,13 +63,19 @@ class ContactController(BaseController):
       # 確認ページ（HTMLチャンク) が表示される 
 
 
+    def css_form(self):
+      pass
+
     def preview(self):
+      self.w = self.params.get('w','700')
+      self.h = self.params.get('h','450')
       pass
 
     def form(self):
       self.action_url = self.base_url + "contact/confirm/" + str(self.udb.key().id())
-      self.width = self.params.get('width','700')
-      self.textarea_w = (int(self.width)  - 120) * 0.9
+
+      #self.width = self.params.get('width','700')
+      #self.textarea_w = (int(self.width)  - 120) * 0.9
       # チケットの確認
       #ticket = None
       start_over = False
@@ -175,9 +181,22 @@ class ContactController(BaseController):
                   col['val'] = item['name']
           self.form_fields.append(col)
 
-      # ここで 送信者と問い合わせ担当者にメールを送る
-      m = NoticeMail()
-      m.notice(self.request,inquiry)
-      m.send_confirm(self.request,inquiry)
+      # 担当者にメールを送る
+      email = inquiry.user_db().getProperty('recipients')
+      values = {'email':email,'id':inquiry.key().id(),'db_name':inquiry.user_db().name}
+      subject = self.render_txt(template="notice_mail_subject",values=values)
+      body    = self.render_txt(template="notice_mail_body",values=values)
+      if mail.is_email_valid(email):
+          mail.send_mail(sender=email, to=email, subject=subject, body=body)
+
+      # 問い合わせした人にメールを送る
+      name = inquiry.profile().email
+      if inquiry.profile().name:
+        name = inquiry.profile().name
+      values = {'name':name,'id':inquiry.key().id(),'db_name':inquiry.user_db().name}
+      subject = self.render_txt(template="confirm_mail_subject",values=values)
+      body    = self.render_txt(template="confirm_mail_body",values=values)
+      if mail.is_email_valid(inquiry.profile().email):
+          mail.send_mail(sender=email, to=inquiry.profile().email, subject=subject, body=body)
 
       # 送信完了メッセージ（HTMLチャンク)を出力

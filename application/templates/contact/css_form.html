@@ -1,0 +1,13 @@
+<h3>CSSの修正</h3>
+<form id="blockui_form">
+<textarea rows="20" cols="50" id="css_edit_area" name="css_edit_area">
+{% if css %}
+{{ css }}
+{% else %}
+{% include "../default_contact.css" %}
+{% endif %}
+</textarea>
+<div id="formBottomNavi">
+<input type="button"  value="保存" onclick="update_css('{{udb.key.id}}');return false"> - <input type="button" onclick="$.unblockUI()" value="閉じる">
+</div>
+</form>

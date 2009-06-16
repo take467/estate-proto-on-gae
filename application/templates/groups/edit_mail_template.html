@@ -1,0 +1,86 @@
+<script type="text/javascript" language="javascript">
+function submit_data(url,w){
+        var width = 400
+        if ( w != undefined ){
+                width = w
+        }
+        $.blockUI({ message: "<b>少々お待ちください...</b>" });
+	$.ajax({
+	   type: "POST",
+	   dataType: "json",
+	   url: url,
+	   data: $('#blockui_form').serializeArray(),
+	   success: function(data){
+		if( data.status == 'success' ){
+			if( data.msg != '' ){
+				alert(data.msg);
+			}
+			blockuiForm('/inquiry/edit/'+ data.iq_id + '?v='+data.view_id,function(){
+				$(".close_form").click(function(){ $.unblockUI();$("#flexigrid01").flexReload();});
+			},{'width':width});
+		}else{  
+			alert(data.msg);
+			$.unblockUI();
+		}
+	   },
+	   error: function(){
+		alert('システムエラー');
+	   }
+	 });
+}
+</script>
+<form id="blockui_form" class="" >
+  <input type="hidden" id="udb_id" name="v" value="{{udb.key.id}}">
+<table noborder width="100%">
+<tr>
+<td valign="top" width="50%">
+	<table id="inquiryTable" width="100%">
+	<tr>
+		<th colspan="2">受理通知のメール</td>
+	</tr>
+	<tr>
+		<th width="10%">題名</td>
+		<td align="left" width="90%"><input type="text" name="confirm_mail_subject" value="{{confirm_mail_subject}}" size="50"></td>
+	</tr>
+	<tr>
+		<th>本文</td>
+		<td align="left"><textarea name="confirm_mail_body" style="width:100%"  rows="20">{{confirm_mail_body}}</textarea></td>
+	</tr>
+	<tr>
+		<td align="left" colspan="2">
+			<p style="font-size:0.9em">"{ {" と "} }"で囲まれた文字はメール送信時に置換されます。</p>
+			<p style="font-size:0.8em">{{id}}:問い合わせ番号<br/>{{db_name}}:データーベース名<br/>{{name}}:問い合わせした人の氏名。無ければメールアドレス
+			</p>
+		</td>
+	</tr>
+	</table>
+</td>
+<td valign="top" width="50%">
+	<table id="inquiryTable" width="100%">
+	<tr>
+		<th colspan="2">回答のメール</td>
+	</tr>
+	<tr>
+		<th width="10%">題名</td>
+		<td align="left" width="90%"><input type="text" name="reply_mail_subject" value="{{reply_mail_subject}}" size="50"></td>
+	</tr>
+	<tr>
+		<th>本文</td>
+		<td align="left"><textarea name="reply_mail_body" style="width:100%"  rows="20">{{reply_mail_body}}</textarea></td>
+	</tr>
+	<tr>
+		<td align="left" colspan="2">
+			<p style="font-size:0.9em">"{ {" と "} }"で囲まれた文字はメール送信時に置換されます。</p>
+			<p style="font-size:0.8em">{{id}}:問い合わせ番号<br/>{{db_name}}:データーベース名<br/>{{name}}:問い合わせした人の氏名。無ければメールアドレス
+			<br/>{{reply_content}}:回答内容
+			</p>
+		</td>
+	</tr>
+	</table>
+	</table>
+</td>
+</tr>
+</table>
+	<input type="button" onclick="submit_data()" value="保存"> -
+	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
+</form>

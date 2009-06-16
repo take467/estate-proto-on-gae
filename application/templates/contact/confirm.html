@@ -9,6 +9,8 @@
 </tr>
 {% endfor %}
 </table>
-<input type="button" onclick="submitData('{{action_url}}');return false" value="送信">&nbsp;&nbsp;&nbsp;
-<input type="button" onclick="submitData('{{base_url}}contact/form/{{udb.key.id}}');return false" value="やり直し">
+<div id="formBottomNavi">
+	<input type="button" onclick="submitData('{{action_url}}');return false" value="送信">&nbsp;&nbsp;&nbsp;
+	<input type="button" onclick="submitData('{{base_url}}contact/form/{{udb.key.id}}');return false" value="やり直し">
+</div>
 </form>

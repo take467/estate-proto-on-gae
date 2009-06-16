@@ -5,7 +5,6 @@ from google.appengine.api import users
 from gaeo.controller import BaseController
 from model.user_db import *
 from model.inquiry import *
-from model.inquiry_mail import *
 from model.view import *
 
 import re
@@ -13,6 +12,8 @@ import cgi
 import copy
 import logging
 import datetime
+import os
+from google.appengine.api import mail
 
 class InquiryController(BaseController):
     def before_action(self):
@@ -63,8 +64,12 @@ class InquiryController(BaseController):
       msg = {'status':'success','msg':'回答を送信しました','view_id':self.view.key().id(),'iq_id':self.inquiry.key().id()}
       if editable:
         # メール送信
-        m = InquiryMail()
-        m.send_reply(self.request,self.inquiry,self.inquiry.profile().email)
+        values = {'email':self.inquiry.profile().email,'reply_content':self.inquiry.reply_content}
+        subject = self.render_txt(template="reply_mail_subject",values=values)
+        body    = self.render_txt(template="reply_mail_body",values=values)
+
+        if mail.is_email_valid(self.inquiry.profile().email):
+          mail.send_mail(sender=self.user.email(), to=self.inquiry.profile().email, subject=subject, body=body)
 
         self.inquiry.reply_person = self.user.email()
         now = datetime.datetime.now() + datetime.timedelta(hours=9)

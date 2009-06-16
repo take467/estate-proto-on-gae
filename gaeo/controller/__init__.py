@@ -200,6 +200,24 @@ class BaseController(object):
                 raise errors.ControllerRenderTypeError('Render type error')
         self.has_rendered = True
 
+    def render_txt(self,  **opt):
+      s = ''
+      context = self.__dict__
+      if opt.has_key('template'):
+        if isinstance(opt.get('values'), dict):
+          context.update(opt.get('values'))
+        s = template.render( os.path.join(self.__tpldir,opt.get('template') + '.txt'), context)
+      elif opt.has_key('template_string'):
+        if isinstance(opt.get('values'), dict):
+          context.update(opt.get('values'))
+        from django.template import Context, Template
+        t = Template(opt.get('template_string').encode('utf-8'))
+        c = Context(context)
+        s = t.render(c)
+
+      return s
+
+
     def skip_rendering(self):
       self.has_rendered = True
  

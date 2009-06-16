@@ -11,11 +11,18 @@
         width:750px;
 	font-size:12px;
 }
+#preview_menu {
+	text-align:right;
+}
 #footer {
         text-align:right;
 }
 </style>
 <script type="text/javascript" language="javascript">
+$(document).ready(function(){
+        $.ajaxSetup({cache: false });
+});
+
 function update_css(id){
         $.blockUI({ message: "<b>少々お待ちください...</b>" });
         $.ajax({
@@ -39,7 +46,11 @@ function update_css(id){
            }
          });
 }
-function disp_blockui_area(area){
+
+function disp_blockui_area(area,url){
+        if( url != undefined ){
+		$(area).load(url);
+	}
         var width = 700
         var offsetX =  ($(window).width() - width) /2
         var offsetY =  ($(window).height() / 7)
@@ -55,11 +66,14 @@ function disp_blockui_area(area){
 <div id="container">
 <h2 style="margin:0px">ESTATE-PROTOTYPE &gt; {{udb.name }}&gt; プレビュー</h2>
 <div id="preview_menu">
-<a href="javascript:void(0)" onclick="disp_blockui_area('#blockui_area');return false">コード表示</a> | <a href="javascript:void(0)" onclick="disp_blockui_area('#blockui_area2');return false">CSSの編集</a>
+<a href="javascript:void(0)" onclick="disp_blockui_area('#blockui_area');return false">コード表示</a> | <a href="javascript:void(0)" onclick="disp_blockui_area('#blockui_area2','/contact/css_form/{{udb.key.id}}');return false">CSSの編集</a>
+<div>
+<form>横:<input size="4" type="text" name="w" value="{{w}}">px x 高さ:<input size="4" type="text" name="h" value="{{h}}">px <input type="submit" value="変更"></form></span>
+</div>
 </div>
 
 <h3>お問い合わせ</h3>
-<iframe marginheight="0" marginwidth="0" src="{{base_url}}contact/form/{{udb.key.id}}" scrolling="no" width="750" frameborder="0" height="400"></iframe>
+<iframe marginheight="0" marginwidth="0" src="{{base_url}}contact/form/{{udb.key.id}}" scrolling="no" width="{{w}}" frameborder="0" height="{{h}}"></iframe>
 
 
 <div id="blockui_area" style="margin:1em;display:none; cursor: default">
@@ -67,26 +81,14 @@ function disp_blockui_area(area){
 HTMLを貼付けてサイトにフォームを埋め込んでください。
 </p>
 <textarea readonly rows="3" cols="65" onclick="this.focus();this.select()" id="code">
-<iframe marginheight="0" marginwidth="0" src="{{base_url}}contact/form/{{udb.key.id}}" scrolling="no" width="750" frameborder="0" height="400"></iframe>
+<iframe marginheight="0" marginwidth="0" src="{{base_url}}contact/form/{{udb.key.id}}" scrolling="no" width="{{w}}" frameborder="0" height="{{h}}"></iframe>
 </textarea>
 <div style="text-align:center">
 	<input type="button" onclick="$.unblockUI()" value="閉じる">
 </div>
 </div>
+
 <div id="blockui_area2" style="margin:1em;display:none; cursor: default">
-<h3>CSSの修正</h3>
-<form id="blockui_form">
-<textarea rows="20" cols="50" id="css_edit_area" name="css_edit_area">
-{% if css %}
-{{ css }}
-{% else %}
-{% include "../default_contact.css" %}
-{% endif %}
-</textarea>
-<p>
-<input type="button"  value="保存" onclick="update_css('{{udb.key.id}}');return false"> - <input type="button" onclick="$.unblockUI()" value="閉じる">
-</p>
-</form>
 </div>
 
 <div id="footer">

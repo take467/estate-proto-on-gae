@@ -24,22 +24,16 @@
 				{% endfor %}
 				</select>
 			{% endifequal %}{% ifequal f.type 'textarea' %}
-				<style type="text/css">
-					#{{f.name}} {
-						width: {{textarea_w}}px;
-						height: 7em;
-						scrollbar-base-color: #ff0000;
-					}
-				</style>
-				<!-- textarea id="{{f.name}}" name="{{ f.name}}" cols="{{f.cols}}" rows="{{f.rows}}">{{f.val}}</textarea -->
 				<textarea id="{{f.name}}" name="{{ f.name}}">{{f.val}}</textarea>
 			{% endifequal %}
 			{% if f.comment  %}<p style="font-size:0.8em;margin:0;padding:0">{{f.comment}}</p>{% endif %}
 			</td>
 		</tr>{% endfor %}
 	</table>
+	<div id="formBottomNavi">
 	<input type="button" id="submit_form_submit" value="確認画面へ" onclick="submitData('{{action_url}}');return false;">
 &nbsp;&nbsp;&nbsp;<input type="reset" value="リセット">
+	</div>
 </form>
 <!--
 <h3>ご注意</h3>

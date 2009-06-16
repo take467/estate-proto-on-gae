@@ -169,6 +169,28 @@ class GroupsController(BaseController):
         list = db.GqlQuery("SELECT * FROM UserView WHERE user_db_id = :1",u)
         self.user_dbs.append({'db':u,'views':list})
 
+    def edit_mail_template(self):
+      if self.request.method.upper() == "GET":
+        id = self.params.get('id')
+        self.user_db = UserDb.get_by_id(int(id))
+
+	values={'id':'{{id}}','db_name':'{{db_name}}','name':'{{name}}','reply_content':'{{reply_content}}'}
+        self.confirm_mail_subject = self.user_db.getProperty('confirm_mail_subject')
+        if not self.confirm_mail_subject:
+          self.confirm_mail_subject = self.render_txt(template='confirm_mail_subject',values=values)
+
+        self.confirm_mail_body = self.user_db.getProperty('confirm_mail_body')
+        if not self.confirm_mail_body:
+          self.confirm_mail_body = self.render_txt(template='confirm_mail_body',values=values)
+
+        self.reply_mail_subject = self.user_db.getProperty('reply_mail_subject')
+        if not self.reply_mail_subject:
+          self.reply_mail_subject = self.render_txt(template='reply_mail_subject',values=values)
+
+        self.reply_mail_body = self.user_db.getProperty('reply_mail_body')
+        if not self.reply_mail_body:
+          self.reply_mail_body = self.render_txt(template='reply_mail_body',values=values)
+
     def edit(self):
       id = self.params.get('id')
       self.user_db = UserDb.get_by_id(int(id))

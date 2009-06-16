@@ -18,7 +18,7 @@ class Inquiry(BaseModel):
 
   reference_id  = db.StringProperty(default="")
   content     = db.TextProperty(default='')
-  reply_content  = db.TextProperty(default=None)
+  reply_content  = db.TextProperty(default='')
   reply_person   = db.StringProperty(default='')
   reply_at     = db.DateTimeProperty()
 
