@@ -81,14 +81,14 @@ function send_reply(){
 	--> 
 	{% for col in option_cols %}
 		<th align="left" ><label for="check_{{col.name}}">{{col.label}}</label></th>
-		<td align="left" colspan="3">{{col.val}}</td>
+		<td align="left" colspan="3">{{col.val|pre2markup}}</td>
 	</tr>{% endfor %}
                 </td>
 	<tr>
 		<th colspan="4"><label for="text">内容</label></td>
 	</tr>
 	<tr>
-		<td align="left" colspan="4">{{inquiry.content}}</td>
+		<td align="left" colspan="4">{{inquiry.content|pre2markup}}</td>
 	</tr>
 	
 	</table>
@@ -115,7 +115,7 @@ function send_reply(){
 				<p style="font-size:0.9em">保存するだけでは送信されません。保存した後に送信手続きを行ってください。</p>
 				<input type="button" id="save_reply" value="回答内容を保存" onclick="submit_reply('/inquiry/save_reply',959);return false">
 			{% else %}
-				{{ inquiry.reply_content }}
+				{{ inquiry.reply_content|pre2markup}}
 			{% endifequal %}
 			</div>
 		</td>

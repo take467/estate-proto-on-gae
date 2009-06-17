@@ -29,7 +29,7 @@ handlers:
 
 - url: /contact/.*
   script: main.py
-
+  secure: always
 
 - url: .*
   script: main.py

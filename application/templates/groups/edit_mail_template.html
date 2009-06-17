@@ -1,36 +1,19 @@
 <script type="text/javascript" language="javascript">
-function submit_data(url,w){
-        var width = 400
-        if ( w != undefined ){
-                width = w
-        }
+function submit_data(id){
+        var width = 950
+        var offsetX =  ($(window).width() - width) /2
+        var offsetY =  ($(window).height() / 7)
+
         $.blockUI({ message: "<b>少々お待ちください...</b>" });
-	$.ajax({
-	   type: "POST",
-	   dataType: "json",
-	   url: url,
-	   data: $('#blockui_form').serializeArray(),
-	   success: function(data){
-		if( data.status == 'success' ){
-			if( data.msg != '' ){
-				alert(data.msg);
-			}
-			blockuiForm('/inquiry/edit/'+ data.iq_id + '?v='+data.view_id,function(){
-				$(".close_form").click(function(){ $.unblockUI();$("#flexigrid01").flexReload();});
-			},{'width':width});
-		}else{  
-			alert(data.msg);
-			$.unblockUI();
-		}
-	   },
-	   error: function(){
-		alert('システムエラー');
-	   }
-	 });
+        $('#blockui_area').load('/groups/edit_mail_template/'+id,$('#blockui_form').serializeArray())
+        $.blockUI({ message: $('#blockui_area'),css: {
+                top:  offsetY + 'px',
+                left: offsetX + 'px',
+                width: width + 'px'
+        }})
 }
 </script>
 <form id="blockui_form" class="" >
-  <input type="hidden" id="udb_id" name="v" value="{{udb.key.id}}">
 <table noborder width="100%">
 <tr>
 <td valign="top" width="50%">
@@ -81,6 +64,6 @@ function submit_data(url,w){
 </td>
 </tr>
 </table>
-	<input type="button" onclick="submit_data()" value="保存"> -
+	<input type="button" onclick="submit_data('{{user_db.key.id}}')" value="保存"> -
 	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
 </form>

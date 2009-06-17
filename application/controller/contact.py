@@ -1,6 +1,8 @@
 #!-*- coding:utf-8 -*-
 from google.appengine.ext import db
 from google.appengine.api import mail
+from google.appengine.api import memcache
+
 
 from gaeo.controller import BaseController
 from model.user_db import *
@@ -10,11 +12,12 @@ import re
 import cgi
 import copy
 import yaml
+import datetime
 
 class ContactController(BaseController):
     def before_action(self):
       # かならずURLの最後にはUserDbのIDが付与される
-      self.udb = UserDb.get_by_id(int(self.params.get('id')))
+      self.udb = UserDb.get(self.params.get('id'))
 
       self.config = yaml.load(self.udb.config)
       self.css = ''
@@ -30,17 +33,18 @@ class ContactController(BaseController):
         self.base_url = 'http://%s/' % (self.server_name,)
 
     def confirm(self):
-      # チケットの確認
-      #try:
-      #  ticket = self.session['ticket']
-      #  if ticket == None:
-      #    self.redirect('/contact/preview/' + str(self.udb.key().id()))
-      #    return
-      #except:
-      #  self.redirect('/contact/preview/' + str(self.udb.key().id()))
-      #  return
 
-      self.action_url = self.base_url + "contact/post/" + str(self.udb.key().id())
+      # CSRF対策 
+      import md5
+      m=md5.new()
+      self.ticket = str(m)
+      m.update(self.ticket + str(self.udb.key()))
+      self.session_val = m.hexdigest()
+
+      # cookieが使えないことも考慮してmemcacheに値をいれる
+      memcache.add(key=self.ticket,value=self.session_val)
+
+      self.action_url = self.base_url + "contact/post/" + str(self.udb.key())
 
       # FORM FIELD の更新
       self.form_fields = []
@@ -48,7 +52,8 @@ class ContactController(BaseController):
       for col in self.form_config:
         if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
 
-          col['val'] = re.sub("\n","<br/>",cgi.escape(self.params.get(col['name'])))
+          #col['val'] = re.sub("\n","<br/>",cgi.escape(self.params.get(col['name'])))
+          col['val'] = self.params.get(col['name'])
 
           if col['type'] == 'radio' or col['type'] == 'select':
             result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
@@ -62,17 +67,8 @@ class ContactController(BaseController):
 
       # 確認ページ（HTMLチャンク) が表示される 
 
-
-    def css_form(self):
-      pass
-
-    def preview(self):
-      self.w = self.params.get('w','700')
-      self.h = self.params.get('h','450')
-      pass
-
     def form(self):
-      self.action_url = self.base_url + "contact/confirm/" + str(self.udb.key().id())
+      self.action_url = self.base_url + "contact/confirm/" + str(self.udb.key())
 
       #self.width = self.params.get('width','700')
       #self.textarea_w = (int(self.width)  - 120) * 0.9
@@ -92,6 +88,7 @@ class ContactController(BaseController):
       #elif ticket != None and self.request.method.upper() == "POST":
 
       if self.request.method.upper() == "POST":
+        self.ticket = self.params.get('ticket')
         start_over = True
 
       self.fields = []
@@ -126,29 +123,35 @@ class ContactController(BaseController):
 
           self.fields.append(col)
 
+          # darty hack
+          if col['name'] == 'email':
+            wk = copy.deepcopy(col)
+            wk['name'] = 'email_confirm'
+            wk['label'] = '電子メール（確認)'
+            wk['comment'] = None
+            wk['validator'] = "Validator.check(this,'equal','email')"
+            self.fields.append(wk)
+
+
     # 問い合わせを保存
     def post(self):
       # チケットの確認
-      #try:
-      #  ticket = self.session['ticket']
-      #  if ticket == None:
-      #    self.redirect('/contact/preview/'+str(self.udb.key().id()))
-#	  return
-#      except:
-#        self.redirect('/contact/preview/'+str(self.udb.key().id()))
-#	return
+      ticket  = self.params.get('ticket')
+      session_val = self.params.get('session_val')
 
-#      try:
-#        self.session['ticket']=None
-#        del self.session['ticket']
-#        self.session.put()
-#      except KeyError ,ex:
-#        self.render(text=ex) 
-#        return
+      wk = memcache.get(ticket)
+      try:
+        if wk == None or (session_val != wk):
+          self.redirect('/contact/form/'+str(self.udb.key()))
+	  return
+      except:
+        self.redirect('/contact/form/'+str(self.udb.key()))
+	return
+
 
       profile = ProfileCore(user_db_id = self.udb,user=self.udb.user)
       profile.put()
-      inquiry = Inquiry(user_db_id = self.udb,profile_id = profile)
+      inquiry = Inquiry(user_db_id = self.udb,profile_id = profile,ticket=ticket)
       # FORM FIELD の更新
       #self.form_config =  self.udb.getProperty('form_config')
       for col in self.form_config:
@@ -170,7 +173,8 @@ class ContactController(BaseController):
       self.form_fields = []
       for col in self.form_config:
         if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
-          col['val'] = re.sub("\n","<br/>",cgi.escape(self.params.get(col['name'])))
+          #col['val'] = re.sub("\n","<br/>",cgi.escape(self.params.get(col['name'])))
+          col['val'] = self.params.get(col['name'])
           if col['type'] == 'radio' or col['type'] == 'select':
             result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
             if result.count() > 0:
@@ -198,5 +202,11 @@ class ContactController(BaseController):
       body    = self.render_txt(template="confirm_mail_body",values=values)
       if mail.is_email_valid(inquiry.profile().email):
           mail.send_mail(sender=email, to=inquiry.profile().email, subject=subject, body=body)
+
+      try:
+        memcache.delete(ticket)
+      except KeyError ,ex:
+        self.render(text=ex) 
+        return
 
       # 送信完了メッセージ（HTMLチャンク)を出力

@@ -481,7 +481,7 @@ function update_user_db(){
 function initInquiryContextMenu(action,el,pos){
                 var id = $(el).attr('id').slice(2)
                 if( action == 'preview' ){
-			window.open('/contact/preview/' + id)
+			window.open('/inquiry/preview/' + id)
                 }else if( action == 'addview' ){
 			$('#action_url').val('/view/create')
 			submitData('db_id=' + id)

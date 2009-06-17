@@ -1,0 +1,41 @@
+<p style="font-size:1.5em;color:red;margin:1em">
+変更を保存しました。
+</p>
+<form id="blockui_form" class="" >
+  <input type="hidden" id="udb_id" name="v" value="{{udb.key.id}}">
+<table noborder width="100%">
+<tr>
+<td valign="top" width="50%">
+	<table id="inquiryTable" width="100%">
+	<tr>
+		<th colspan="2">受理通知のメール</td>
+	</tr>
+	<tr>
+		<th width="10%">題名</td>
+		<td align="left" width="90%">{{config.confirm_mail_subject}}</td>
+	</tr>
+	<tr>
+		<th width="10%" >本文</td>
+		<td width="90%" align="left"><textarea  style="width:100%"  rows="20">{{config.confirm_mail_body}}</textarea></td>
+	</tr>
+	</table>
+</td>
+<td valign="top" width="50%">
+	<table id="inquiryTable" width="100%">
+	<tr>
+		<th colspan="2">回答のメール</td>
+	</tr>
+	<tr>
+		<th width="10%">題名</td>
+		<td align="left" width="90%">{{config.reply_mail_subject}}</td>
+	</tr>
+	<tr>
+		<th width="10%">本文</td>
+		<td width="90%" align="left"><textarea  style="width:100%"  rows="20">{{config.reply_mail_body}}</textarea></td>
+	</tr>
+	</table>
+</td>
+</tr>
+</table>
+	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
+</form>

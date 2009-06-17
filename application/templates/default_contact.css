@@ -55,6 +55,19 @@ table#inquiryTable td {
 #formBottomNavi{
         margin:1em 0.5em;
 }
+#sent_message {
+	text-align:center;
+	width:100%;
+}
+#sent_message_box {
+	border: solid 2px #f00000;
+	margin:1em;
+	padding:0 1em;
+}
+#sent_message_box p{
+	font-size:1.5em;
+	color:#f00000;
+}
 
 
 

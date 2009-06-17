@@ -1,7 +1,7 @@
 
-<div style="text-align:center;width:100%">
-	<div style="border: solid 2px #f00000;;margin:1em;padding:0 1em;">
-	<p style="font-size:1.5em;color:#f00000"> お問い合わせを承りました。</p>
+<div id="sent_message">
+	<div id="sent_message_box">
+		<p> お問い合わせを承りました。</p>
 	</div>
 	<p>後ほど受付完了のメールが送信されますのでご確認ください</p>
 </div>
@@ -10,7 +10,7 @@
 {% for f in form_fields %}
 <tr>
 	<th align="left" width="30%">{{ f.label }}</th>
-	<td align="left" width="70%">{{ f.val}}<input type="hidden" name="{{f.name}}" value="{% if f.code %}{{f.code}}{% else %}{{f.val}}{% endif %}"></td>
+	<td align="left" width="70%">{{ f.val|pre2markup}}<input type="hidden" name="{{f.name}}" value="{% if f.code %}{{f.code}}{% else %}{{f.val}}{% endif %}"></td>
 </tr>
 {% endfor %}
 </table>

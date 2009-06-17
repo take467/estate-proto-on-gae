@@ -1,0 +1,27 @@
+
+div.baloon {
+   font-size: 11px;
+   color: #900;
+   position: absolute;
+   padding-left: 5px;
+   background: url("/img/validator/baloon.gif") no-repeat top left;
+   z-index: 1;
+}
+
+div.baloon a {
+   color: blue;
+   text-decoration: none;
+   padding: 2px;
+   margin-right: 2px;
+}
+
+div.baloon a:hover {
+   background-color: #eef;
+}
+
+div.baloon div {
+   background: url("/img/validator/baloon_right.gif") no-repeat top right;
+   padding: 7px 7px 14px 0;
+   white-space: nowrap;
+}
+

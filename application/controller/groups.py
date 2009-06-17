@@ -170,9 +170,10 @@ class GroupsController(BaseController):
         self.user_dbs.append({'db':u,'views':list})
 
     def edit_mail_template(self):
+      id = self.params.get('id')
+      self.user_db = UserDb.get_by_id(int(id))
+
       if self.request.method.upper() == "GET":
-        id = self.params.get('id')
-        self.user_db = UserDb.get_by_id(int(id))
 
 	values={'id':'{{id}}','db_name':'{{db_name}}','name':'{{name}}','reply_content':'{{reply_content}}'}
         self.confirm_mail_subject = self.user_db.getProperty('confirm_mail_subject')
@@ -190,6 +191,16 @@ class GroupsController(BaseController):
         self.reply_mail_body = self.user_db.getProperty('reply_mail_body')
         if not self.reply_mail_body:
           self.reply_mail_body = self.render_txt(template='reply_mail_body',values=values)
+
+      if self.request.method.upper() == "POST":
+        self.config = yaml.load(self.user_db.config)
+        self.config['confirm_mail_subject'] = self.params.get('confirm_mail_subject')
+        self.config['confirm_mail_body'] = self.params.get('confirm_mail_body')
+        self.config['reply_mail_subject'] = self.params.get('reply_mail_subject')
+        self.config['reply_mail_body'] = self.params.get('reply_mail_body')
+        self.user_db.config = yaml.dump(self.config)
+        self.user_db.put()
+        self.render(template='update_mail_template')
 
     def edit(self):
       id = self.params.get('id')

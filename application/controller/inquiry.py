@@ -17,13 +17,23 @@ from google.appengine.api import mail
 
 class InquiryController(BaseController):
     def before_action(self):
-    #  self.server_name = self.request.environ['SERVER_NAME']
-    #  self.server_port = int(self.request.environ['SERVER_PORT'])
-    #  if self.server_port != 80:
-    #    self.base_url = ('http://%s:%s/' % (self.server_name, self.server_port))
-    #  else:
-    #    self.base_url = 'http://%s/' % (self.server_name,)
+      self.server_name = self.request.environ['SERVER_NAME']
+      self.server_port = int(self.request.environ['SERVER_PORT'])
+      if self.server_port != 80:
+        self.base_url = ('http://%s:%s/' % (self.server_name, self.server_port))
+      else:
+        self.base_url = 'http://%s/' % (self.server_name,)
       self.user=users.get_current_user()
+
+    def css_form(self):
+      self.udb = UserDb.get_by_id(int(self.params.get('id')))
+      pass
+
+    def preview(self):
+      self.udb = UserDb.get_by_id(int(self.params.get('id')))
+      self.w = self.params.get('w','700')
+      self.h = self.params.get('h','550')
+      pass
 
     def delete(self):
       view = UserView.get_by_id(int(self.cookies['cv_id']))
@@ -113,15 +123,15 @@ class InquiryController(BaseController):
       self.mode = self.params.get('mode','show')
       self.view = UserView.get_by_id(int(self.params.get('v')))
       self.inquiry = Inquiry.get_by_id(int(self.params.get('id')))
-      self.inquiry.content       = re.sub("\n","<br/>",cgi.escape(self.inquiry.content))
+      #self.inquiry.content       = re.sub("\n","<br/>",cgi.escape(self.inquiry.content))
       if self.inquiry.reply_content == None or self.inquiry.reply_content == '':
         self.mode = 'edit'
 
       if self.inquiry.status == 'answered':
         self.mode='show' ;#強制的に変更
 
-      if self.mode == 'show':
-        self.inquiry.reply_content = re.sub("\n","<br/>",cgi.escape(self.inquiry.reply_content))
+      #if self.mode == 'show':
+        #self.inquiry.reply_content = re.sub("\n","<br/>",cgi.escape(self.inquiry.reply_content))
 
 
       self.option_cols = []

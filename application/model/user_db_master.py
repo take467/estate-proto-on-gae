@@ -30,6 +30,6 @@ class UserDbMaster(BaseModel):
         wk['checked'] = ''
       cols.append(wk)
 
-    cols.append({'name':'iq_content','label':u'お問い合わせ内容','cols':'60','rows':'10','type':'textarea','search_refinement':False,'hidden':'false','form':'must','checked':''})
+    cols.append({'name':'iq_content','label':u'お問い合わせ内容','cols':'60','rows':'10','type':'textarea','search_refinement':False,'hidden':'false','form':'must','checked':'','validator':"Validator.check(this)"})
 
     return cols
