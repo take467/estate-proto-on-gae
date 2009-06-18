@@ -20,7 +20,9 @@ class ContactController(BaseController):
       self.udb = None
       try:
         self.udb = UserDb.get(self.params.get('id'))
-      exception:
+      except Exception, ex:
+        self.error(400,'Bad Request')
+        return
 
       self.config = yaml.load(self.udb.config)
       self.css = ''

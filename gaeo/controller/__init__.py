@@ -107,6 +107,10 @@ class BaseController(object):
     def getResponse(self):
       return self.resp
 
+    def error(self,errno,msg="error"):
+        self.hnd.error(errno)
+        self.render(text=msg)
+
     def invalid_action(self):
         """ If the router went to an invalid action """
         self.hnd.error(404)
