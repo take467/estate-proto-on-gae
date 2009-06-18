@@ -1,9 +1,11 @@
 {% extends "../contact.html" %}
-{% block title %}ESTATE-PROTOTYPE &gt; {{udb.name }}&gt; プレビュー{% endblock %}
+{% block title %}お問い合わせ{% endblock %}
 
 {% block form_area %}
 <p>下記の項目を入力し、「確認画面へ」をクリックしてください。</p>
-<form id="contact_form" onsubmit="submitDataValidated(this,'{{action_url}}');return false">
+<form id="contact_form" method="post" onsubmit="return submitDataValidated(this,'{{action_url}}')">
+        <input type="hidden" name="ticket"   id="ticket"  value="{{ticket}}">
+        <input type="hidden" name="session_val"   id="session_val"  value="{{session_val}}">
 	<table id="inquiryTable">{% for f in fields %}
 		<tr>
 			<th norwrap>{{ f.label }}</th>
@@ -25,7 +27,7 @@
 			{% endifequal %}{% ifequal f.type 'textarea' %}
 				<textarea id="{{f.name}}" name="{{ f.name}}" {% if f.validator %}onblur="{{f.validator}}"{% endif %}>{{f.val}}</textarea>
 			{% endifequal %}
-			{% if f.comment  %}<p style="font-size:0.8em;margin:0;padding:0">{{f.comment}}</p>{% endif %}
+			{% if f.comment  %}<p class="field_comment">{{f.comment}}</p>{% endif %}
 			</td>
 		</tr>{% endfor %}
 	</table>

@@ -17,7 +17,10 @@ import datetime
 class ContactController(BaseController):
     def before_action(self):
       # かならずURLの最後にはUserDbのIDが付与される
-      self.udb = UserDb.get(self.params.get('id'))
+      self.udb = None
+      try:
+        self.udb = UserDb.get(self.params.get('id'))
+      exception:
 
       self.config = yaml.load(self.udb.config)
       self.css = ''
@@ -27,22 +30,39 @@ class ContactController(BaseController):
 
       self.server_name = self.request.environ['SERVER_NAME']
       self.server_port = int(self.request.environ['SERVER_PORT'])
-      if self.server_port != 80:
-        self.base_url = ('http://%s:%s/' % (self.server_name, self.server_port))
-      else:
+      if self.server_port == 80:
         self.base_url = 'http://%s/' % (self.server_name,)
+        self.base_url_nossl = self.base_url
+      elif self.server_port == 443:
+        self.base_url = 'https://%s/' % (self.server_name,)
+        self.base_url_nossl = 'http://%s/' % (self.server_name,)
+      else:
+        self.base_url = ('http://%s:%s/' % (self.server_name, self.server_port))
+        self.base_url_nossl = self.base_url
+
+    def preview(self):
+      self.w = self.params.get('w','700')
+      self.h = self.params.get('h','550')
+      pass
 
     def confirm(self):
 
-      # CSRF対策 
-      import md5
-      m=md5.new()
-      self.ticket = str(m)
-      m.update(self.ticket + str(self.udb.key()))
-      self.session_val = m.hexdigest()
+      self.ticket = self.params.get('ticket','')
+      self.session_val = self.params.get('session_val','')
+      if self.ticket and db.GqlQuery("SELECT * FROM Inquiry WHERE ticket = :1",self.ticket).get():
+        self.redirect('/contact/form/'+str(self.udb.key()))
+        return
 
-      # cookieが使えないことも考慮してmemcacheに値をいれる
-      memcache.add(key=self.ticket,value=self.session_val)
+      # CSRF対策 
+      if not self.ticket:
+        import md5
+        m=md5.new()
+        self.ticket = str(m)
+        m.update(self.ticket + str(self.udb.key()))
+        self.session_val = m.hexdigest()
+
+        # cookieが使えないことも考慮してmemcacheに値をいれる
+        memcache.add(key=self.ticket,value=self.session_val)
 
       self.action_url = self.base_url + "contact/post/" + str(self.udb.key())
 
@@ -65,48 +85,34 @@ class ContactController(BaseController):
                   col['val'] = item['name']
           self.form_fields.append(col)
 
-      # 確認ページ（HTMLチャンク) が表示される 
 
     def form(self):
       self.action_url = self.base_url + "contact/confirm/" + str(self.udb.key())
-
-      #self.width = self.params.get('width','700')
-      #self.textarea_w = (int(self.width)  - 120) * 0.9
-      # チケットの確認
-      #ticket = None
       start_over = False
-      #try:
-      #  ticket = self.session['ticket']
-      #except:
-      #  pass
 
-      #if ticket == None:
-      #  # チケットの発行
-      #  self.session['ticket'] = str(self.udb.key())
-      #  self.session.put()
-      #
-      #elif ticket != None and self.request.method.upper() == "POST":
+      self.ticket = self.params.get('ticket','')
+      self.session_val = self.params.get('session_val','')
+
+      if db.GqlQuery("SELECT * FROM Inquiry WHERE ticket = :1",self.ticket).get():
+        self.redirect('/contact/form/'+str(self.udb.key()))
+        return
 
       if self.request.method.upper() == "POST":
-        self.ticket = self.params.get('ticket')
         start_over = True
 
       self.fields = []
-      #self.config = yaml.load(self.udb)
-      #self.form_config = self.udb.getProperty('form_config')
-      #self.css = self.config['css']
-      #self.form_config = self.config['form_config']
       for col in self.form_config:
         if col['form'] == 'must' or ( col['form'] != 'discard' and col['checked'] == 'checked'):
           if start_over:
             col['val']  = self.params.get(col['name'])
             if col['type'] == 'textarea':
-               s = re.sub("<br/>","\n",self.params.get(col['name']))
-               s = s.replace("&amp;", "&") # Must be done first!
-               s = s.replace("&lt;","<")
-               s = s.replace("&gt;",">")
-               s = s.replace("&quot;",'"')
-               col['val'] = s
+               col['val'] = self.params.get(col['name'])
+               #s = re.sub("<br/>","\n",self.params.get(col['name']))
+               #s = s.replace("&amp;", "&") # Must be done first!
+               #s = s.replace("&lt;","<")
+               #s = s.replace("&gt;",">")
+               #s = s.replace("&quot;",'"')
+               #col['val'] = s
           if col['type'] == 'radio' or col['type'] == 'select':
             result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
             if result.count() > 0:
@@ -139,6 +145,10 @@ class ContactController(BaseController):
       ticket  = self.params.get('ticket')
       session_val = self.params.get('session_val')
 
+      if db.GqlQuery("SELECT * FROM Inquiry WHERE ticket = :1",ticket).get():
+        self.redirect('/contact/form/'+str(self.udb.key()))
+        return
+
       wk = memcache.get(ticket)
       try:
         if wk == None or (session_val != wk):
@@ -168,6 +178,7 @@ class ContactController(BaseController):
 
       inquiry.profile().put()
       inquiry.put() 
+      self.inquiry = inquiry
 
       # FORM FIELD の更新
       self.form_fields = []
@@ -208,5 +219,3 @@ class ContactController(BaseController):
       except KeyError ,ex:
         self.render(text=ex) 
         return
-
-      # 送信完了メッセージ（HTMLチャンク)を出力

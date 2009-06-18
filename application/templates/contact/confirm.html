@@ -1,12 +1,16 @@
+{% extends "../contact.html" %}
+{% block title %}お問い合わせ &gt; 確認{% endblock %}
+
+{% block form_area %}
 <p>この内容で送信します。よろしいでしょうか？</p>
-<form id="contact_form">
+<form id="contact_form" method="post">
         <input type="hidden" name="ticket"   id="ticket"  value="{{ticket}}">
         <input type="hidden" name="session_val"   id="session_val"  value="{{session_val}}">
 <table id="inquiryTable">
 {% for f in form_fields %}
 <tr>
 	<th align="left" width="30%">{{ f.label }}</th>
-	<td align="left" width="70%">{{ f.val|pre2markup}}<input type="hidden" name="{{f.name}}" value="{% if f.code %}{{f.code}}{% else %}{{f.val}}{% endif %}"></td>
+	<td align="left" width="70%">{% ifequal f.type 'textarea' %} <textarea id="{{f.name}}" name="{{ f.name}}" readonly>{{f.val}}</textarea>{% else %}{{ f.val|pre2markup}}{% endifequal %}<input type="hidden" name="{{f.name}}" value="{% if f.code %}{{f.code}}{% else %}{{f.val}}{% endif %}"></td>
 </tr>
 {% endfor %}
 </table>
@@ -15,3 +19,4 @@
 	<input type="button" onclick="submitData('{{base_url}}contact/form/{{udb.key}}');return false" value="やり直し">
 </div>
 </form>
+{% endblock %}

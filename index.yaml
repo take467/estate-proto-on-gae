@@ -64,7 +64,7 @@ indexes:
   - name: post_at
     direction: desc
 
-# Used 32 times in query history.
+# Used 46 times in query history.
 - kind: Inquiry
   properties:
   - name: user_db_id

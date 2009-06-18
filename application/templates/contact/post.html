@@ -1,16 +1,21 @@
+{% extends "../contact.html" %}
+{% block title %}お問い合わせ &gt; 完了{% endblock %}
 
+{% block form_area %}
 <div id="sent_message">
 	<div id="sent_message_box">
-		<p> お問い合わせを承りました。</p>
+		<p> お問い合わせを承りました</p>
+		<p>本件のお問い合わせ番号は「{{inquiry.key.id}}」です</p>
 	</div>
 	<p>後ほど受付完了のメールが送信されますのでご確認ください</p>
 </div>
-<p>送信内容</p>
+<h4 >送信内容</h4>
 <table id="inquiryTable">
 {% for f in form_fields %}
 <tr>
 	<th align="left" width="30%">{{ f.label }}</th>
-	<td align="left" width="70%">{{ f.val|pre2markup}}<input type="hidden" name="{{f.name}}" value="{% if f.code %}{{f.code}}{% else %}{{f.val}}{% endif %}"></td>
+	<td align="left" width="70%">{% ifequal f.type 'textarea' %} <textarea id="{{f.name}}" name="{{ f.name}}" readonly>{{f.val}}</textarea>{% else %}{{ f.val|pre2markup}}{% endifequal %}</td>
 </tr>
 {% endfor %}
 </table>
+{% endblock %}

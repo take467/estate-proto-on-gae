@@ -27,7 +27,20 @@ class InquiryController(BaseController):
 
     def css_form(self):
       self.udb = UserDb.get_by_id(int(self.params.get('id')))
+      self.css = self.udb.getProperty('css')
       pass
+
+    def update_css(self):
+      if self.request.method.upper() != "POST":
+        return
+      
+      data = {'status':'success','msg':'スタイルシートを保存しました'}
+      self.udb = UserDb.get_by_id(int(self.params.get('id')))
+      css = self.params.get('css_edit_area')
+      self.udb.setProperty('css',css)
+      self.udb.put()
+
+      self.render(json=self.to_json(data))
 
     def preview(self):
       self.udb = UserDb.get_by_id(int(self.params.get('id')))

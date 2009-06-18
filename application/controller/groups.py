@@ -211,19 +211,6 @@ class GroupsController(BaseController):
         self.render(template="inquiry_edit")
       pass
 
-    def update_css(self):
-      if self.request.method.upper() != "POST":
-        return 
-
-      data = {'status':'success','msg':'スタイルシートを保存しました'}
-      self.udb = UserDb.get_by_id(int(self.params.get('id')))
-      css = self.params.get('css_edit_area')
-      self.udb.setProperty('css',css)
-      self.udb.put()
-
-      self.render(json=self.to_json(data))
-
-
     def update(self):
       if self.request.method.upper() != "POST":
         return 

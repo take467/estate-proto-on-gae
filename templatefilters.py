@@ -23,9 +23,12 @@ def timeJST (value):
   # SDK102 にしたら動作がかわった？??
 
 def pre2markup(value):
-  description = re.sub("\n","<br/>",value)
-  description = re.sub("\s","&nbsp;",description)
-  return description
+  if value:
+    description = re.sub("\n","<br/>",value)
+    description = re.sub("\s","&nbsp;",description)
+    return description
+  else:
+    return ''
 
 def join(value,d):
   return d.join(value)

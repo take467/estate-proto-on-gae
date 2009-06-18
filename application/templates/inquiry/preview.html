@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>ESTATE-PROTOTYPE &gt; {{udb.name }}&gt; プレビュー</title>
+<title>プレビュー</title>
 <script src="/js/jquery-1.2.6.pack.js"          type="text/javascript"></script>
 <script src="/js/jquery.blockUI.js"             type="text/javascript"></script>
 <style type="text/css">
@@ -28,7 +28,7 @@ function update_css(id){
         $.ajax({
            type: "POST",
            dataType: "json",
-           url: '/groups/update_css/'+id,
+           url: '/inquiry/update_css/'+id,
            data: $('#blockui_form').serializeArray(),
            success: function(data){
                 if( data.status == 'success' ){
@@ -64,7 +64,7 @@ function disp_blockui_area(area,url){
 </head>
 <body>
 <div id="container">
-<h2 style="margin:0px">ESTATE-PROTOTYPE &gt; {{udb.name }}&gt; プレビュー</h2>
+<h2 style="margin:0px">{{udb.name }}&gt; プレビュー</h2>
 <div id="preview_menu">
 <a href="javascript:void(0)" onclick="disp_blockui_area('#blockui_area');return false">コード表示</a> | <a href="javascript:void(0)" onclick="disp_blockui_area('#blockui_area2','/inquiry/css_form/{{udb.key.id}}');return false">CSSの編集</a>
 <div>
