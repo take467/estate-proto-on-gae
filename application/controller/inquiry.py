@@ -86,13 +86,33 @@ class InquiryController(BaseController):
 
       msg = {'status':'success','msg':'回答を送信しました','view_id':self.view.key().id(),'iq_id':self.inquiry.key().id()}
       if editable:
+
         # メール送信
-        values = {'email':self.inquiry.profile().email,'reply_content':self.inquiry.reply_content}
-        subject = self.render_txt(template="reply_mail_subject",values=values)
-        body    = self.render_txt(template="reply_mail_body",values=values)
+        values = {'id':self.inquiry.key().id(), 'name':self.inquiry.profile().email,'reply_content':self.inquiry.reply_content}
+
+        self.udb = self.view.user_db()
+        # SUBJECT
+        subject = '{{id}}'
+        ts = self.udb.getProperty('reply_mail_subject')
+        if ts:
+          subject = self.render_txt(template_string=ts,values=values)
+        else:
+          subject = self.render_txt(template="reply_mail_subject",values=values)
+
+        # BODY  
+        body = '{{reply_content}}'
+        ts = self.udb.getProperty('reply_mail_body')
+        if ts:
+          body = self.render_txt(template_string=ts,values=values)
+        else:
+          body    = self.render_txt(template="reply_mail_body",values=values)
 
         if mail.is_email_valid(self.inquiry.profile().email):
           mail.send_mail(sender=self.user.email(), to=self.inquiry.profile().email, subject=subject, body=body)
+        else:
+          msg = {'status':'error','msg':'不正な処メールアドレスです。(' + self.inquiry.profile().email + ')'}
+          self.render(json=self.to_json(msg))
+          return
 
         self.inquiry.reply_person = self.user.email()
         now = datetime.datetime.now() + datetime.timedelta(hours=9)
@@ -119,7 +139,8 @@ class InquiryController(BaseController):
         if su.isWritable():
           editable = True
 
-      msg = {'status':'success','msg':'回答を保存しました','view_id':self.view.key().id(),'iq_id':self.inquiry.key().id()}
+      #msg = {'status':'success','msg':'回答を保存しました','view_id':self.view.key().id(),'iq_id':self.inquiry.key().id()}
+      msg = {'status':'success','view_id':self.view.key().id(),'iq_id':self.inquiry.key().id()}
       if editable:
         #内部利用だし、JSでのチェックだけでとりあえず良いだろう
         self.inquiry.reply_content = self.params.get('reply_content')
@@ -153,6 +174,12 @@ class InquiryController(BaseController):
           if c['name'] != 'email':
             if c['checked'] == 'checked':
               self.option_cols.append(c)
+              val = getattr(self.inquiry.profile(),c['name'])
+              if c['type'] == 'radio' or c['type'] == 'select':
+                c['val'] = self.inquiry.profile().getLabel(c['name'],val)
+              else:
+                c['val'] = val
+              
 
 
 
@@ -204,8 +231,9 @@ class InquiryController(BaseController):
                 name = col['name'][3:]
                 if isinstance(getattr(Inquiry,name),db.StringProperty):
                   flg = True
-                elif isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
+              elif isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
                   flg = True
+
               if flg:
                  val = self.params.get(col['name'])
                  if val != None and val != '':
@@ -254,7 +282,7 @@ class InquiryController(BaseController):
         for f in add_filters:
           # Profile での絞り込みがあった！ 
           if not f['name'].startswith('iq_'): 
-            pval = getattr(iq.profile(),col['name'])
+            pval = getattr(iq.profile(),f['name'])
             if pval != f['val']:
               is_added = False
         if is_added:

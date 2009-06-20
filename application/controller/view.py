@@ -43,7 +43,8 @@ class ViewController(BaseController):
               elif col['hidden'] == '':
                 col['hidden'] = 'false'
 
-              if col['type'] == 'radio' or col['type'] == 'select':
+              #if col['type'] == 'radio' or col['type'] == 'select':
+              if col['search_refinement']: 
                 result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
                 if result.count() > 0:
                   rec = result.get()
@@ -136,17 +137,18 @@ class ViewController(BaseController):
 
       self.config = []
       self.must_config = []
-      for c in yaml.load(self.view.config):
-        if not c['name'].startswith('iq_'):
-          if c['name'] == 'email':
-            self.must_config.append(c)
-          else:
-            self.config.append(c)
-        else:
-          if c['name'] != 'iq_content':
-            self.must_config.append(c)
-
       if self.view.user_db().service_type == 'c':
+        for c in yaml.load(self.view.config):
+          if not c['name'].startswith('iq_'):
+            if c['name'] == 'email':
+              self.must_config.append(c)
+            else:
+              if c['form'] == 'option':
+                self.config.append(c)
+          else:
+            if c['name'] != 'iq_content':
+              self.must_config.append(c)
+
         self.render(template="inquiry_edit")
 
 

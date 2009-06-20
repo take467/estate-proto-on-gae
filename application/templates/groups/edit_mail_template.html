@@ -13,7 +13,11 @@ function submit_data(id){
         }})
 }
 </script>
-<form id="blockui_form" class="" >
+<h4>
+メールの編集
+</h4>
+<div style="margin-top:0.8em">
+<form id="blockui_form" class="niceform" >
 <table noborder width="100%">
 <tr>
 <td valign="top" width="50%">
@@ -67,3 +71,4 @@ function submit_data(id){
 	<input type="button" onclick="submit_data('{{user_db.key.id}}')" value="保存"> -
 	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
 </form>
+</div>

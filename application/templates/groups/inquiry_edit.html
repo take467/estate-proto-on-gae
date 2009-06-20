@@ -1,9 +1,14 @@
+<h4>
+基本設定
+</h4>
+<div style="margin-top:0.8em">
 <form id="blockui_form" class="niceform" >
   <input type="hidden" id="edit_db_id" name="edit_db_id" value="{{user_db.key.id}}">
 <table>
 <tr>
 <td valign="top">
 	<table>
+<!--
 	<tr>
 		<td> <label for="text">公開:</label> </td>
 		<td align="left"> 
@@ -14,6 +19,7 @@
 		    </select>
 		</td>
 	</tr>
+-->
 	<tr>
 		<td> <label for="text">データベース名:</label> </td>
 		<td align="left"> <input type="text" name="edit_db_name" id="edit_db_name" value="{{user_db.name}}" size="35"> </td>
@@ -36,7 +42,7 @@
 	<table>
 	<tr>
 		<td valign="top" align="left"><label for="text">オプション項目</label></td>
-		<td align="left"><font size="-3">使用する項目にチェックを付けてください</font><br />
+		<td align="left"><font size="-3">使用する入力項目にチェックを付けてください</font><br />
 		{% for col in config.form_config %}{% ifequal col.form 'option' %}
 				<input type="checkbox" name="disp_{{col.name}}" id="disp_{{col.name}}" value="yes" {{col.checked}}>
 				<label for="check_{{col.name}}">{{col.label}}</label><br clear="all">
@@ -50,3 +56,4 @@
 	<input type="button" id="submit_blockui_form" value="保存" onclick="update_inquiry_user_db();return false"> -
 	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
 </form>
+</div>

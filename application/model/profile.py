@@ -2,6 +2,7 @@
 from google.appengine.ext import db
 from gaeo.model import BaseModel, SearchableBaseModel
 from model.user_db import UserDb
+import yaml
 
 class ProfileCore(BaseModel):
   claimed_id      = db.StringProperty()
@@ -31,6 +32,14 @@ class ProfileCore(BaseModel):
   cellphone_no    = db.StringProperty(default='')
   data            = db.TextProperty(default='')
   post_at         = db.DateTimeProperty(auto_now_add=True)
+
+
+  def getLabel(self,name,code):
+    udm = db.GqlQuery("SELECT  * FROM UserDbMaster WHERE name = :1",name).get()
+    for item in yaml.load(udm.yaml_data):
+      if item['code'] == code:
+        val = item['name']
+        return val
 
   disp_columns = [
 	{'name':'post_at','label':u'登録日','checked':'checked','width':'80','align':'right','type':'hidden','hidden':'true','format':'%Y/%m/%d %H:%M:%S','search_refinement':'false'}

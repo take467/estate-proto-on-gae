@@ -201,18 +201,36 @@ class ContactController(BaseController):
       # 担当者にメールを送る
       email = inquiry.user_db().getProperty('recipients')
       values = {'email':email,'id':inquiry.key().id(),'db_name':inquiry.user_db().name}
+
       subject = self.render_txt(template="notice_mail_subject",values=values)
       body    = self.render_txt(template="notice_mail_body",values=values)
+
       if mail.is_email_valid(email):
           mail.send_mail(sender=email, to=email, subject=subject, body=body)
 
+      # /user_db/config/edit/ /user_db/config/update のほうがわかりやすいかURLマッピング
       # 問い合わせした人にメールを送る
       name = inquiry.profile().email
       if inquiry.profile().name:
         name = inquiry.profile().name
       values = {'name':name,'id':inquiry.key().id(),'db_name':inquiry.user_db().name}
-      subject = self.render_txt(template="confirm_mail_subject",values=values)
-      body    = self.render_txt(template="confirm_mail_body",values=values)
+
+      # SUBJECT
+      subject = '{{id}}'
+      ts = self.udb.getProperty('confirm_mail_subject')
+      if ts:
+        subject = self.render_txt(template_string=ts,values=values)
+      else:
+        subject = self.render_txt(template="confirm_mail_subject",values=values)
+
+      # BODY
+      body = ''
+      ts = self.udb.getProperty('confirm_mail_body')
+      if ts:
+        body = self.render_txt(template_string=ts,values=values)
+      else:
+        body = self.render_txt(template="confirm_mail_body",values=values)
+
       if mail.is_email_valid(inquiry.profile().email):
           mail.send_mail(sender=email, to=inquiry.profile().email, subject=subject, body=body)
 

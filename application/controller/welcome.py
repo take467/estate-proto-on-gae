@@ -56,7 +56,18 @@ class WelcomeController(BaseController):
           self.colModels.append({'display':'ID','name':'id','width':'40','align':'center','hidden':'false','sortable':'true'})
 
           configs =  yaml.load(self.view.config)
+          names = []
           for col in configs:
+
+            if col['search_refinement'] and col['checked'] == 'checked':
+              result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
+              if result.count() > 0:
+                rec = result.get()
+                i = i+1
+                col['items'] = yaml.load(rec.yaml_data)
+                self.fields.append(col)
+                names.append('#sr_' + col['name'])
+
             if col['name'].startswith('iq_') and col['checked'] == 'checked':
               self.colModels.append({'display':col['label'],'name':col['name'],'width':'100','align':'left','hidden':col['hidden'],'sortable':'true'})
               continue
@@ -80,14 +91,9 @@ class WelcomeController(BaseController):
                 else:
                   if isinstance(getattr(ProfileCore,col['name']),db.StringProperty):
                     self.searchitems.append({'display':col['label'],'name':col['name']})
-              else:
-                result = db.GqlQuery("SELECT * FROM UserDbMaster WHERE name = :1",col['name'])
-                if result.count() > 0:
-                  rec = result.get()
-                  i = i+1
-                  col['items'] = yaml.load(rec.yaml_data)
-                  self.fields.append(col)
 
+
+          self.fields_join = ','.join(names)
           self.colModelsJson = self.to_json(self.colModels)
           m = 100 / i
           if m < self.width:

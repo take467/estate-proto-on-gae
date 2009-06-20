@@ -29,7 +29,7 @@ function submit_reply(url,w){
 	   data: $('#blockui_form').serializeArray(),
 	   success: function(data){
 		if( data.status == 'success' ){
-			if( data.msg != '' ){
+			if( data.msg != undefined && data.msg != '' ){
 				alert(data.msg);
 			}
 			blockuiForm('/inquiry/edit/'+ data.iq_id + '?v='+data.view_id,function(){
@@ -51,15 +51,22 @@ function send_reply(){
 	}
 }
 </script>
+<p>
+	詳細情報
+</p>
 <form id="blockui_form" class="" >
   <input type="hidden" id="iq_id" name="iq_id" value="{{inquiry.key.id}}">
   <input type="hidden" id="view_id" name="v" value="{{view.key.id}}">
+<div>
 <table noborder width="100%">
 <tr>
 <td valign="top" width="50%">
 	<table id="inquiryTable" width="100%">
 	<tr>
-		<th align="left" width="20%"> <label for="text">問い合わせ番号</label> </td>
+		<th colspan="4">お問い合わせ情報</td>
+	</tr>
+	<tr>
+		<th align="left" width="20%"> <label for="text">ID</label> </td>
 		<td align="left" width="30%"> {{inquiry.key.id}}</td>
 		<th align="left" width="20%"> <label for="text">ステータス</label> </td>
 		<td align="left" width="30%"> {{inquiry.getStatusLabel }}
@@ -67,13 +74,13 @@ function send_reply(){
 	<tr>
 		<th align="left"> <label for="text">件名</label> </td>
 		<td align="left">{{inquiry.title}}  </td>
-		<th align="left"> <label for="text">参照元</label> </td>
+		<th align="left"> <label for="text">参照元番号</label> </td>
 		<td align="left">{{inquiry.reference_id}}  </td>
 	</tr>
 	<tr>
-		<th valign="top" align="left"><label for="text">問い合わせ者</label></td>
+		<th valign="top" align="left"><label for="text">電子メール</label></td>
 		<td align="left">{{inquiry.profile.email}} </td>
-		<th align="left"> <label for="text">問い合わせ日</label> </td>
+		<th align="left"> <label for="text">日付</label> </td>
 		<td align="left"> {{inquiry.post_at|date:"Y/m/d H:s"}}</td>
 	</tr>
 	<!--
@@ -81,20 +88,23 @@ function send_reply(){
 	--> 
 	{% for col in option_cols %}
 		<th align="left" ><label for="check_{{col.name}}">{{col.label}}</label></th>
-		<td align="left" colspan="3">{{col.val|pre2markup}}</td>
+		<td align="left" colspan="3">{{col.val}}</td>
 	</tr>{% endfor %}
                 </td>
 	<tr>
-		<th colspan="4"><label for="text">内容</label></td>
+		<th colspan="4"><label for="text">お問い合わせ内容</label></td>
 	</tr>
 	<tr>
-		<td align="left" colspan="4">{{inquiry.content|pre2markup}}</td>
+		<td align="left" colspan="4"><textarea style="width:100%" rows="10" readonly>{{inquiry.content}}</textarea></td>
 	</tr>
 	
 	</table>
 </td>
 <td valign="top" width="50%">
 	<table id="inquiryTable" width="100%">
+	<tr>
+		<th colspan="4">回答</td>
+	</tr>
 	<tr>
 		<th align="left"> <label for="text">回答者(email)</label> </td>
 		<td align="left">{{inquiry.reply_person}} </td>
@@ -111,7 +121,7 @@ function send_reply(){
 			<div id="reply_content">
 			{% ifequal mode 'edit'  %}
 				<p style="font-size:0.9em">個人情報は極力書き込まないでください。宛名はメールに自動で付与されます。</p>
-				<textarea id="reply_textarea" name="reply_content" style="width:100%"  rows="20">{{inquiry.reply_content}}</textarea>
+				<textarea id="reply_textarea" name="reply_content" style="width:100%"  rows="10">{{inquiry.reply_content}}</textarea>
 				<p style="font-size:0.9em">保存するだけでは送信されません。保存した後に送信手続きを行ってください。</p>
 				<input type="button" id="save_reply" value="回答内容を保存" onclick="submit_reply('/inquiry/save_reply',959);return false">
 			{% else %}
@@ -138,5 +148,6 @@ function send_reply(){
 </td>
 </tr>
 </table>
+</div>
 	<input type="button" class="close_form" onclick="$.unblockUI()" value="閉じる">
 </form>

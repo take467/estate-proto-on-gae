@@ -54,7 +54,8 @@ $(document).ready(function(){
 	//$.preloadCssImages();
         $.ajaxSetup({cache: false });
         {% if fields %}
-	$('{% for f in fields %}#sr_{{f.name}},{% endfor %}').change(function(){
+	//$('{% for f in fields %}#sr_{{f.name}},{% endfor %}').change(function(){
+	$('{{fields_join}}').change(function(){
 		var _selectedObj = $(this).children("option[@selected]");
 		var dt=$('#search_refinement').serializeArray();
 		$('#flexigrid01').flexOptions({params:dt});
@@ -164,7 +165,8 @@ function createDatabase(qs){
 
 function initSearchRefinment(){
         {% if fields %}
-	$('{% for f in fields %}#sr_{{f.name}},{% endfor %}').change(function(){
+	//$('{% for f in fields %}#sr_{{f.name}},{% endfor %}').change(function(){
+	$('{{fields_join}}').change(function(){
 		var _selectedObj = $(this).children("option[@selected]");
 		var dt=$('#search_refinement').serializeArray();
 		$('#flexigrid01').flexOptions({params:dt});
@@ -493,7 +495,7 @@ function initInquiryContextMenu(action,el,pos){
 			blockuiForm(url,null,{'width':'950'})
                 }else if( action=="delete" ) {
                         var url = '/groups/delete'
-                        if( confirm('['+$(el).text() +']を本当に削除しますか？') != true ){
+                        if( confirm('データの復旧はできません。['+$(el).text() +']を本当に削除しますか？') != true ){
                                 return;
                         }else{  
 				$('#action_url').val(url)
@@ -511,7 +513,7 @@ function initContextMenu(action,el,pos){
 			blockuiForm(url)
                 }else if( action=="delete" ) {
                         var url = '/groups/delete'
-                        if( confirm('['+$(el).text() +']を本当に削除しますか？') != true ){
+                        if( confirm('データの復旧はできません。['+$(el).text() +']を本当に削除しますか？') != true ){
                                 return;
                         }else{  
 				$('#action_url').val(url)
@@ -593,7 +595,7 @@ function upload_csv(){
 				<div class="boxContent" id="sheet_list">
 					<ul id="myFileMenu" class="contextMenu">
 						<li class="share"><a href="#share">共有</a></li>
-						<li class="edit separator"><a href="#edit">編集</a></li>
+						<li class="edit separator"><a href="#edit">設定</a></li>
 						<li class="delete"><a href="#delete">削除</a></li>
 						<li class="export separator"><a href="#export">書き出し</a></li>
 					</ul>
@@ -606,7 +608,7 @@ function upload_csv(){
 					<ul id="myInquiryMenu" class="contextMenu">
 						<li class="add"><a href="#preview">プレビュー</a></li>
 						<li class="add"><a href="#addview">ビューの追加</a></li>
-						<li class="edit separator"><a href="#edit">フォームの編集</a></li>
+						<li class="edit separator"><a href="#edit">基本設定</a></li>
 						<li class="edit"><a href="#edit_mail_template">メールの編集</a></li>
 						<li class="delete"><a href="#delete">削除</a></li>
 					</ul>

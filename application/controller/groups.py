@@ -176,6 +176,11 @@ class GroupsController(BaseController):
       if self.request.method.upper() == "GET":
 
 	values={'id':'{{id}}','db_name':'{{db_name}}','name':'{{name}}','reply_content':'{{reply_content}}'}
+        self.id = '{{id}}'
+        self.db_name = '{{db_name}}'
+        self.name = '{{name}}'
+        self.reply_content = '{{reply_content}}'
+
         self.confirm_mail_subject = self.user_db.getProperty('confirm_mail_subject')
         if not self.confirm_mail_subject:
           self.confirm_mail_subject = self.render_txt(template='confirm_mail_subject',values=values)
@@ -264,12 +269,22 @@ class GroupsController(BaseController):
 
       data = {'status':'success'}
       if g:
-        # 紐づくProfileデータは、リンク関係を切るー＞ゴミ箱をつくってそこに入れる
+
+        # 紐づくデータは、リンク関係を切るー＞ゴミ箱をつくってそこに入れる
+        # という仕様は面倒なのでまずは削除してしまう
         q = ProfileCore.all()
         q.filter("user_db_id = ",g)
         for p in q:
-          p.user_db_id = None
-          p.put()
+          p.delete()
+          #p.user_db_id = None
+          #p.put()
+
+        q = Inquiry.all()
+        q.filter("user_db_id = ",g)
+        for p in q:
+          p.delete()
+          #p.user_db_id = None
+          #p.put()
 
         # 紐づくViewを全て削除
         q = UserView.all()
