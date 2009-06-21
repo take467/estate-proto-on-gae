@@ -64,7 +64,7 @@ indexes:
   - name: post_at
     direction: desc
 
-# Used 16 times in query history.
+# Unused in query history -- copied from input.
 - kind: Inquiry
   properties:
   - name: status
@@ -72,39 +72,39 @@ indexes:
   - name: post_at
     direction: desc
 
-# Used 5 times in query history.
+# Unused in query history -- copied from input.
 - kind: Inquiry
   properties:
   - name: user_db_id
   - name: post_at
 
-# Used 181 times in query history.
+# Used 3 times in query history.
 - kind: Inquiry
   properties:
   - name: user_db_id
   - name: post_at
     direction: desc
 
-# Used once in query history.
+# Unused in query history -- copied from input.
 - kind: Inquiry
   properties:
   - name: user_db_id
   - name: status
 
-# Used 2 times in query history.
+# Unused in query history -- copied from input.
 - kind: Inquiry
   properties:
   - name: user_db_id
   - name: status
     direction: desc
 
-# Used 10 times in query history.
+# Unused in query history -- copied from input.
 - kind: Inquiry
   properties:
   - name: user_db_id
   - name: title
 
-# Used 10 times in query history.
+# Unused in query history -- copied from input.
 - kind: Inquiry
   properties:
   - name: user_db_id
@@ -425,7 +425,7 @@ indexes:
   - name: name
     direction: desc
 
-# Used 38 times in query history.
+# Unused in query history -- copied from input.
 - kind: ProfileCore
   properties:
   - name: user_db_id
