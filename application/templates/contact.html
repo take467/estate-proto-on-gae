@@ -3,10 +3,10 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <title>{% block title %}{% endblock %}</title>
-<link type="text/css"  href="{{base_url_nossl}}css/smoothness/jquery-ui-1.7.1.custom.css" rel="stylesheet" />
-<link rel="stylesheet" href="{{base_url_nossl}}css/validator/default.css" type="text/css">
-<script type="text/javascript" src="{{base_url_nossl}}js/validator/util.js"></script>
-<script type="text/javascript" src="{{base_url_nossl}}js/validator/validator.js"></script>
+<link type="text/css"  href="/css/smoothness/jquery-ui-1.7.1.custom.css" rel="stylesheet" />
+<link rel="stylesheet" href="/css/validator/default.css" type="text/css">
+<script type="text/javascript" src="/js/validator/util.js"></script>
+<script type="text/javascript" src="/js/validator/validator.js"></script>
 <style type="text/css">
 {% if css %}
 {{css}}
@@ -14,9 +14,10 @@
 {% include "../default_contact.css" %}
 {% endif %}
 </style>
-<script src="{{base_url_nossl}}js/jquery-1.2.6.pack.js"          type="text/javascript"></script>
-<script src="{{base_url_nossl}}js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
-<script src="{{base_url_nossl}}js/ui.datepicker-ja.js"           type="text/javascript"></script>
+<script src="{{base_url}}js/jquery-1.2.6.pack.js"          type="text/javascript"></script>
+<script src="/js/jquery-1.3.2.min.js"          type="text/javascript"></script>
+<script src="/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>
+<script src="/js/ui.datepicker-ja.js"           type="text/javascript"></script>
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
 	$('#birthday').datepicker({
@@ -26,9 +27,11 @@ $(document).ready(function(){
 	});
 });
 function submitData(url){
-	$('#contact_form').attr('action',url).get(0).submit();
+	$('#contact_form').attr('action',url)
+	$('#contact_form').submit();
 }
 function submitDataValidated(form,url){
+        var rslt = true
 	rslt = Validator.submit(form)
         if(rslt){
 		submitData(url)

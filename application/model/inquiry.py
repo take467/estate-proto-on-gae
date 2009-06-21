@@ -26,10 +26,13 @@ class Inquiry(BaseModel):
   config = db.TextProperty()
   disp_columns = [
       {'name':'iq_reference_id','label':u'お問い合せ番号','width':'100','align':'left','type':'text','search_refinement':False,'hidden':'false','form':'must','checked':'','comment':'以前からのお問い合わせの場合は、お問い合わせ番号を入力してください','validator':"Validator.check(this,'!num')"}
+      ,{'name':'iq_post_at','label':u'問い合せ日','checked':'checked','width':'100','align':'left','type':'date','format':'%Y/%m/%d %H:%M','search_refinement':'false','hidden':'false','form':'discard'}
       ,{'name':'iq_status','label':u'ステータス','checked':'checked','width':'80','align':'left','type':'select','search_refinement':True,'hidden':'false','form':'discard'}
-      ,{'name':'iq_post_at','label':u'問い合せ日','checked':'checked','width':'100','align':'left','type':'date','format':'%Y/%m/%d','search_refinement':'false','hidden':'false','form':'discard'}
       ,{'name':'iq_title','label':u'件名','checked':'checked','width':'180','align':'left','type':'text','search_refinement':'false','hidden':'false','form':'must','validator':"Validator.check(this)"}
   ]
+
+  def user(self):
+    return self.user_db_id.user
 
   def user_db(self):
     return self.user_db_id

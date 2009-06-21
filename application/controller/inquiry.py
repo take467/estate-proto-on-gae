@@ -19,11 +19,15 @@ class InquiryController(BaseController):
     def before_action(self):
       self.server_name = self.request.environ['SERVER_NAME']
       self.server_port = int(self.request.environ['SERVER_PORT'])
-      if self.server_port != 80:
-        self.base_url = ('http://%s:%s/' % (self.server_name, self.server_port))
-      else:
+      if self.server_port == 80:
         self.base_url = 'http://%s/' % (self.server_name,)
-      self.user=users.get_current_user()
+        self.base_url_nossl = self.base_url
+      elif self.server_port == 443:
+        self.base_url = 'https://%s/' % (self.server_name,)
+        self.base_url_nossl = 'http://%s/' % (self.server_name,)
+      else:
+        self.base_url = ('http://%s:%s/' % (self.server_name, self.server_port))
+        self.base_url_nossl = self.base_url
 
     def css_form(self):
       self.udb = UserDb.get_by_id(int(self.params.get('id')))
@@ -191,6 +195,7 @@ class InquiryController(BaseController):
         self.render(json=self.to_json([]))
         return
 
+      total = 0
       self.fields = []
       self.view = UserView.get_by_id(int(id))
       if self.view == None:
@@ -204,10 +209,12 @@ class InquiryController(BaseController):
       qtype = self.params.get("qtype",'')
 
       sortname = self.params.get("sortname",'iq_id')
+      is_iq_sort = False
       if sortname.startswith("iq_"):
+        is_iq_sort = True
         sortname = sortname[3:]
-      elif sortname.startswith("-iq_"):
-        sortname = "-" + sortname[4:]
+      #elif sortname.startswith("-iq_"):
+      #  sortname = "-" + sortname[4:]
       sortorder = self.params.get("sortorder",'DESC')
 
       lines = int(self.params.get("rp",'15'))
@@ -243,19 +250,22 @@ class InquiryController(BaseController):
       if (query != None and query != '' ) and ( qtype != None and qtype != ''):
         add_filters.append({'name':qtype,'val':query})
 
+      is_id_sort = False
       p = None
-      if (query != None and query != '' ) and  qtype == 'iq_id' and ( qtype != None and qtype != ''):
+      iqs = []
+      #if (query != None and query != '' ) and  qtype == 'iq_id' and ( qtype != None and qtype != ''):
+      if (query != None and query != '' ) and  qtype == 'iq_id':
         try:
           p  = Inquiry.get_by_id(int(query))
         except:
           pass
-        total = 0
-        if p != None and (p.user == self.user):
+        if p != None and (p.user() == self.user):
           total = 1
           iqs=[p]
       else:
         logging.debug('>>> Inquiry.all() <<< [UDB]' + str( self.view.user_db_id.key().id()))
         p = Inquiry.all()
+        total = p.count()
         p.filter(" user_db_id = ",self.view.user_db_id)
         for f in add_filters:
           if f['name'].startswith('iq_'): 
@@ -263,17 +273,17 @@ class InquiryController(BaseController):
             name = f['name'][3:]
             p.filter(name + " = ",f['val'])
             logging.debug('>>> add filter <<< name = ' + f['val'])
+
+        if sortname != 'id' and sortname != '-id' :
+          if sortorder.upper() == 'DESC':
+            sortname = '-' + sortname
+          if is_iq_sort:
+            p.order(sortname)
+        else:
+          is_id_sort = True
+
         iqs = p.fetch(lines,offset)
-
-      is_id_sort = False
-      if sortname != 'id' and sortname != '-id' :
-        if sortorder.upper() == 'DESC':
-          sortname = '-' + sortname
-        p.order(sortname)
-      else:
-        is_id_sort = True
-
-      logging.debug(">>> p.count() is " + str(p.count()) + " <<<")
+        logging.debug(">>> p.count() is " + str(p.count()) + " <<<")
 
       # Profile の絞り込み項目で
       results = []
@@ -290,6 +300,13 @@ class InquiryController(BaseController):
 
       if is_id_sort and (sortorder != None and sortorder.upper() == 'DESC'):
         results.reverse()
+      else:
+        if not is_id_sort and not is_iq_sort: # Profileの項目でソートの場合は自力でソートする
+          if sortname.startswith("-"):
+            sortname = sortname[1:]
+            results.sort(lambda y,x: cmp(getattr(x.profile(),sortname),getattr(y.profile(),sortname)))
+          else:
+            results.sort(lambda x,y: cmp(getattr(x.profile(),sortname),getattr(y.profile(),sortname)))
 
       config = []
       for col in self.config:
@@ -303,7 +320,7 @@ class InquiryController(BaseController):
           config.append(col)
    
       rows = []
-      total = len(results)
+      #total = len(results)
       for rec in results:
         wk = {'id':rec.key().id(),"cell":[rec.key().id()]}
         for col in config:

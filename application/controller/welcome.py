@@ -69,10 +69,11 @@ class WelcomeController(BaseController):
                 names.append('#sr_' + col['name'])
 
             if col['name'].startswith('iq_') and col['checked'] == 'checked':
-              self.colModels.append({'display':col['label'],'name':col['name'],'width':'100','align':'left','hidden':col['hidden'],'sortable':'true'})
+              self.colModels.append({'display':col['label'],'name':col['name'],'width':col['width'],'align':col['align'],'hidden':col['hidden'],'sortable':'false'})
               continue
             if col['name'] == 'email':
-              self.colModels.append({'display':col['label'],'name':col['name'],'width':col['width'],'align':col['align'],'hidden':col['hidden'],'sortable':'true'})
+              self.colModels.append({'display':col['label'],'name':col['name'],'width':col['width'],'align':col['align'],'hidden':col['hidden'],'sortable':'false'})
+              self.searchitems.append({'display':col['label'],'name':col['name']})
               continue
 
             if col['checked'] == 'checked':
@@ -81,7 +82,7 @@ class WelcomeController(BaseController):
               elif col['hidden'] == '':
                 col['hidden'] = 'false'
 
-              self.colModels.append({'display':col['label'],'name':col['name'],'width':col['width'],'align':col['align'],'hidden':col['hidden'],'sortable':'true'})
+              self.colModels.append({'display':col['label'],'name':col['name'],'width':col['width'],'align':col['align'],'hidden':col['hidden'],'sortable':'false'})
               if col['type'] != 'radio' and col['type'] != 'select':
                 if col['name'].startswith('iq_'):
                   # "iq_{name} => {name}

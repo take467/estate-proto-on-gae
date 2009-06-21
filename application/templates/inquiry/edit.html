@@ -81,7 +81,7 @@ function send_reply(){
 		<th valign="top" align="left"><label for="text">電子メール</label></td>
 		<td align="left">{{inquiry.profile.email}} </td>
 		<th align="left"> <label for="text">日付</label> </td>
-		<td align="left"> {{inquiry.post_at|date:"Y/m/d H:s"}}</td>
+		<td align="left"> {{inquiry.post_at|timeJST|date:"Y/m/d H:i"}}</td>
 	</tr>
 	<!--
 		ここでループするんだ。ビューに合せて表示する項目を
@@ -111,7 +111,7 @@ function send_reply(){
 	</tr>
 	<tr>
 		<th align="left"> <label for="text">回答日</label> </td>
-		<td align="left">{{inquiry.reply_at|date:"Y/m/d H:s"}} </td>
+		<td align="left">{{inquiry.reply_at|date:"Y/m/d H:i"}} </td>
 	</tr>
 	<tr>
 		<th colspan="2"><label for="text">回答内容</label></td>

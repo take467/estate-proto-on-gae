@@ -64,7 +64,7 @@ indexes:
   - name: post_at
     direction: desc
 
-# Used 12 times in query history.
+# Used 16 times in query history.
 - kind: Inquiry
   properties:
   - name: status
@@ -72,11 +72,43 @@ indexes:
   - name: post_at
     direction: desc
 
-# Used 75 times in query history.
+# Used 5 times in query history.
 - kind: Inquiry
   properties:
   - name: user_db_id
   - name: post_at
+
+# Used 181 times in query history.
+- kind: Inquiry
+  properties:
+  - name: user_db_id
+  - name: post_at
+    direction: desc
+
+# Used once in query history.
+- kind: Inquiry
+  properties:
+  - name: user_db_id
+  - name: status
+
+# Used 2 times in query history.
+- kind: Inquiry
+  properties:
+  - name: user_db_id
+  - name: status
+    direction: desc
+
+# Used 10 times in query history.
+- kind: Inquiry
+  properties:
+  - name: user_db_id
+  - name: title
+
+# Used 10 times in query history.
+- kind: Inquiry
+  properties:
+  - name: user_db_id
+  - name: title
     direction: desc
 
 # Unused in query history -- copied from input.

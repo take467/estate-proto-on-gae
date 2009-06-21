@@ -55,17 +55,6 @@ class ContactController(BaseController):
         self.redirect('/contact/form/'+str(self.udb.key()))
         return
 
-      # CSRF対策 
-      if not self.ticket:
-        import md5
-        m=md5.new()
-        self.ticket = str(m)
-        m.update(self.ticket + str(self.udb.key()))
-        self.session_val = m.hexdigest()
-
-        # cookieが使えないことも考慮してmemcacheに値をいれる
-        memcache.add(key=self.ticket,value=self.session_val)
-
       self.action_url = self.base_url + "contact/post/" + str(self.udb.key())
 
       # FORM FIELD の更新
@@ -95,9 +84,21 @@ class ContactController(BaseController):
       self.ticket = self.params.get('ticket','')
       self.session_val = self.params.get('session_val','')
 
-      if db.GqlQuery("SELECT * FROM Inquiry WHERE ticket = :1",self.ticket).get():
-        self.redirect('/contact/form/'+str(self.udb.key()))
-        return
+      # CSRF対策 
+      if not self.ticket:
+        import md5
+        m=md5.new()
+        self.ticket = str(m)
+        m.update(self.ticket + str(self.udb.key()))
+        self.session_val = m.hexdigest()
+
+        # cookieが使えないことも考慮してmemcacheに値をいれる
+        memcache.add(key=self.ticket,value=self.session_val)
+
+      else:
+        if db.GqlQuery("SELECT * FROM Inquiry WHERE ticket = :1",self.ticket).get():
+          self.redirect('/contact/form/'+str(self.udb.key()))
+          return
 
       if self.request.method.upper() == "POST":
         start_over = True

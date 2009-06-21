@@ -19,7 +19,7 @@
 	<td>{{inquiry.is_replied}}</td>
 	<td>{{inquiry.status}}</td>
 	<td>{{inquiry.category.name }}</td>
-	<td>{{inquiry.post_at|date:"Y/m/d H:s" }}</td>
+	<td>{{inquiry.post_at|timeJST|date:"Y/m/d H:i" }}</td>
 </tr>
 {% endfor %}
 </table>

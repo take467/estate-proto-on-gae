@@ -11,7 +11,7 @@
 </tr>
 <tr>
 	<th>ステータス</th><td>{{ inquiry.status}}</td>
-	<th>問合せ日</th><td>{{ inquiry.post_at|date:"Y/m/d H:s"}}</td>
+	<th>問合せ日</th><td>{{ inquiry.post_at|timeJST|date:"Y/m/d H:i"}}</td>
 </tr>
 <tr>
 	<th>件名</th><td>{{ inquiry.category.name|escape}}</td>
@@ -63,7 +63,7 @@
 {% else %}
 <tr>
 	<th>回答の送信</th><td>送信済み</td>
-	<th>送信日</th><td>{{inquiry.reply_at|date:"Y/m/d H:s"}}
+	<th>送信日</th><td>{{inquiry.reply_at|timeJST|date:"Y/m/d H:i"}}
 </tr>
 {% endif %}
 </table>
